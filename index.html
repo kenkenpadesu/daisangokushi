@@ -47,14 +47,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .cmd-head .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .cmd-head .pos{font-weight:700;font-size:14px}
   .cmd-head .spd{margin-left:auto;font-size:10.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+  .cmd-head .spd .fillt{color:var(--parch)}
+  .cmd-head .spd .jk{color:var(--jade-hi);font-weight:700}
   .cmd-grid{display:grid;grid-template-columns:1fr auto;gap:9px 12px;align-items:center}
   .seg{display:flex;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:3px;gap:3px}
   .seg button{flex:1;background:transparent;border:none;color:var(--mute);font-family:"Noto Sans JP";
     font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;cursor:pointer;white-space:nowrap}
   .seg button.on{background:var(--gold);color:#171205}
-  .facsel{background:var(--ink);border:1px solid var(--line);border-radius:7px;color:var(--parch);
-    font-family:"Noto Sans JP";font-size:13px;font-weight:700;padding:8px 10px;width:100%}
-  .facsel:focus{outline:none;border-color:var(--gold)}
+  .facbtns{display:flex;flex-wrap:wrap;gap:6px}
+  .facbtn{flex:1 1 auto;min-width:44px;background:var(--ink);border:1.5px solid var(--line);
+    border-radius:7px;color:var(--mute);font-family:"Noto Sans JP";font-size:14px;font-weight:700;
+    padding:8px 4px;cursor:pointer;transition:.12s}
+  .facbtn.on{background:var(--fc);border-color:var(--fc);color:#12161d}
+  .facbtn:not(.on):hover{border-color:var(--fc);color:var(--parch)}
+  .d-note{font-size:10.5px;color:var(--mute);font-weight:400;margin-left:6px}
+  .d-head .d-val{margin-left:auto}
   .num-field{display:flex;align-items:center;gap:6px}
   .num-field label{font-size:11px;color:var(--mute);white-space:nowrap}
   .num-field input{width:72px;background:var(--ink);border:1px solid var(--line);border-radius:6px;color:var(--parch);
@@ -144,8 +151,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="eyebrow">率土之濱</div>
   <h1><span class="accent">徴兵時間</span>シミュレーター</h1>
   <p class="lede">
-    徴兵の短縮は「時間を◯%削る」のではなく<b>スピードに加算</b>される。一律バフが厚い要塞ほど、
-    徐晃(-31.9%)を最少1人に乗せても実際に縮むのはわずか。<b>放置とこまめ再徴兵の差もそこで決まる。</b>
+    徴兵の短縮は各バフが時間に<b>掛け算（乗算）</b>される（実測確定）。徐晃は最少1人に<b>一律-28%</b>、
+    バフの厚さで効果は変わらない。<b>放置とこまめ再徴兵の差は、兵数のバラつきで決まる。</b>
     自分の環境を入れて確かめる。
   </p>
 
@@ -162,11 +169,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <section>
     <div class="sec-title"><span class="no">結果</span>徐晃の実効と、全員満タンまで</div>
     <div class="hero">
-      <div class="cap">最少1人への実効短縮（徐晃／楽進の有利な方）</div>
+      <div class="cap">最少1人への実効短縮（徐晃／楽進・共存不可で有利な方）</div>
       <div class="big" id="effVal">–</div>
       <div class="who" id="effWho"></div>
       <div class="scale"><i id="effBar"></i></div>
-      <div class="ends"><span>バフ厚い（効果小）</span><span>バフ薄い（効果大）</span></div>
+      <div class="ends"><span>0%</span><span>-40%</span></div>
     </div>
     <div class="cards" id="cards"></div>
     <div class="verdict" id="verdict"></div>
@@ -196,46 +203,52 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script>
 const $=id=>document.getElementById(id);
 const COL=['#c8a24a','#6f9bd1','#cf8b5c'], POS=['本営','中衛','前衛'];
-const S_BOO=2.333,S_TEN=0.20,S_ZEN=0.05,S_KATSU=0.102,S_KATSU_SHU=0.026;
+// 乗算モデル: 徴兵時間 = 素 × ∏(1-短縮率)。実測(魏騎3人×3城)で確定
+const F_BOO=0.30, F_TEN=0.80, F_ZEN=0.95, F_CHOK=0.96; // 募兵所-70%/点将台-20%/善戦-5%/張郃騎馬-4%
+const JOKO_RED=0.28, RAKU_RED=0.12; // 徐晃 実測-28%(表記-31.9%)/楽進 実測-12%
 // 文官のLv1短縮率(小数)。Lv1→15で×2.552(全文官共通・実測確定)
-const BASE1={joko:0.125,raku:0.06,shu:0.025,chin:0.04};
+const BASE1={joko:0.125,raku:0.047,shu:0.03672,chin:0.04,katsu:0.04,katsuShu:0.01}; // raku=楽進12%,shu=周瑜9.37%/段(実測)
 const LV_STEP=0.11086; // 毎Lv +Lv1値×この割合(線形)
 function lvEff(key,lv){return BASE1[key]*(1+LV_STEP*(lv-1));}
 function lvCap(star){return 10+Math.max(0,Math.min(5,star));} // 星0→Lv10, 星5→Lv15
 // 陣営→素速度ティア(漢=速い/群=遅い/他=普通)
 const TIER={han:'fast',gi:'norm',go:'norm',shu:'norm',qun:'slow',shin:'norm'};
-const RAW={fast:1.8427*(1+S_BOO), norm:1.9940*(1+S_BOO), slow:2.2521*(1+S_BOO)};
+const BASE_T={fast:9.998*0.924, norm:9.998, slow:9.998*1.129}; // 魏呉(普通)=9.998、本城の甘寧2.047から確定。漢/群は暫定比
 const FAC_LABEL={han:'漢',gi:'魏',go:'呉',shu:'蜀',qun:'群',shin:'晋'};
 const FAC_LIST=['han','gi','go','shu','qun','shin'];
-function raw(i){return RAW[TIER[CM[i].fac]];}
+const FAC_COLOR={han:'#9b7bd4',gi:'#5b8fd6',go:'#cf5555',shu:'#4fb783',qun:'#d4af37',shin:'#5fc7d6'};
+function baseRate(i){return BASE_T[TIER[CM[i].fac]];} // 素(ゼロバフ)。騎馬は素に内包
 
 let CM=[
-  {fac:'han', zhi:false, female:false, cur:4800, max:10000},
-  {fac:'go',  zhi:false, female:false, cur:5000, max:10000},
-  {fac:'qun', zhi:false, female:false, cur:4900, max:10000},
+  {fac:'go', zhi:false, cav:false, female:false, cur:1435, max:9000},
+  {fac:'go', zhi:false, cav:false, female:false, cur:1079, max:9000},
+  {fac:'go', zhi:false, cav:false, female:false, cur:100,  max:9000},
 ];
 let BUFF={
-  boo:true, ten:true, zen:false, katsu:false,
-  joko:{on:true,  star:5, lv:15},
-  raku:{on:false, star:5, lv:15},
+  boo:true, ten:true, zen:true, chok:false,
+  katsu:{on:true,  star:5, lv:15},
+  joko:{on:false, star:5, lv:15},
+  raku:{on:true,  star:5, lv:15},
   shu:{on:false,  star:5, lv:15, n:3},
   chin:{on:false, star:5, lv:15},
 };
 let MODE='active';
 
 function fmt(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;if(h<=0)return m+'分';return h+'時間'+(m>0?m+'分':'');}
-function sBase(i){const c=CM[i],B=BUFF;let s=0;
-  if(B.boo)s+=S_BOO; if(B.ten)s+=S_TEN; if(B.zen)s+=S_ZEN;
-  if(B.katsu){s+=S_KATSU; if(c.fac==='shu')s+=S_KATSU_SHU;}
-  if(B.shu.on)s+=lvEff('shu',B.shu.lv)*(1+B.shu.n);
-  if(B.chin.on&&c.zhi)s+=lvEff('chin',B.chin.lv);
-  return s;}
-function jokoVal(){return BUFF.joko.on?lvEff('joko',BUFF.joko.lv):0;}
-function rakuVal(){return BUFF.raku.on?lvEff('raku',BUFF.raku.lv):0;}
-function boostBonus(){return Math.max(jokoVal(),rakuVal());}
-function boostWho(){const j=jokoVal(),r=rakuVal();if(j===0&&r===0)return'';return j>=r?'徐晃':'楽進';}
-function secWith(i){return raw(i)/(1+sBase(i)+boostBonus());}
-function secWithout(i){return raw(i)/(1+sBase(i));}
+function facAlways(i){const c=CM[i],B=BUFF;let f=1; // 常時系バフの乗算積
+  if(B.boo)f*=F_BOO; if(B.ten)f*=F_TEN; if(B.zen)f*=F_ZEN;
+  if(B.chok&&c.cav)f*=F_CHOK;
+  if(B.katsu.on){f*=(1-lvEff('katsu',B.katsu.lv)); if(c.fac==='shu')f*=(1-lvEff('katsuShu',B.katsu.lv));}
+  if(B.shu.on)f*=Math.pow(1-lvEff('shu',B.shu.lv),B.shu.n); // 周瑜：実測-9.37%/段(3段で-25.6%)
+  if(B.chin.on&&c.zhi)f*=(1-lvEff('chin',B.chin.lv));
+  return f;}
+function jokoRed(){return BUFF.joko.on?JOKO_RED:0;}
+function rakuRed(){return BUFF.raku.on?RAKU_RED:0;}
+function boostFactor(){return 1-Math.max(jokoRed(),rakuRed());} // 最少1人枠は1つ。実測で共存不可=有利な方だけ
+function boostOn(){return jokoRed()>0||rakuRed()>0;}
+function boostWho(){const j=jokoRed(),r=rakuRed();if(j===0&&r===0)return'';return j>=r?'徐晃':'楽進';}
+function secWithout(i){return baseRate(i)*facAlways(i);}
+function secWith(i){return baseRate(i)*facAlways(i)*boostFactor();}
 
 function argminActive(v,max){let idx=-1,mn=Infinity;for(let i=0;i<3;i++){if(v[i]<max[i]-1e-6&&v[i]<mn){mn=v[i];idx=i;}}return idx;}
 function simulate(strategy){
@@ -245,7 +258,7 @@ function simulate(strategy){
   const dt=Math.max( Math.max(...max)/ Math.min(...rBase.map(r=>r)) /2500, 0.5);
   let v=cur.slice(),t=0,g=0,last=initMin,series=[{t:0,v:v.slice(),boost:initMin}],switches=[];
   while(v.some((x,i)=>x<max[i]-1e-6)&&g<300000){
-    let boost=(boostBonus()>0)?((strategy==='once')?initMin:argminActive(v,max)):-1;
+    let boost=(boostOn())?((strategy==='once')?initMin:argminActive(v,max)):-1;
     if(strategy==='once'&&boost!==-1&&v[initMin]>=max[initMin]-1e-6)boost=-1;
     if(boost!==last&&boost!==-1){switches.push({t,idx:boost});last=boost;}
     for(let i=0;i<3;i++){if(v[i]<max[i]){const r=(i===boost)?rBoost[i]:rBase[i];v[i]=Math.min(max[i],v[i]+r*dt);}}
@@ -260,8 +273,9 @@ function renderCmds(){
     h+=`<div class="cmd">
       <div class="cmd-head"><span class="dot" style="background:${COL[i]}"></span><span class="pos">${POS[i]}</span><span class="spd" id="spd${i}"></span></div>
       <div class="cmd-grid">
-        <select class="facsel" onchange="setFac(${i},this.value)">${FAC_LIST.map(f=>`<option value="${f}" ${c.fac===f?'selected':''}>${FAC_LABEL[f]}</option>`).join('')}</select>
+        <div class="facbtns">${FAC_LIST.map(f=>`<button class="facbtn ${c.fac===f?'on':''}" style="--fc:${FAC_COLOR[f]}" onclick="setFac(${i},'${f}')">${FAC_LABEL[f]}</button>`).join('')}</div>
         <label class="chip"><input type="checkbox" ${c.zhi?'checked':''} onchange="setZhi(${i},this.checked)">知略型</label>
+        <label class="chip"><input type="checkbox" ${c.cav?'checked':''} onchange="setCav(${i},this.checked)">騎馬兵</label>
         <div class="num-field"><label>現在</label><input type="number" value="${c.cur}" inputmode="numeric" onchange="setCur(${i},this.value)"></div>
         <div class="num-field"><label>上限</label><input type="number" value="${c.max}" inputmode="numeric" onchange="setMax(${i},this.value)"></div>
       </div></div>`;}
@@ -271,15 +285,15 @@ function pct(x){return (x*100).toFixed(1)+'%';}
 function detsuRow(key,name,note){
   const b=BUFF[key],cap=lvCap(b.star),val=lvEff(key,b.lv);
   const shuN = key==='shu' ? `<span class="mini">文官<span class="stepper"><button onclick="stepShu(-1)">−</button><span>${b.n}</span><button onclick="stepShu(1)">+</button></span></span>` : '';
-  return `<div class="detsu ${b.on?'on':''}">
-    <label class="d-head"><input type="checkbox" ${b.on?'checked':''} onchange="setBuff('${key}',this.checked)">
-      <b>${name}</b><span class="d-val">-${pct(val)}${key==='shu'?'/段':''}</span></label>
-    <div class="d-sub">${note}</div>
-    <div class="d-ctl">
+  const ctl = b.on ? `<div class="d-ctl">
       <span class="mini">星<span class="stepper"><button onclick="setStar('${key}',-1)">−</button><span>${b.star}</span><button onclick="setStar('${key}',1)">+</button></span></span>
       <span class="mini">Lv<span class="stepper"><button onclick="setLv('${key}',-1)">−</button><span>${b.lv}</span><button onclick="setLv('${key}',1)">+</button></span><span class="cap">/${cap}</span></span>
       ${shuN}
-    </div>
+    </div>` : '';
+  return `<div class="detsu ${b.on?'on':''}">
+    <label class="d-head"><input type="checkbox" ${b.on?'checked':''} onchange="setBuff('${key}',this.checked)">
+      <b>${name}</b><span class="d-note">${note}</span><span class="d-val">-${pct(val)}${key==='shu'?'/段':''}</span></label>
+    ${ctl}
   </div>`;
 }
 function renderBuffs(){const b=BUFF;
@@ -287,12 +301,13 @@ function renderBuffs(){const b=BUFF;
     <div class="buffrow">
       <label class="buff ${b.boo?'on':''}"><input type="checkbox" ${b.boo?'checked':''} onchange="setBuff('boo',this.checked)">募兵所MAX<span class="sub">-70%</span></label>
       <label class="buff ${b.ten?'on':''}"><input type="checkbox" ${b.ten?'checked':''} onchange="setBuff('ten',this.checked)">点将台<span class="sub">全陣営-20%</span></label>
-      <label class="buff ${b.katsu?'on':''}"><input type="checkbox" ${b.katsu?'checked':''} onchange="setBuff('katsu',this.checked)">諸葛亮<span class="sub">全体-10.2%</span></label>
-      <label class="buff ${b.zen?'on':''}"><input type="checkbox" ${b.zen?'checked':''} onchange="setBuff('zen',this.checked)">善戦<span class="sub">-5%</span></label>
+      <label class="buff ${b.zen?'on':''}"><input type="checkbox" ${b.zen?'checked':''} onchange="setBuff('zen',this.checked)">善戦<span class="sub">シーズン-5%</span></label>
+      <label class="buff ${b.chok?'on':''}"><input type="checkbox" ${b.chok?'checked':''} onchange="setBuff('chok',this.checked)">張郃<span class="sub">騎馬のみ-4%</span></label>
     </div>
-    ${detsuRow('joko','徐晃','最少1人。楽進と共存不可(有利な方)')}
-    ${detsuRow('raku','楽進','最少1人・本城編成のみ。徐晃と共存不可')}
-    ${detsuRow('shu','周瑜','部隊一律。文官数ぶんスタック(最大3)')}
+    ${detsuRow('katsu','諸葛亮','名声15000到達。全体短縮＋蜀は追加短縮')}
+    ${detsuRow('joko','徐晃','最少1人・実測-28%。楽進とは共存不可(枠は1つ・徐晃優先)')}
+    ${detsuRow('raku','楽進','最少1人・実測-12%。徐晃とは共存不可(枠は1つ)')}
+    ${detsuRow('shu','周瑜','部隊一律・実測-9.4%/段。文官数ぶんスタック(最大3=約-25.6%)')}
     ${detsuRow('chin','陳宮','知略型(知略>攻撃)の武将のみ')}`;
 }
 function setBuff(k,v){if(typeof BUFF[k]==='object')BUFF[k].on=v;else BUFF[k]=v;renderBuffs();recompute();}
@@ -301,19 +316,24 @@ function setLv(k,d){const b=BUFF[k];const cap=lvCap(b.star);b.lv=Math.max(1,Math
 function stepShu(d){BUFF.shu.n=Math.max(0,Math.min(3,BUFF.shu.n+d));renderBuffs();recompute();}
 function setFac(i,f){CM[i].fac=f;renderCmds();recompute();}
 function setZhi(i,v){CM[i].zhi=v;recompute();}
+function setCav(i,v){CM[i].cav=v;renderCmds();recompute();}
 function setCur(i,v){CM[i].cur=Math.max(0,+v||0);recompute();}
 function setMax(i,v){CM[i].max=Math.max(1,+v||1);recompute();}
 
 function recompute(){
-  for(let i=0;i<3;i++){const el=$('spd'+i);if(el){const s=sBase(i);el.textContent=(raw(i)/(1+s)).toFixed(2)+'秒/兵';}}
+  const _cur=CM.map(c=>Math.min(c.cur,c.max)), _max=CM.map(c=>c.max), _L=argminActive(_cur,_max);
+  for(let i=0;i<3;i++){const el=$('spd'+i);if(el){
+    const boosted=(i===_L&&boostOn()), rate=boosted?secWith(i):secWithout(i), need=Math.max(0,_max[i]-_cur[i]);
+    el.innerHTML=rate.toFixed(2)+'秒/兵<span class="fillt"> ・ 満タン'+fmt(need*rate/60)+(boosted?' <span class="jk">⚡徐晃</span>':'')+'</span>';
+  }}
   const once=simulate('once'), active=simulate('active');
   window._R={once,active};
   const max=CM.map(c=>c.max), cur=CM.map(c=>Math.min(c.cur,c.max)), L=argminActive(cur,max);
-  if(boostBonus()>0&&L>=0){
-    const eff=1-(1+sBase(L))/(1+sBase(L)+boostBonus());
+  if(boostOn()&&L>=0){
+    const eff=1-boostFactor();
     $('effVal').textContent='-'+(eff*100).toFixed(1)+'%';
     $('effWho').textContent='対象：'+POS[L]+'（'+FAC_LABEL[CM[L].fac]+'）／適用：'+boostWho();
-    const p=Math.max(0,Math.min(1,(eff-0.04)/(0.35-0.04)));
+    const p=Math.max(0,Math.min(1,eff/0.40));
     $('effBar').style.width=(6+p*94)+'%';
   }else{$('effVal').textContent='—';$('effWho').textContent='徐晃・楽進オフ';$('effBar').style.width='0%';}
   const save=once.total-active.total;
@@ -325,10 +345,10 @@ function recompute(){
   $('verdict').innerHTML = save<0.5
     ? `再徴兵しても差は <b>ほぼ0分</b><br><span style="font-size:12px">この環境ではバフが厚く、付け替えの手間はほぼ無駄。</span>`
     : `放置より <b>${fmt(save)}</b> 短縮 &nbsp;(約${pct}%早い)<br><span style="font-size:12px">バフを外すほど、この差は大きくなる。</span>`;
-  $('foot').innerHTML=`<b>確定：</b>短縮は<b>加算式</b>（周瑜スタックの等差929秒/段で実証）。徐晃はバフが薄いほど大きく効く（実測：フルバフ約-4%／薄い環境で約-18〜24%）。名目倒れ説は否定。`+
-    `<b>徐晃×楽進は共存不可</b>＝最少1人枠は1つ、有利な方だけ適用（戍城編成は徐晃のみ）。`+
-    `陳宮=知略型-10.2%（3例一致）。張郃【用兵巧変】=騎兵のみ徴兵短縮（兵種条件系、ツール未反映）。`+
-    `<b>注意：</b>厳密な徐晃係数と単一計算式は未確定。数値は暫定校正で、方向性は確実だが絶対値は目安。`;
+  $('foot').innerHTML=`<b>確定（実測）：</b>各バフは時間に<b>乗算</b>で掛かる（陳宮が3城で常に-10.2%一定＝加算では説明不可）。`+
+    `徐晃=実測-28%（表記-31.9%）・楽進=-12%・陳宮=-10.2%・張郃=騎馬-4%。いずれもバフ厚に依らず一定。`+
+    `<b>徐晃×楽進は共存不可（実測確定）</b>＝最少1人枠は1つ。同じ部隊に両方付けても有利な方(徐晃)だけ乗り、楽進は弾かれる。`+
+    `校正は魏・騎馬。他陣営/兵種の素は暫定比。`;
   renderBars();
 }
 
