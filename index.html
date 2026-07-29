@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>徴兵検証 — 率土之濱</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12161d; --ink2:#1a1f28; --panel:#1e242e; --panel2:#242b36; --line:#333b47;
+    --gold:#c8a24a; --gold-hi:#e6c774; --jade:#54bd88; --jade-hi:#77dba7;
+    --clay:#cf8b5c; --steel:#6f9bd1; --verm:#c25b4e; --parch:#ece7d9; --mute:#939aa4;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 500px at 80% -10%, rgba(200,162,74,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(111,155,209,.08), transparent 55%), var(--ink);
+    color:var(--parch); font-family:"Noto Sans JP",system-ui,sans-serif; line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 16px 60px}
+  .eyebrow{font-size:11px;letter-spacing:.32em;color:var(--gold);font-weight:700;
+    margin-bottom:10px;display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);opacity:.7}
+  h1{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(24px,6.6vw,38px);line-height:1.16;margin:0 0 12px}
+  h1 .accent{color:var(--gold-hi)}
+  .lede{color:var(--mute);font-size:14px;margin:0 0 24px;max-width:58ch}
+  .lede b{color:var(--parch);font-weight:700}
+  section{margin-bottom:24px}
+  .sec-title{font-family:"Noto Serif JP",serif;font-weight:700;font-size:17px;margin:0 0 13px;display:flex;align-items:baseline;gap:10px}
+  .sec-title .no{font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.1em;
+    border:1px solid rgba(200,162,74,.4);border-radius:2px;padding:1px 7px;font-family:"Noto Sans JP";flex:none;position:relative;top:-1px}
+  .panel{background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:12px;padding:14px}
+
+  .cmd{border:1px solid var(--line);border-radius:9px;padding:11px 12px;margin-bottom:9px;background:var(--ink2)}
+  .cmd-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .cmd-head .dot{width:11px;height:11px;border-radius:50%;flex:none}
+  .cmd-head .pos{font-weight:700;font-size:14px}
+  .cmd-head .spd{margin-left:auto;font-size:10.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+  .cmd-grid{display:grid;grid-template-columns:1fr auto;gap:9px 12px;align-items:center}
+  .seg{display:flex;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:3px;gap:3px}
+  .seg button{flex:1;background:transparent;border:none;color:var(--mute);font-family:"Noto Sans JP";
+    font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;cursor:pointer;white-space:nowrap}
+  .seg button.on{background:var(--gold);color:#171205}
+  .num-field{display:flex;align-items:center;gap:6px}
+  .num-field label{font-size:11px;color:var(--mute);white-space:nowrap}
+  .num-field input{width:72px;background:var(--ink);border:1px solid var(--line);border-radius:6px;color:var(--parch);
+    font-family:"Noto Sans JP";font-size:15px;font-weight:700;padding:6px 8px;font-variant-numeric:tabular-nums}
+  .num-field input:focus{outline:none;border-color:var(--gold)}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mute);cursor:pointer;user-select:none;white-space:nowrap}
+  .chip input{width:15px;height:15px;accent-color:var(--jade)}
+
+  .buffs{display:flex;flex-wrap:wrap;gap:8px}
+  .buff{display:flex;align-items:center;gap:8px;background:var(--ink2);border:1px solid var(--line);border-radius:8px;
+    padding:8px 11px;font-size:12.5px;font-weight:500;cursor:pointer;user-select:none}
+  .buff input{width:16px;height:16px;accent-color:var(--jade)}
+  .buff.on{border-color:rgba(84,189,136,.5);background:linear-gradient(120deg,rgba(84,189,136,.10),var(--ink2) 70%)}
+  .buff .sub{color:var(--mute);font-size:10.5px;font-weight:400}
+  .stepper{display:inline-flex;align-items:center;gap:6px;margin-left:2px}
+  .stepper button{width:22px;height:22px;border-radius:5px;border:1px solid var(--line);background:var(--ink);
+    color:var(--parch);font-size:14px;font-weight:700;cursor:pointer;line-height:1}
+  .stepper span{min-width:18px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+  .buffrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .detsu{border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:8px;background:var(--ink2)}
+  .detsu.on{border-color:rgba(84,189,136,.45);background:linear-gradient(120deg,rgba(84,189,136,.08),var(--ink2) 70%)}
+  .d-head{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;user-select:none}
+  .d-head input{width:16px;height:16px;accent-color:var(--jade)}
+  .d-head .d-val{margin-left:auto;font-family:"Noto Serif JP";font-weight:900;color:var(--jade-hi);
+    font-variant-numeric:tabular-nums}
+  .d-sub{font-size:10.5px;color:var(--mute);margin:3px 0 8px 24px}
+  .d-ctl{display:flex;flex-wrap:wrap;gap:14px;padding-left:24px}
+  .mini{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--mute)}
+  .cap{font-size:10px;color:var(--mute)}
+
+  .hero{background:linear-gradient(120deg,rgba(200,162,74,.10),var(--panel) 60%);border:1px solid rgba(200,162,74,.35);
+    border-radius:14px;padding:18px 16px;text-align:center;margin-bottom:14px}
+  .hero .cap{font-size:12px;color:var(--mute);letter-spacing:.05em}
+  .hero .big{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(40px,13vw,64px);line-height:1;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+  .hero .who{font-size:12.5px;color:var(--gold-hi)}
+  .hero .scale{margin-top:12px;height:7px;border-radius:4px;background:var(--ink);overflow:hidden;position:relative}
+  .hero .scale i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,var(--verm),var(--gold),var(--jade))}
+  .hero .ends{display:flex;justify-content:space-between;font-size:10px;color:var(--mute);margin-top:4px}
+
+  .cards{display:flex;flex-direction:column;gap:10px}
+  .card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;
+    padding:13px 16px;background:var(--panel);position:relative;overflow:hidden}
+  .card .k{font-size:13.5px;font-weight:500}
+  .card .k small{display:block;color:var(--mute);font-size:11px;font-weight:400;margin-top:2px}
+  .card .v{font-family:"Noto Serif JP",serif;font-weight:900;font-size:24px;font-variant-numeric:tabular-nums;text-align:right;line-height:1;white-space:nowrap}
+  .card.best{border-color:rgba(84,189,136,.55);background:linear-gradient(120deg,rgba(84,189,136,.12),var(--panel) 65%)}
+  .card.best .v{color:var(--jade-hi)}
+  .card.best::before{content:"最短";position:absolute;top:0;right:0;background:var(--jade);color:#0c130f;font-size:10px;font-weight:700;padding:2px 9px;border-bottom-left-radius:8px}
+  .card.meh .v{color:var(--parch)}
+  .verdict{margin-top:13px;text-align:center;font-size:13.5px;color:var(--mute);background:var(--ink2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px}
+  .verdict b{font-family:"Noto Serif JP";font-weight:900;font-size:20px;color:var(--gold-hi);font-variant-numeric:tabular-nums}
+
+  .toggle{display:flex;background:var(--ink2);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:14px;gap:4px}
+  .toggle button{flex:1;background:transparent;border:none;color:var(--mute);font-family:"Noto Sans JP";font-size:12.5px;font-weight:700;padding:9px 6px;border-radius:7px;cursor:pointer;line-height:1.3}
+  .toggle button.on{background:var(--gold);color:#171205}
+  .chart-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .axis-row{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);padding:0 2px 12px;font-variant-numeric:tabular-nums}
+  .bar-row{display:grid;grid-template-columns:120px 1fr;align-items:center;gap:10px;margin-bottom:14px}
+  .bar-name{font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.25}
+  .bar-name .dot{width:9px;height:9px;border-radius:50%}
+  .bar-name .fac{font-size:10px;color:var(--mute);font-weight:400}
+  .bar-name .badge{font-size:9px;color:var(--jade-hi);font-weight:700;opacity:0;transition:opacity .15s;width:100%}
+  .bar-row.boosting .badge{opacity:1}
+  .bar-track{position:relative;height:26px;background:var(--ink);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px 0 0 5px}
+  .bar-tick{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--parch);opacity:.85;transform:translateX(-1px)}
+  .bar-val{position:absolute;top:50%;right:8px;transform:translateY(-50%);font-size:11.5px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000,0 0 2px #000;font-variant-numeric:tabular-nums}
+  .bar-row.boosting .bar-track{box-shadow:0 0 0 2px var(--jade),0 0 14px rgba(84,189,136,.45)}
+  .bar-row.full .bar-track{box-shadow:0 0 0 1px rgba(200,162,74,.7)}
+  .play-row{display:flex;align-items:center;gap:12px;margin-top:2px}
+  .play{background:var(--gold);color:#171205;border:none;border-radius:8px;font-weight:700;font-family:"Noto Sans JP";font-size:13px;padding:9px 16px;cursor:pointer;white-space:nowrap}
+  .play.playing{background:var(--panel2);color:var(--parch);border:1px solid var(--line)}
+  #scrub{flex:1;accent-color:var(--gold);height:4px}
+  .elapsed{font-family:"Noto Serif JP";font-weight:900;font-size:14px;color:var(--gold-hi);min-width:92px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .chart-note{font-size:11.5px;color:var(--mute);text-align:center;margin:12px 4px 2px;line-height:1.6}
+  .foot{font-size:11px;color:#6b727c;margin-top:28px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  .foot b{color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">率土之濱 &nbsp;/&nbsp; 徴兵検証</div>
+  <h1>徐晃の価値は、<br><span class="accent">バフの厚さ</span>で決まる。</h1>
+  <p class="lede">
+    徴兵の短縮は「時間を◯%削る」のではなく<b>スピードに加算</b>される。一律バフが厚い要塞ほど、
+    徐晃(-31.9%)を最少1人に乗せても実際に縮むのはわずか。<b>放置とこまめ再徴兵の差もそこで決まる。</b>
+    自分の環境を入れて確かめる。
+  </p>
+
+  <section>
+    <div class="sec-title"><span class="no">武将</span>部隊の3人</div>
+    <div id="cmds"></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><span class="no">バフ</span>部隊にかかる効果</div>
+    <div class="panel"><div class="buffs" id="buffs"></div></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><span class="no">結果</span>徐晃の実効と、全員満タンまで</div>
+    <div class="hero">
+      <div class="cap">最少1人への実効短縮（徐晃／楽進の有利な方）</div>
+      <div class="big" id="effVal">–</div>
+      <div class="who" id="effWho"></div>
+      <div class="scale"><i id="effBar"></i></div>
+      <div class="ends"><span>バフ厚い（効果小）</span><span>バフ薄い（効果大）</span></div>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="verdict" id="verdict"></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><span class="no">図</span>兵数バーで動かす</div>
+    <div class="toggle">
+      <button id="tgOnce" onclick="setMode('once')">放置<br>（最初の1人に固定）</button>
+      <button id="tgActive" class="on" onclick="setMode('active')">こまめ再徴兵<br>（最少に付け直す）</button>
+    </div>
+    <div class="chart-box">
+      <div class="axis-row"><span>0</span><span id="axisMax">MAX</span></div>
+      <div id="bars"></div>
+      <div class="play-row">
+        <button id="playBtn" class="play" onclick="togglePlay()">▶ 再生</button>
+        <input id="scrub" type="range" min="0" max="1000" value="0">
+        <div class="elapsed" id="elapsed">0分</div>
+      </div>
+      <div class="chart-note" id="chartNote"></div>
+    </div>
+  </section>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const COL=['#c8a24a','#6f9bd1','#cf8b5c'], POS=['本営','中衛','前衛'];
+const S_BOO=2.333,S_TEN=0.20,S_ZEN=0.05,S_KATSU=0.102;
+// 文官のLv1短縮率(小数)。Lv1→15で×2.552(全文官共通・実測確定)
+const BASE1={joko:0.125,raku:0.06,shu:0.025,chin:0.04};
+const LV_STEP=0.11086; // 毎Lv +Lv1値×この割合(線形)
+function lvEff(key,lv){return BASE1[key]*(1+LV_STEP*(lv-1));}
+function lvCap(star){return 10+Math.max(0,Math.min(5,star));} // 星0→Lv10, 星5→Lv15
+const RAW={han:1.8427*(1+S_BOO), normal:1.9940*(1+S_BOO), qun:2.2521*(1+S_BOO)};
+const FAC_LABEL={han:'漢(速)', normal:'普通', qun:'群(遅)'};
+
+let CM=[
+  {fac:'han',    zhi:false, cur:4800, max:10000},
+  {fac:'normal', zhi:false, cur:5000, max:10000},
+  {fac:'qun',    zhi:false, cur:4900, max:10000},
+];
+let BUFF={
+  boo:true, ten:true, zen:false, katsu:false,
+  joko:{on:true,  star:5, lv:15},
+  raku:{on:false, star:5, lv:15},
+  shu:{on:false,  star:5, lv:15, n:3},
+  chin:{on:false, star:5, lv:15},
+};
+let MODE='active';
+
+function fmt(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;if(h<=0)return m+'分';return h+'時間'+(m>0?m+'分':'');}
+function sBase(i){const c=CM[i],B=BUFF;let s=0;
+  if(B.boo)s+=S_BOO; if(B.ten)s+=S_TEN; if(B.zen)s+=S_ZEN; if(B.katsu)s+=S_KATSU;
+  if(B.shu.on)s+=lvEff('shu',B.shu.lv)*(1+B.shu.n);
+  if(B.chin.on&&c.zhi)s+=lvEff('chin',B.chin.lv);
+  return s;}
+function jokoVal(){return BUFF.joko.on?lvEff('joko',BUFF.joko.lv):0;}
+function rakuVal(){return BUFF.raku.on?lvEff('raku',BUFF.raku.lv):0;}
+function boostBonus(){return Math.max(jokoVal(),rakuVal());}
+function boostWho(){const j=jokoVal(),r=rakuVal();if(j===0&&r===0)return'';return j>=r?'徐晃':'楽進';}
+function secWith(i){return RAW[CM[i].fac]/(1+sBase(i)+boostBonus());}
+function secWithout(i){return RAW[CM[i].fac]/(1+sBase(i));}
+
+function argminActive(v,max){let idx=-1,mn=Infinity;for(let i=0;i<3;i++){if(v[i]<max[i]-1e-6&&v[i]<mn){mn=v[i];idx=i;}}return idx;}
+function simulate(strategy){
+  const max=CM.map(c=>c.max), cur=CM.map(c=>Math.min(c.cur,c.max));
+  const rBase=[0,1,2].map(i=>1/secWithout(i)), rBoost=[0,1,2].map(i=>1/secWith(i));
+  const initMin=argminActive(cur,max);
+  const dt=Math.max( Math.max(...max)/ Math.min(...rBase.map(r=>r)) /2500, 0.5);
+  let v=cur.slice(),t=0,g=0,last=initMin,series=[{t:0,v:v.slice(),boost:initMin}],switches=[];
+  while(v.some((x,i)=>x<max[i]-1e-6)&&g<300000){
+    let boost=(boostBonus()>0)?((strategy==='once')?initMin:argminActive(v,max)):-1;
+    if(strategy==='once'&&boost!==-1&&v[initMin]>=max[initMin]-1e-6)boost=-1;
+    if(boost!==last&&boost!==-1){switches.push({t,idx:boost});last=boost;}
+    for(let i=0;i<3;i++){if(v[i]<max[i]){const r=(i===boost)?rBoost[i]:rBase[i];v[i]=Math.min(max[i],v[i]+r*dt);}}
+    t+=dt;g++;series.push({t,v:v.slice(),boost});
+  }
+  return {series,total:t/60,switches};
+}
+
+function renderCmds(){
+  let h='';
+  for(let i=0;i<3;i++){const c=CM[i];
+    h+=`<div class="cmd">
+      <div class="cmd-head"><span class="dot" style="background:${COL[i]}"></span><span class="pos">${POS[i]}</span><span class="spd" id="spd${i}"></span></div>
+      <div class="cmd-grid">
+        <div class="seg">${['han','normal','qun'].map(f=>`<button class="${c.fac===f?'on':''}" onclick="setFac(${i},'${f}')">${FAC_LABEL[f]}</button>`).join('')}</div>
+        <label class="chip"><input type="checkbox" ${c.zhi?'checked':''} onchange="setZhi(${i},this.checked)">知略型</label>
+        <div class="num-field"><label>現在</label><input type="number" value="${c.cur}" inputmode="numeric" onchange="setCur(${i},this.value)"></div>
+        <div class="num-field"><label>上限</label><input type="number" value="${c.max}" inputmode="numeric" onchange="setMax(${i},this.value)"></div>
+      </div></div>`;}
+  $('cmds').innerHTML=h;
+}
+function pct(x){return (x*100).toFixed(1)+'%';}
+function detsuRow(key,name,note){
+  const b=BUFF[key],cap=lvCap(b.star),val=lvEff(key,b.lv);
+  const shuN = key==='shu' ? `<span class="mini">文官<span class="stepper"><button onclick="stepShu(-1)">−</button><span>${b.n}</span><button onclick="stepShu(1)">+</button></span></span>` : '';
+  return `<div class="detsu ${b.on?'on':''}">
+    <label class="d-head"><input type="checkbox" ${b.on?'checked':''} onchange="setBuff('${key}',this.checked)">
+      <b>${name}</b><span class="d-val">-${pct(val)}${key==='shu'?'/段':''}</span></label>
+    <div class="d-sub">${note}</div>
+    <div class="d-ctl">
+      <span class="mini">星<span class="stepper"><button onclick="setStar('${key}',-1)">−</button><span>${b.star}</span><button onclick="setStar('${key}',1)">+</button></span></span>
+      <span class="mini">Lv<span class="stepper"><button onclick="setLv('${key}',-1)">−</button><span>${b.lv}</span><button onclick="setLv('${key}',1)">+</button></span><span class="cap">/${cap}</span></span>
+      ${shuN}
+    </div>
+  </div>`;
+}
+function renderBuffs(){const b=BUFF;
+  $('buffs').innerHTML=`
+    <div class="buffrow">
+      <label class="buff ${b.boo?'on':''}"><input type="checkbox" ${b.boo?'checked':''} onchange="setBuff('boo',this.checked)">募兵所MAX<span class="sub">-70%</span></label>
+      <label class="buff ${b.ten?'on':''}"><input type="checkbox" ${b.ten?'checked':''} onchange="setBuff('ten',this.checked)">点将台<span class="sub">全陣営-20%</span></label>
+      <label class="buff ${b.katsu?'on':''}"><input type="checkbox" ${b.katsu?'checked':''} onchange="setBuff('katsu',this.checked)">諸葛亮<span class="sub">全体-10.2%</span></label>
+      <label class="buff ${b.zen?'on':''}"><input type="checkbox" ${b.zen?'checked':''} onchange="setBuff('zen',this.checked)">善戦<span class="sub">-5%</span></label>
+    </div>
+    ${detsuRow('joko','徐晃','最少1人。楽進と共存不可(有利な方)')}
+    ${detsuRow('raku','楽進','最少1人・本城編成のみ。徐晃と共存不可')}
+    ${detsuRow('shu','周瑜','部隊一律。文官数ぶんスタック(最大3)')}
+    ${detsuRow('chin','陳宮','知略型(知略>攻撃)の武将のみ')}`;
+}
+function setBuff(k,v){if(typeof BUFF[k]==='object')BUFF[k].on=v;else BUFF[k]=v;renderBuffs();recompute();}
+function setStar(k,d){const b=BUFF[k];b.star=Math.max(0,Math.min(5,b.star+d));const cap=lvCap(b.star);if(b.lv>cap)b.lv=cap;renderBuffs();recompute();}
+function setLv(k,d){const b=BUFF[k];const cap=lvCap(b.star);b.lv=Math.max(1,Math.min(cap,b.lv+d));renderBuffs();recompute();}
+function stepShu(d){BUFF.shu.n=Math.max(0,Math.min(3,BUFF.shu.n+d));renderBuffs();recompute();}
+function setFac(i,f){CM[i].fac=f;renderCmds();recompute();}
+function setZhi(i,v){CM[i].zhi=v;recompute();}
+function setCur(i,v){CM[i].cur=Math.max(0,+v||0);recompute();}
+function setMax(i,v){CM[i].max=Math.max(1,+v||1);recompute();}
+
+function recompute(){
+  for(let i=0;i<3;i++){const el=$('spd'+i);if(el){const s=sBase(i);el.textContent=(RAW[CM[i].fac]/(1+s)).toFixed(2)+'秒/兵';}}
+  const once=simulate('once'), active=simulate('active');
+  window._R={once,active};
+  const max=CM.map(c=>c.max), cur=CM.map(c=>Math.min(c.cur,c.max)), L=argminActive(cur,max);
+  if(boostBonus()>0&&L>=0){
+    const eff=1-(1+sBase(L))/(1+sBase(L)+boostBonus());
+    $('effVal').textContent='-'+(eff*100).toFixed(1)+'%';
+    $('effWho').textContent='対象：'+POS[L]+'（'+FAC_LABEL[CM[L].fac]+'）／適用：'+boostWho();
+    const p=Math.max(0,Math.min(1,(eff-0.04)/(0.35-0.04)));
+    $('effBar').style.width=(6+p*94)+'%';
+  }else{$('effVal').textContent='—';$('effWho').textContent='徐晃・楽進オフ';$('effBar').style.width='0%';}
+  const save=once.total-active.total;
+  $('cards').innerHTML=[
+    {k:'放置（1人に固定）',s:'最初に最少だった武将だけ徐晃。追いついた後は無駄がけ',v:once.total,cls:'meh'},
+    {k:'こまめ再徴兵',s:'常に最少へ徐晃を付け直す',v:active.total,cls:'best'},
+  ].map(c=>`<div class="card ${c.cls}"><div class="k">${c.k}<small>${c.s}</small></div><div class="v">${fmt(c.v)}</div></div>`).join('');
+  const pct=once.total>0?Math.round(save/once.total*100):0;
+  $('verdict').innerHTML = save<0.5
+    ? `再徴兵しても差は <b>ほぼ0分</b><br><span style="font-size:12px">この環境ではバフが厚く、付け替えの手間はほぼ無駄。</span>`
+    : `放置より <b>${fmt(save)}</b> 短縮 &nbsp;(約${pct}%早い)<br><span style="font-size:12px">バフを外すほど、この差は大きくなる。</span>`;
+  $('foot').innerHTML=`<b>確定：</b>短縮は<b>加算式</b>（周瑜スタックの等差929秒/段で実証）。徐晃はバフが薄いほど大きく効く（実測：フルバフ約-4%／薄い環境で約-18〜24%）。名目倒れ説は否定。`+
+    `<b>徐晃×楽進は共存不可</b>＝最少1人枠は1つ、有利な方だけ適用（戍城編成は徐晃のみ）。`+
+    `陳宮=知略型-10.2%（3例一致）。張郃【用兵巧変】=騎兵のみ徴兵短縮（兵種条件系、ツール未反映）。`+
+    `<b>注意：</b>厳密な徐晃係数と単一計算式は未確定。数値は暫定校正で、方向性は確実だが絶対値は目安。`;
+  renderBars();
+}
+
+let PLAYING=false,RAF=null,PROG=0;
+function commonH(){const R=window._R;return Math.max(R.once.total,R.active.total)/60;}
+function currentSim(){return MODE==='once'?window._R.once:window._R.active;}
+function setMode(m){MODE=m;$('tgOnce').classList.toggle('on',m==='once');$('tgActive').classList.toggle('on',m==='active');renderBars();}
+function renderBars(){
+  const R=window._R;if(!R)return;
+  const sim=currentSim(), cH=commonH(), tH=cH*PROG, totalH=sim.total/60, N=sim.series.length;
+  const frac=totalH>0?Math.min(tH,totalH)/totalH:0; let idx=Math.round(frac*(N-1));
+  if(idx<0)idx=0; if(idx>N-1)idx=N-1;
+  const pt=sim.series[idx], finished=tH>=totalH-1e-9;
+  let html='';
+  for(let c=0;c<3;c++){
+    const val=pt.v[c], mx=CM[c].max, pct=Math.max(0,Math.min(100,val/mx*100));
+    const boosting=(pt.boost===c)&&!finished&&val<mx-1e-6, full=val>=mx-1e-6;
+    html+=`<div class="bar-row ${boosting?'boosting':''} ${full?'full':''}">
+      <div class="bar-name"><span class="dot" style="background:${COL[c]}"></span>${POS[c]}
+        <span class="fac">${FAC_LABEL[CM[c].fac]}${CM[c].zhi?'/知':''}</span><span class="badge">⚡ 徐晃</span></div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${pct.toFixed(1)}%;background:linear-gradient(90deg,${COL[c]}99,${COL[c]})"></div>
+        <div class="bar-tick" style="left:${pct.toFixed(1)}%"></div>
+        <div class="bar-val">${Math.round(val)}${full?' <span style="color:var(--gold-hi)">満</span>':''}</div>
+      </div></div>`;
+  }
+  $('bars').innerHTML=html;
+  $('axisMax').textContent='MAX '+Math.max(...CM.map(c=>c.max));
+  $('scrub').value=Math.round(PROG*1000);
+  $('elapsed').textContent=finished?('✓ '+fmt(totalH*60)+'で完了'):fmt(tH*60);
+  $('chartNote').textContent=(MODE==='once')
+    ?'放置：最初に最少だった武将が先に満タン→徐晃が消滅。残りは通常速度で遅れる。'
+    :'こまめ：⚡が常に一番低いバーへ移る。3本が揃って伸びる。';
+}
+function frame(){if(!PLAYING)return;PROG+=1/(7*60);
+  if(PROG>=1){PROG=1;PLAYING=false;$('playBtn').classList.remove('playing');$('playBtn').textContent='▶ もう一度';}
+  renderBars();if(PLAYING)RAF=requestAnimationFrame(frame);}
+function togglePlay(){
+  if(PLAYING){PLAYING=false;cancelAnimationFrame(RAF);$('playBtn').classList.remove('playing');$('playBtn').textContent='▶ 再生';return;}
+  if(PROG>=1)PROG=0;PLAYING=true;$('playBtn').classList.add('playing');$('playBtn').textContent='⏸ 停止';RAF=requestAnimationFrame(frame);}
+
+renderCmds(); renderBuffs(); recompute();
+$('scrub').addEventListener('input',e=>{PLAYING=false;cancelAnimationFrame(RAF);
+  $('playBtn').classList.remove('playing');$('playBtn').textContent='▶ 再生';PROG=(+e.target.value)/1000;renderBars();});
+</script>
+</body>
+</html>
