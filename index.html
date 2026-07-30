@@ -139,6 +139,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .chart-note{font-size:11.5px;color:var(--mute);text-align:center;margin:12px 4px 2px;line-height:1.6}
   .foot{font-size:11px;color:#6b727c;margin-top:28px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
   .foot b{color:var(--mute)}
+  .ver{font-family:"Noto Sans JP";font-size:13px;font-weight:700;color:var(--mute);
+    vertical-align:middle;margin-left:12px;letter-spacing:.02em}
+  .lede .sub-note{color:var(--mute);font-size:.92em}
   .lede .warn{color:var(--gold-hi)}
   .howto-open{background:transparent;border:1px solid var(--line);color:var(--mute);
     font-family:"Noto Sans JP";font-size:12px;font-weight:700;border-radius:20px;
@@ -171,12 +174,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="wrap">
 
   <div class="eyebrow">率土之濱</div>
-  <h1><span class="accent">徴兵時間</span>シミュレーター</h1>
+  <h1><span class="accent">徴兵時間</span>シミュレーター<span class="ver">ver.1</span></h1>
   <p class="lede">
-    <b class="warn">徐晃と楽進は共存する（両方乗る）。</b>どちらも「最少兵数の武将」に乗り、乗算で重なる。
-    短縮率は文官の<b>星・Lvで変わる</b>ので、自分の値を入れる（徐晃Lv15で-31.9%、Lv5で-18%）。
-    各バフは時間に掛け算（乗算）で効く。
-    自分の値を入れて確かめる。各バフは時間に掛け算（乗算）で効く。
+    徐晃・楽進は「最少兵数の武将」に短縮が乗る。でも徴兵を<b>放置</b>していると、途中で最少の武将が入れ替わって、
+    せっかくの短縮が別の枠に活きない瞬間が出る。<b>こまめに徴兵し直して常に最少へ乗せ続ける</b>と、
+    放置よりどれだけ速く全員満タンにできるか ── それを試すツール。自分の部隊とバフを入れて確かめる。
+    <span class="sub-note">（各バフは時間に掛け算で効く。徐晃×楽進は共存＝両方乗る）</span>
   </p>
   <button class="howto-open" onclick="openHowto()">? 使い方</button>
 
