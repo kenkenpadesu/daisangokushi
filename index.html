@@ -111,6 +111,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .card.best .v{color:var(--jade-hi)}
   .card.best::before{content:"最短";position:absolute;top:0;right:0;background:var(--jade);color:#0c130f;font-size:10px;font-weight:700;padding:2px 9px;border-bottom-left-radius:8px}
   .card.meh .v{color:var(--parch)}
+  .card.plain{background:var(--ink2);border-style:dashed}
+  .card.plain .v{color:var(--mute)}
+  .card.plain::before{content:"基準";position:absolute;top:0;right:0;background:var(--line);color:var(--parch);font-size:10px;font-weight:700;padding:2px 9px;border-bottom-left-radius:8px}
   .verdict{margin-top:13px;text-align:center;font-size:13.5px;color:var(--mute);background:var(--ink2);border:1px dashed var(--line);border-radius:10px;padding:12px 14px}
   .verdict b{font-family:"Noto Serif JP";font-weight:900;font-size:20px;color:var(--gold-hi);font-variant-numeric:tabular-nums}
 
@@ -141,6 +144,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .foot b{color:var(--mute)}
   .ver{font-family:"Noto Sans JP";font-size:13px;font-weight:700;color:var(--mute);
     vertical-align:middle;margin-left:12px;letter-spacing:.02em}
+  .inmode{float:right;display:inline-flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .inmode button{background:transparent;border:none;color:var(--mute);font-family:"Noto Sans JP";
+    font-size:11.5px;font-weight:700;padding:5px 12px;cursor:pointer}
+  .inmode button.on{background:var(--gold);color:#171205}
   .lede .sub-note{color:var(--mute);font-size:.92em}
   .lede .warn{color:var(--gold-hi)}
   .howto-open{background:transparent;border:1px solid var(--line);color:var(--mute);
@@ -176,7 +183,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="eyebrow">率土之濱</div>
   <h1><span class="accent">徴兵時間</span>シミュレーター<span class="ver">ver.1</span></h1>
   <p class="lede">
-    文官の徐晃・楽進は「最少兵数の武将」に短縮が乗る。でも徴兵を<b>放置</b>していると、途中で最少の武将が入れ替わって、
+    徐晃・楽進は「最少兵数の武将」に短縮が乗る。でも徴兵を<b>放置</b>していると、途中で最少の武将が入れ替わって、
     せっかくの短縮が別の枠に活きない瞬間が出る。<b>こまめに徴兵し直して常に最少へ乗せ続ける</b>と、
     放置よりどれだけ速く全員満タンにできるか ── それを試すツール。自分の部隊とバフを入れて確かめる。
     <span class="sub-note">（各バフは時間に掛け算で効く。徐晃×楽進は共存＝両方乗る）</span>
@@ -184,7 +191,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <button class="howto-open" onclick="openHowto()">? 使い方</button>
 
   <section>
-    <div class="sec-title"><span class="no">武将</span>部隊の3人</div>
+    <div class="sec-title"><span class="no">武将</span>部隊の3人
+      <span class="inmode"><button id="imCur" class="on" onclick="setInMode('cur')">現在兵数</button><button id="imNeed" onclick="setInMode('need')">徴兵数</button></span>
+    </div>
     <div id="cmds"></div>
   </section>
 
@@ -248,7 +257,8 @@ const COL=['#c8a24a','#6f9bd1','#cf8b5c'], POS=['本営','中衛','前衛'];
 const F_BOO=0.30, F_TEN=0.80, F_ZEN=0.95, F_CHOK=0.96; // 募兵所-70%/点将台-20%/善戦-5%/張郃騎馬-4%
 // 徐晃・楽進の短縮率は redOf() で算出（徐晃は表記%×0.5674、楽進は星Lv連動）
 // 文官のLv1短縮率(小数)。Lv1→15で×2.552(全文官共通・実測確定)
-const BASE1={joko:0.125,raku:0.047,shu:0.03672,chin:0.04,katsu:0.04,katsuShu:0.01}; // raku=楽進12%,shu=周瑜9.37%/段(実測)
+const BASE1={joko:0.125,raku:0.047,shu:0.03672,chin:0.04,katsu:0.04,katsuShu:0.01,
+  kaku:0.03,ourou:0.05,choukaku:0.038,sonsaku:0.06,shoukin:0.05,ganbun:0.025}; // 追加6文官(表記どおりLv連動)
 const LV_STEP=0.11086; // 毎Lv +Lv1値×この割合(線形)
 function lvEff(key,lv){return BASE1[key]*(1+LV_STEP*(lv-1));}
 function lvCap(star){return 10+Math.max(0,Math.min(5,star));} // 星0→Lv10, 星5→Lv15
@@ -272,6 +282,12 @@ let BUFF={
   raku:{on:false, star:5, lv:10},
   shu:{on:false,  star:5, lv:15, n:3},
   chin:{on:false, star:5, lv:15},
+  kaku:{on:false, star:5, lv:15},     // 賈詡: 現在<上限50%の枠のみ
+  ourou:{on:false, star:5, lv:15},    // 王郎: 魏のみ
+  choukaku:{on:false, star:5, lv:15}, // 張角: 群のみ
+  sonsaku:{on:false, star:5, lv:15},  // 孫策: 呉のみ(本城)
+  shoukin:{on:false, star:5, lv:15},  // 蒋欽: 最少1人(要塞)・徐晃楽進と乗算共存
+  ganbun:{on:false, star:5, lv:15},   // 顔良&文醜: 群のみ(要塞)
 };
 let MODE='active';
 
@@ -282,6 +298,11 @@ function facAlways(i){const c=CM[i],B=BUFF;let f=1; // 常時系バフの乗算�
   if(B.katsu.on){f*=(1-lvEff('katsu',B.katsu.lv)); if(c.fac==='shu')f*=(1-lvEff('katsuShu',B.katsu.lv));}
   if(B.shu.on)f*=Math.pow(1-lvEff('shu',B.shu.lv),B.shu.n); // 周瑜：実測-9.37%/段(3段で-25.6%)
   if(B.chin.on&&c.zhi)f*=(1-lvEff('chin',B.chin.lv));
+  if(B.kaku.on && Math.min(c.cur,c.max) < c.max*0.5) f*=(1-lvEff('kaku',B.kaku.lv)); // 賈詡:現在<上限50%
+  if(B.ourou.on && c.fac==='gi') f*=(1-lvEff('ourou',B.ourou.lv));     // 王郎:魏
+  if(B.choukaku.on && c.fac==='qun') f*=(1-lvEff('choukaku',B.choukaku.lv)); // 張角:群
+  if(B.sonsaku.on && c.fac==='go') f*=(1-lvEff('sonsaku',B.sonsaku.lv));   // 孫策:呉
+  if(B.ganbun.on && c.fac==='qun') f*=(1-lvEff('ganbun',B.ganbun.lv));   // 顔良文醜:群
   return f;}
 // 実測基準からのスケール: 徐晃=星5Lv15で-28%、楽進=星5Lv10で-12%
 const RAKU_RED=0.12; // 楽進 実測-12%(星5Lv10)
@@ -291,13 +312,22 @@ function redOf(key){const b=BUFF[key];
 }
 function jokoRed(){return BUFF.joko.on?redOf('joko'):0;}
 function rakuRed(){return BUFF.raku.on?redOf('raku'):0;}
-function boostFactor(){return (1-jokoRed())*(1-rakuRed());} // 最少1人。実測で徐晃×楽進は共存(乗算で両方乗る)
-function boostOn(){return jokoRed()>0||rakuRed()>0;}
-function boostWho(){const a=[];if(jokoRed()>0)a.push('徐晃');if(rakuRed()>0)a.push('楽進');return a.join('＋');}
+function shoukinRed(){return BUFF.shoukin.on?redOf('shoukin'):0;}
+function boostFactor(){return (1-jokoRed())*(1-rakuRed())*(1-shoukinRed());} // 最少1人。徐晃×楽進×蒋欽は乗算で共存
+function boostOn(){return jokoRed()>0||rakuRed()>0||shoukinRed()>0;}
+function boostWho(){const a=[];if(jokoRed()>0)a.push('徐晃');if(rakuRed()>0)a.push('楽進');if(shoukinRed()>0)a.push('蒋欽');return a.join('＋');}
 function secWithout(i){return baseRate(i)*facAlways(i);}
 function secWith(i){return baseRate(i)*facAlways(i)*boostFactor();}
 
 function argminActive(v,max){let idx=-1,mn=Infinity;for(let i=0;i<3;i++){if(v[i]<max[i]-1e-6&&v[i]<mn){mn=v[i];idx=i;}}return idx;}
+function castleTotal(){ // 要塞文官(徐晃・張郃・周瑜・蒋欽・顔良文醜)なしで各枠を満タンにする時間(分)
+  const s={joko:BUFF.joko.on,chok:BUFF.chok,shu:BUFF.shu.on,shoukin:BUFF.shoukin.on,ganbun:BUFF.ganbun.on};
+  BUFF.joko.on=false; BUFF.chok=false; BUFF.shu.on=false; BUFF.shoukin.on=false; BUFF.ganbun.on=false;
+  let mx=0;
+  for(let i=0;i<3;i++){const need=Math.max(0,CM[i].max-Math.min(CM[i].cur,CM[i].max)); mx=Math.max(mx,need*secWithout(i));}
+  BUFF.joko.on=s.joko; BUFF.chok=s.chok; BUFF.shu.on=s.shu; BUFF.shoukin.on=s.shoukin; BUFF.ganbun.on=s.ganbun;
+  return mx/60;
+}
 function simulate(strategy){
   const max=CM.map(c=>c.max), cur=CM.map(c=>Math.min(c.cur,c.max));
   const rBase=[0,1,2].map(i=>1/secWithout(i)), rBoost=[0,1,2].map(i=>1/secWith(i));
@@ -323,7 +353,7 @@ function renderCmds(){
         <div class="facbtns">${FAC_LIST.map(f=>`<button class="facbtn ${c.fac===f?'on':''}" style="--fc:${FAC_COLOR[f]}" onclick="setFac(${i},'${f}')">${FAC_LABEL[f]}</button>`).join('')}</div>
         <label class="chip"><input type="checkbox" ${c.zhi?'checked':''} onchange="setZhi(${i},this.checked)">知略型</label>
         <label class="chip"><input type="checkbox" ${c.cav?'checked':''} onchange="setCav(${i},this.checked)">騎馬兵</label>
-        <div class="num-field"><label>現在</label><input type="number" value="${c.cur}" inputmode="numeric" onchange="setCur(${i},this.value)"></div>
+        <div class="num-field"><label>${INMODE==='need'?'徴兵数':'現在'}</label><input type="number" value="${INMODE==='need'?Math.max(0,c.max-Math.min(c.cur,c.max)):c.cur}" inputmode="numeric" onchange="${INMODE==='need'?`setNeed(${i},this.value)`:`setCur(${i},this.value)`}"></div>
         <div class="num-field"><label>上限(100刻み)</label><span class="stepper maxstep"><button onclick="stepMax(${i},-100)">−</button><span>${c.max}</span><button onclick="stepMax(${i},100)">+</button></span></div>
       </div></div>`;}
   $('cmds').innerHTML=h;
@@ -358,7 +388,13 @@ function renderBuffs(){const b=BUFF;
     ${detsuRow('joko','徐晃','最少1人。表記どおりLv連動(Lv1:12.5%〜Lv15:31.9%)。楽進と共存(乗算)')}
     ${detsuRow('raku','楽進','最少1人・-12%。徐晃と共存(乗算で両方乗る)')}
     ${detsuRow('shu','周瑜','部隊一律・実測-9.4%/段。文官数ぶんスタック(最大3=約-25.6%)')}
-    ${detsuRow('chin','陳宮','知略型(知略>攻撃)の武将のみ')}`;
+    ${detsuRow('chin','陳宮','知略型(知略>攻撃)の武将のみ')}
+    ${detsuRow('shoukin','蒋欽','要塞のみ・最少1人。徐晃/楽進と共存(乗算)')}
+    ${detsuRow('kaku','賈詡','現兵力が上限50%未満の武将のみ')}
+    ${detsuRow('ourou','王郎','魏の武将のみ')}
+    ${detsuRow('choukaku','張角','群の武将のみ')}
+    ${detsuRow('sonsaku','孫策','本城のみ・呉の武将のみ')}
+    ${detsuRow('ganbun','顔良&文醜','要塞のみ・群の武将のみ')}`;
 }
 function setBuff(k,v){if(typeof BUFF[k]==='object')BUFF[k].on=v;else BUFF[k]=v;renderBuffs();recompute();}
 function setStar(k,d){const b=BUFF[k];b.star=Math.max(0,Math.min(5,b.star+d));const cap=lvCap(b.star);if(b.lv>cap)b.lv=cap;renderBuffs();recompute();}
@@ -368,6 +404,9 @@ function setFac(i,f){CM[i].fac=f;renderCmds();recompute();}
 function setZhi(i,v){CM[i].zhi=v;recompute();}
 function setCav(i,v){CM[i].cav=v;renderCmds();recompute();}
 function setCur(i,v){CM[i].cur=Math.max(0,+v||0);recompute();}
+function setNeed(i,v){const need=Math.max(0,+v||0);CM[i].cur=Math.max(0,CM[i].max-need);recompute();}
+let INMODE='cur';
+function setInMode(m){INMODE=m;$('imCur').classList.toggle('on',m==='cur');$('imNeed').classList.toggle('on',m==='need');renderCmds();recompute();}
 function setMax(i,v){CM[i].max=Math.max(1,+v||1);recompute();}
 function stepMax(i,d){CM[i].max=Math.max(100,CM[i].max+d);renderCmds();recompute();}
 
@@ -375,7 +414,7 @@ function recompute(){
   const _cur=CM.map(c=>Math.min(c.cur,c.max)), _max=CM.map(c=>c.max), _L=argminActive(_cur,_max);
   for(let i=0;i<3;i++){const el=$('spd'+i);if(el){
     const boosted=(i===_L&&boostOn()), rate=boosted?secWith(i):secWithout(i), need=Math.max(0,_max[i]-_cur[i]);
-    el.innerHTML=rate.toFixed(2)+'秒/兵<span class="fillt"> ・ 満タン'+fmt(need*rate/60)+(boosted?' <span class="jk">⚡徐晃</span>':'')+'</span>';
+    el.innerHTML=rate.toFixed(2)+'秒/兵<span class="fillt"> ・ 満タン'+fmt(need*rate/60)+(boosted?' <span class="jk">⚡'+boostWho()+'</span>':'')+'</span>';
   }}
   const once=simulate('once'), active=simulate('active');
   window._R={once,active};
@@ -388,14 +427,17 @@ function recompute(){
     $('effBar').style.width=(6+p*94)+'%';
   }else{$('effVal').textContent='—';$('effWho').textContent='徐晃・楽進オフ';$('effBar').style.width='0%';}
   const save=once.total-active.total;
+  const castle=castleTotal();
+  const saveByGen=castle-active.total; // 要塞文官(徐晃張郃周瑜)を付けたことによる短縮
   $('cards').innerHTML=[
+    {k:'城で徴兵（要塞文官なし）',s:'徐晃・張郃・周瑜を付けない場合の満タン時間',v:castle,cls:'plain'},
     {k:'放置（1人に固定）',s:'最初に最少だった武将だけ徐晃。追いついた後は無駄がけ',v:once.total,cls:'meh'},
     {k:'こまめ再徴兵',s:'常に最少へ徐晃を付け直す',v:active.total,cls:'best'},
   ].map(c=>`<div class="card ${c.cls}"><div class="k">${c.k}<small>${c.s}</small></div><div class="v">${fmt(c.v)}</div></div>`).join('');
   const pct=once.total>0?Math.round(save/once.total*100):0;
-  $('verdict').innerHTML = save<0.5
-    ? `再徴兵しても差は <b>ほぼ0分</b><br><span style="font-size:12px">この環境ではバフが厚く、付け替えの手間はほぼ無駄。</span>`
-    : `放置より <b>${fmt(save)}</b> 短縮 &nbsp;(約${pct}%早い)<br><span style="font-size:12px">バフを外すほど、この差は大きくなる。</span>`;
+  $('verdict').innerHTML = saveByGen<0.5
+    ? `要塞文官(徐晃・張郃・周瑜)を付けても差は <b>ほぼ0分</b><br><span style="font-size:12px">この兵数・環境では付ける手間に見合わない。</span>`
+    : `要塞文官を付けると城徴兵より <b>${fmt(saveByGen)}</b> 短縮<br><span style="font-size:12px">${save<0.5?'放置とこまめの差はほぼ0分。':`さらにこまめ再徴兵で放置より ${fmt(save)} 速い（約${pct}%）。`}</span>`;
   $('foot').innerHTML=`<b>確定（実測）：</b>各バフは時間に<b>乗算</b>で掛かる（陳宮が3城で常に-10.2%一定＝加算では説明不可）。`+
     `徐晃=実測-28%（表記-31.9%）・楽進=-12%・陳宮=-10.2%・張郃=騎馬-4%。いずれもバフ厚に依らず一定。`+
     `<b>徐晃×楽進は共存(乗算)</b>＝最少1人に両方乗り掛け合わさる。短縮率は星Lv連動(徐晃Lv15:-31.9%/Lv5:-18%)、楽進-12%。`+
@@ -419,7 +461,7 @@ function renderBars(){
     const boosting=(pt.boost===c)&&!finished&&val<mx-1e-6, full=val>=mx-1e-6;
     html+=`<div class="bar-row ${boosting?'boosting':''} ${full?'full':''}">
       <div class="bar-name"><span class="dot" style="background:${COL[c]}"></span>${POS[c]}
-        <span class="fac">${FAC_LABEL[CM[c].fac]}${CM[c].zhi?'/知':''}</span><span class="badge">⚡ 徐晃</span></div>
+        <span class="fac">${FAC_LABEL[CM[c].fac]}${CM[c].zhi?'/知':''}</span><span class="badge">⚡ ${boostWho()||'徐晃'}</span></div>
       <div class="bar-track">
         <div class="bar-fill" style="width:${pct.toFixed(1)}%;background:linear-gradient(90deg,${COL[c]}99,${COL[c]})"></div>
         <div class="bar-tick" style="left:${pct.toFixed(1)}%"></div>
