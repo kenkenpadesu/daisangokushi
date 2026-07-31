@@ -154,7 +154,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #scrub{flex:1;accent-color:var(--gold);height:4px}
   .elapsed{font-family:"Noto Serif JP";font-weight:900;font-size:14px;color:var(--gold-hi);min-width:92px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .chart-note{font-size:11.5px;color:var(--mute);text-align:center;margin:12px 4px 2px;line-height:1.6}
-  .foot{font-size:11px;color:#6b727c;margin-top:28px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+  .foot{margin-top:28px;border-top:1px solid var(--line);padding-top:22px}
+  .foot-label{font-size:11px;color:var(--mute);letter-spacing:.1em;text-align:center;margin-bottom:12px}
+  .drama-banner{display:block;text-decoration:none;max-width:420px;margin:0 auto;border-radius:12px;
+    overflow:hidden;border:1px solid rgba(200,162,74,.35)}
+  .drama-inner{position:relative;padding:20px 22px;
+    background:radial-gradient(60% 90% at 82% 22%, rgba(200,162,74,.16), rgba(200,162,74,0) 60%), linear-gradient(120deg,#131820,#0c0f15 55%,#080a0e)}
+  .drama-eyebrow{font-size:9px;color:var(--gold);letter-spacing:.28em;margin-bottom:8px}
+  .drama-title{font-family:"Noto Serif JP",serif;font-size:20px;font-weight:900;color:#f2ead6;line-height:1.35}
+  .drama-title span{color:var(--gold-hi)}
+  .drama-stars{color:#e0b34a;font-size:12px;letter-spacing:2px;margin-top:8px}
+  .drama-meta{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;font-size:11px}
+  .drama-meta span:first-child{color:#9a9382}
+  .drama-meta span:last-child{color:var(--mute)}
+  .drama-banner:hover{border-color:var(--gold)}
+  .credit{text-align:center;font-size:11px;color:#5f6773;margin-top:16px}
   .foot b{color:var(--mute)}
   .ver{font-family:"Noto Sans JP";font-size:13px;font-weight:700;color:var(--mute);
     vertical-align:middle;margin-left:12px;letter-spacing:.02em}
@@ -195,7 +209,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="wrap">
 
   <div class="eyebrow">率土之濱</div>
-  <h1><span class="accent">徴兵時間</span>シミュレーター<span class="ver">ver.1</span></h1>
+  <h1><span class="accent">徴兵時間</span>シミュレーター<span class="ver">ver.1.4</span></h1>
   <p class="lede">
     徐晃・楽進は「最少兵数の武将」に短縮が乗る。でも徴兵を<b>放置</b>していると、途中で最少の武将が入れ替わって、
     せっかくの短縮が別の枠に活きない瞬間が出る。<b>こまめに徴兵し直して常に最少へ乗せ続ける</b>と、
@@ -247,7 +261,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
   </section>
 
-  <div class="foot" id="foot"></div>
+  <div class="foot" id="foot">
+    <div class="foot-label">けんけんぱが作成した別サイト</div>
+    <a class="drama-banner" href="https://kenkenpa-drama.com/">
+      <div class="drama-inner">
+        <div class="drama-eyebrow">DRAMA REVIEWS</div>
+        <div class="drama-title">けんけんぱの<br><span>ドラマレビュー</span></div>
+        <div class="drama-stars">★★★★★</div>
+        <div class="drama-meta"><span>観たドラマを5項目で採点</span><span>kenkenpa-drama.com ↗</span></div>
+      </div>
+    </a>
+    <div class="credit">© kenkenpadesu ・ 徴兵時間シミュレーター ver.1.4</div>
+  </div>
 </div>
 
 <div class="modal-bg" id="howto" onclick="if(event.target===this)closeHowto()">
@@ -452,10 +477,6 @@ function recompute(){
   $('verdict').innerHTML = saveByGen<0.5
     ? `要塞文官(徐晃・張郃・周瑜)を付けても差は <b>ほぼ0分</b><br><span style="font-size:12px">この兵数・環境では付ける手間に見合わない。</span>`
     : `要塞文官を付けると城徴兵より <b>${fmt(saveByGen)}</b> 短縮<br><span style="font-size:12px">${save<0.5?'放置とこまめの差はほぼ0分。':`さらにこまめ再徴兵で放置より ${fmt(save)} 速い（約${pct}%）。`}</span>`;
-  $('foot').innerHTML=`<b>確定（実測）：</b>各バフは時間に<b>乗算</b>で掛かる（陳宮が3城で常に-10.2%一定＝加算では説明不可）。`+
-    `徐晃=実測-28%（表記-31.9%）・楽進=-12%・陳宮=-10.2%・張郃=騎馬-4%。いずれもバフ厚に依らず一定。`+
-    `<b>徐晃×楽進は共存(乗算)</b>＝最少1人に両方乗り掛け合わさる。短縮率は星Lv連動(徐晃Lv15:-31.9%/Lv5:-18%)、楽進-12%。`+
-    `校正は魏・騎馬。他陣営/兵種の素は暫定比。`;
   renderBars();
 }
 
