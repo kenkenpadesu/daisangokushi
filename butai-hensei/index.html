@@ -3,7 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>率土之滨 2026夏版 Tier表 & 5部隊編成ボード</title>
+<title>率土之濱 5部隊編成ボード｜2026夏版 Tier表</title>
+<meta name="description" content="率土之濱-大三国志 2026年夏版（第3四半期）チーム強度Tier榜100隊を日本語化。武将で逆引き、戦法おすすめ、所持武将フィルター、5部隊の編成シミュレート・画像保存ができます。">
+<meta name="theme-color" content="#16202b">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="favicon-256.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="率土之濱 5部隊編成ボード">
+<meta property="og:title" content="率土之濱 5部隊編成ボード｜2026夏版 Tier表">
+<meta property="og:description" content="2026夏版のTier榜100隊を日本語化。武将で逆引き・戦法おすすめ・所持フィルター・画像保存。">
+<meta property="og:url" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/">
+<meta property="og:image" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/ogp.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="率土之濱 5部隊編成ボード｜2026夏版 Tier表">
+<meta name="twitter:description" content="2026夏版のTier榜100隊を日本語化。武将で逆引き・戦法おすすめ・所持フィルター・画像保存。">
+<meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/ogp.png">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-NK4MCM9C');</script>
+<!-- End Google Tag Manager -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -192,6 +211,37 @@ select.dup{border-color:var(--warn);background:#fdecec;color:var(--warn);font-we
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .foot{max-width:1180px;margin:8px auto 30px;padding:0 18px;color:var(--muted);font-size:11px}
+
+/* ===== site footer ===== */
+.site-foot{margin-top:32px;border-top:1px solid var(--line);background:var(--card2)}
+.foot-inner{max-width:1180px;margin:0 auto;padding:26px 18px 40px}
+.foot-head{font-family:"Shippori Mincho",serif;font-weight:800;font-size:15px;color:var(--text);margin-bottom:14px;text-align:center}
+.foot-sites{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:720px;margin:0 auto 22px}
+.foot-site{display:block;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);text-decoration:none;color:var(--text);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.foot-site:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(20,30,40,.14)}
+.foot-site img{display:block;width:100%;aspect-ratio:1200/630;object-fit:cover;background:#0e1620}
+.foot-site span{display:block;padding:9px 12px;font-weight:700;font-size:13px}
+.foot-cite{max-width:760px;margin:0 auto 16px;font-size:11.5px;color:var(--muted);line-height:1.7;text-align:center}
+.foot-cite a{color:var(--seal-d);text-decoration:underline}
+.foot-links{text-align:center;margin-bottom:10px}
+.foot-link{appearance:none;border:1px solid var(--line2);background:var(--card);color:var(--text);font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 16px;border-radius:8px;cursor:pointer}
+.foot-copy{text-align:center;font-size:11.5px;color:var(--muted)}
+
+/* ===== scroll to top ===== */
+.totop{position:fixed;right:16px;bottom:20px;z-index:55;width:46px;height:46px;border-radius:50%;
+  border:1px solid var(--line2);background:var(--ink);color:#f4efe4;font-size:20px;cursor:pointer;
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}
+.totop.show{opacity:.92;pointer-events:auto;transform:translateY(0)}
+.totop:hover{opacity:1;background:var(--seal)}
+
+/* ===== help modal ===== */
+.help-body{font-size:13.5px;color:var(--text)}
+.help-lead{margin:0 0 14px;color:var(--muted)}
+.help-steps{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:12px}
+.help-steps li{line-height:1.6}
+.help-steps b{color:var(--seal-d)}
+.help-note{margin:16px 0 0;font-size:11.5px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+.help-actions{margin-top:16px;text-align:center}
 @media (max-width:640px){
   .brand h1{font-size:16px}.tabs{margin-left:0;width:100%}.tab{flex:1}
   .summary{top:120px}
@@ -274,6 +324,9 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
 </style>
 </head>
 <body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NK4MCM9C" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <label class="theme-toggle" title="昼／夜モード切替">
   <span class="tlabel" id="themeLabel">昼</span>
   <span class="switch"><input type="checkbox" id="themeSwitch" role="switch" aria-label="ダークモード切替"><span class="track"></span><span class="thumb" id="themeThumb">☀</span></span>
@@ -281,7 +334,7 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
 <header>
   <div class="hwrap">
     <div class="brand">
-      <div class="seal mincho">碧</div>
+      <div class="seal mincho">率</div>
       <div>
         <h1>率土之滨 部隊編成ボード</h1>
         <div class="sub">2026年 夏版（第3四半期）チーム強度Tier榜・100隊 ／ 日本語版</div>
@@ -339,7 +392,49 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
     <div class="boards" id="boards"></div>
   </section>
 </main>
-<div class="foot">データ：碧版 2026年 第3四半期 Tier榜（原作者 @老碧666）を日本語化。「/」は「どちらか一方（or）」の意味です。実際のゲーム内設定・バージョンにより数値は変動します。</div>
+<footer class="site-foot">
+  <div class="foot-inner">
+    <div class="foot-head">けんけんぱが作成した別サイト</div>
+    <div class="foot-sites">
+      <a class="foot-site" href="https://kenkenpa-drama.com/" target="_blank" rel="noopener">
+        <img src="https://kenkenpa-drama.com/ogp.png" alt="けんけんぱのドラマレビュー" loading="lazy">
+        <span>けんけんぱのドラマレビュー</span>
+      </a>
+      <a class="foot-site" href="https://kenkenpadesu.github.io/daisangokushi/" target="_blank" rel="noopener">
+        <img src="https://kenkenpadesu.github.io/daisangokushi/ogp.png" alt="率土之濱 徴兵時間シミュレーター" loading="lazy">
+        <span>率土之濱 徴兵時間シミュレーター</span>
+      </a>
+    </div>
+    <div class="foot-cite">
+      データ出典：<a href="https://m.ds.163.com/article/6a6ed31ce034c360f1fc11dd/" target="_blank" rel="noopener">碧版 2026年 第3四半期 チーム強度Tier榜（原作者 @老碧666）</a> を日本語化。<br>
+      「/」は「どちらか一方（or）」の意味です。戦法名はゲーム内正式名に準拠。実際のゲーム内設定・バージョンにより数値は変動します。本サイトは非公式のファンツールです。
+    </div>
+    <div class="foot-links"><button class="foot-link" id="helpOpen">使い方</button></div>
+    <div class="foot-copy">© 2026 kenkenpadesu. All rights reserved.</div>
+  </div>
+</footer>
+
+<button class="totop" id="toTop" aria-label="トップへ戻る" title="トップへ戻る">↑</button>
+
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-label="使い方">
+  <div class="sheet">
+    <div class="sh"><h3>このサイトの使い方</h3><button class="x" id="helpClose" aria-label="閉じる">×</button></div>
+    <div class="body help-body">
+      <p class="help-lead">率土之濱のTier表を日本語で見て、5部隊を組んでみるツールです。できることを紹介します。</p>
+      <ol class="help-steps">
+        <li><b>Tier表を見る</b><br>上部のタブ（T0／T0-／T1／T2-）で強さ別に部隊を表示。武将名・部隊名・戦法で検索もできます。</li>
+        <li><b>2つの組み方</b><br>「部隊で選ぶ」＝Tier表の部隊をそのまま採用。「武将で選ぶ（逆引き）」＝武将を1人ずつ選ぶと、近い部隊名が逆引き表示されます。</li>
+        <li><b>戦法おすすめ＋全戦法</b><br>武将を選ぶと、その武将がよく使う戦法が回数つきで候補に出ます。「全戦法から選ぶ」で全戦法に切替も可。第二・第三戦法は入れ替え自由です。</li>
+        <li><b>重複チェック</b><br>武将・戦法は各1つの前提。5部隊でカブると赤く表示。「戦法を自動割り当て」でカブりを自動回避できます。</li>
+        <li><b>持ってる武将で絞る</b><br>「武将を設定」で所持武将にチェック→「所持武将で絞る」で、組める部隊だけに絞れます。</li>
+        <li><b>保存・共有・続きから</b><br>「画像を保存」で編成をPNG/JPG/PDF化（QR付き）。QRや「共有」リンクで別端末に渡せます。同じ端末なら開くだけで前回の続きから再開します。</li>
+      </ol>
+      <p class="help-note">※ 記録（所持武将・編集内容・昼夜設定）はこの端末のブラウザにのみ保存されます。シークレットモードやデータ削除では残りません。</p>
+      <div class="help-actions"><button class="btn primary" id="helpStart">はじめる</button></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="ownModal" role="dialog" aria-modal="true" aria-label="所持武将の設定">
   <div class="sheet">
     <div class="sh"><h3>所持武将を設定</h3><span class="own-count" id="ownCount2" style="color:#b9c2ce"></span><button class="x" id="ownClose" aria-label="閉じる">×</button></div>
@@ -3272,6 +3367,21 @@ function jpegToPdf(jpeg,w,h){
 
 /* ---------- theme + ownership events ---------- */
 document.getElementById('themeSwitch').addEventListener('change',e=>applyTheme(e.target.checked));
+
+/* ---------- help modal ---------- */
+const helpModal=document.getElementById('helpModal');
+function openHelp(){helpModal.classList.add('open');}
+function closeHelp(){helpModal.classList.remove('open');store.set('stzb_help_seen',true);}
+document.getElementById('helpOpen').onclick=openHelp;
+document.getElementById('helpClose').onclick=closeHelp;
+document.getElementById('helpStart').onclick=closeHelp;
+helpModal.addEventListener('click',e=>{if(e.target===helpModal)closeHelp();});
+if(!store.get('stzb_help_seen',false)){setTimeout(openHelp,350);}
+
+/* ---------- scroll to top ---------- */
+const toTop=document.getElementById('toTop');
+window.addEventListener('scroll',()=>{toTop.classList.toggle('show',window.scrollY>420);},{passive:true});
+toTop.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 
 /* ---------- save / share events (in sticky summary bar) ---------- */
 const saveMenu=document.getElementById('saveMenu');
