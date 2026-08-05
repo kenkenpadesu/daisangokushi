@@ -247,11 +247,12 @@ body.dark .pick{background:#141b22;color:var(--text)}
   font-family:inherit;font-weight:700;font-size:12px;padding:4px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .jumpchip:hover{background:var(--ink);color:#f4efe4;border-color:var(--ink)}
 .jumpchip:disabled{opacity:.35;cursor:default}
-.picklist{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 6px}
+.picklist{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 6px;position:relative}
 .pickgrp{padding:9px 14px 6px 18px;font-size:12.5px;font-weight:800;color:var(--text);letter-spacing:.02em;
   position:sticky;top:0;background:var(--paper);z-index:1;border-bottom:1px solid var(--line2)}
 .pickgrp::before{content:"";position:absolute;left:6px;top:9px;bottom:8px;width:4px;border-radius:2px;background:var(--seal)}
 .pickgrp:first-child{padding-top:6px}
+.pickanchor{height:0;overflow:hidden;padding:0;margin:0}
 body.dark .pickgrp{background:var(--paper)}
 .pickitem{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--line)}
 .pickitem:hover{background:var(--card2)}
@@ -276,12 +277,12 @@ body.dark .pickgrp{background:var(--paper)}
 /* ===== site footer ===== */
 .site-foot{margin-top:32px;border-top:1px solid var(--line);background:var(--card2)}
 .foot-inner{max-width:1180px;margin:0 auto;padding:26px 18px 40px}
-.foot-head{font-family:"Shippori Mincho",serif;font-weight:800;font-size:15px;color:var(--text);margin-bottom:14px;text-align:center}
-.foot-sites{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:720px;margin:0 auto 22px}
-.foot-site{display:block;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card);text-decoration:none;color:var(--text);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
-.foot-site:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(20,30,40,.14)}
-.foot-site img{display:block;width:100%;aspect-ratio:1200/630;object-fit:cover;background:#0e1620}
-.foot-site span{display:block;padding:9px 12px;font-weight:700;font-size:13px}
+.foot-head{font-family:"Shippori Mincho",serif;font-weight:800;font-size:13px;color:var(--text);margin-bottom:10px;text-align:center}
+.foot-sites{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:560px;margin:0 auto 18px}
+.foot-site{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);text-decoration:none;color:var(--text);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;padding:6px 12px 6px 6px}
+.foot-site:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,30,40,.12)}
+.foot-site img{display:block;width:54px;height:30px;object-fit:cover;border-radius:5px;background:#0e1620;flex:none}
+.foot-site span{font-weight:700;font-size:12px;white-space:nowrap}
 .foot-cite{max-width:760px;margin:0 auto 16px;font-size:11.5px;color:var(--muted);line-height:1.7;text-align:center}
 .foot-cite a{color:var(--seal-d);text-decoration:underline}
 .foot-links{text-align:center;margin-bottom:10px}
@@ -3482,8 +3483,8 @@ function buildJump(){
     const chip=document.createElement('button');
     chip.type='button';chip.className='jumpchip';chip.textContent=SHORT[g.label]||g.label;chip.dataset.target=g.label;
     chip.addEventListener('click',()=>{
-      const h=pickList.querySelector('.pickgrp[data-label="'+CSS.escape(g.label)+'"]');
-      if(h)pickList.scrollTo({top:h.offsetTop-2,behavior:'smooth'});
+      const a=pickList.querySelector('.pickanchor[data-label="'+CSS.escape(g.label)+'"]');
+      if(a)pickList.scrollTo({top:Math.max(0,a.offsetTop),behavior:'smooth'});
     });
     pickJump.appendChild(chip);
   });
@@ -3496,6 +3497,7 @@ function renderPickList(q){
     const items=g.items.filter(it=>it.always || !q || String(it.label).toLowerCase().includes(q) || String(it.value).toLowerCase().includes(q));
     const real=items.filter(it=>!it.always);
     if(g.label && real.length){
+      const a=document.createElement('div');a.className='pickanchor';a.dataset.label=g.label;frag.appendChild(a);
       const h=document.createElement('div');h.className='pickgrp';h.textContent=g.label;h.dataset.label=g.label;frag.appendChild(h);
       present.add(g.label);
     }
