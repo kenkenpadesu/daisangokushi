@@ -254,6 +254,35 @@ body.dark .pick{background:#141b22;color:var(--text)}
 .pickgrp::before{content:"";position:absolute;left:6px;top:9px;bottom:8px;width:4px;border-radius:2px;background:var(--seal)}
 .pickgrp:first-child{padding-top:6px}
 .pickanchor{height:0;overflow:hidden;padding:0;margin:0}
+
+/* ===== 陣営バッジ＋兵種アイコン ===== */
+.cbadge{display:inline-flex;align-items:center;gap:3px;vertical-align:middle}
+.camp{font-size:10px;font-weight:800;color:#fff;padding:1px 5px;border-radius:4px;line-height:1.4}
+.camp.c群{background:#c5a03c}.camp.c漢{background:#8b5ec4}.camp.c晋{background:#5aaac8}
+.camp.c魏{background:#466eb4}.camp.c呉{background:#be4646}.camp.c蜀{background:#4f8f4a}
+.arms{font-size:10px;font-weight:800;color:var(--text);background:var(--card2);border:1px solid var(--line2);
+  width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+body.dark .arms{background:#2a3644;color:#e7ecf1}
+/* テーブル武将セル内 */
+table.mem td.g .cbadge{margin-top:2px}
+.gcell{display:flex;flex-direction:column;gap:1px;align-items:flex-start}
+/* ピッカー・ボード用インライン */
+.pickitem .cbadge, .gname .cbadge, .pick .cbadge{margin-left:5px}
+
+/* 陣営/兵種フィルタ */
+.cfilter{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.cfilter .cf-label{font-size:11px;font-weight:700;color:var(--muted)}
+.cf-chip{appearance:none;border:1px solid var(--line2);background:var(--card);color:var(--text);
+  font-family:inherit;font-weight:700;font-size:11.5px;padding:3px 9px;border-radius:999px;cursor:pointer}
+.cf-chip.on{background:var(--ink);color:#f4efe4;border-color:var(--ink)}
+.cf-chip.camp群.on{background:#c5a03c;border-color:#c5a03c}
+.cf-chip.camp漢.on{background:#8b5ec4;border-color:#8b5ec4}
+.cf-chip.camp晋.on{background:#5aaac8;border-color:#5aaac8}
+.cf-chip.camp魏.on{background:#466eb4;border-color:#466eb4}
+.cf-chip.camp呉.on{background:#be4646;border-color:#be4646}
+.cf-chip.camp蜀.on{background:#4f8f4a;border-color:#4f8f4a}
+.cf-chip.cf-clear{background:transparent;border-color:var(--seal);color:var(--seal)}
+.cf-chip.cf-clear[hidden]{display:none}
 body.dark .pickgrp{background:var(--paper)}
 .pickitem{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--line)}
 .pickitem:hover{background:var(--card2)}
@@ -426,6 +455,7 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
       <label class="own-toggle"><input type="checkbox" id="ownFilter"> <span data-i18n="ownFilter">所持武将で絞る</span></label>
       <span class="own-count" id="ownCount"></span>
     </div>
+    <div class="cfilter" id="tierFilter"></div>
     <div class="tiernav" id="tierNav" role="tablist" aria-label="Tierで表示">
       <button class="tnav T0"  data-tier="T0"  role="tab" aria-selected="true">T0 <span class="tn-count"></span></button>
       <button class="tnav T0-" data-tier="T0-" role="tab" aria-selected="false">T0- <span class="tn-count"></span></button>
@@ -527,7 +557,7 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
 <div class="pickpop" id="pickPop" hidden>
   <div class="picksheet">
     <div class="pickhead"><h4 id="pickTitle">選ぶ</h4><button class="x" id="pickClose" aria-label="閉じる">×</button></div>
-    <div class="picksearch"><input id="pickSearch" type="search" placeholder="検索（1文字でも絞り込み）" autocomplete="off"><div class="jumpbar" id="pickJump" hidden></div></div>
+    <div class="picksearch"><input id="pickSearch" type="search" placeholder="検索（1文字でも絞り込み）" autocomplete="off"><div class="jumpbar" id="pickJump" hidden></div><div class="cfilter" id="pickFilter" hidden></div></div>
     <div class="picklist" id="pickList"></div>
   </div>
 </div>
@@ -2899,6 +2929,7 @@ const I18N={
   treasure:{ja:'宝物',zh:'宝物'},ci:{ja:'词条',zh:'词条'},
   help:{ja:'使い方',zh:'使用说明'},
   jumpReco:{ja:'推奨',zh:'推荐'},
+  clear:{ja:'✕ クリア',zh:'✕ 清除'},
 };
 let LANG=store.get('stzb_lang','ja');
 function isZH(){return LANG==='zh';}
@@ -2912,6 +2943,15 @@ function gName(n){ // 武将名を言語で
   return n;
 }
 function tName(t){ if(isZH()){const z=(DATA.tacticZh||{})[t]; if(z)return z;} return t; }
+/* 陣営・兵種の取得＆バッジ */
+const ARMS_KANJI={'歩兵':'歩','弓兵':'弓','騎馬兵':'騎'};
+function campOf(n){const g=GEN_INDEX[n];if(g&&g.camp)return g.camp;const cm=(DATA.customMeta||{})[n];return cm&&cm.camp||'';}
+function armsOf(n){const g=GEN_INDEX[n];if(g&&g.arms)return g.arms;const cm=(DATA.customMeta||{})[n];return cm&&cm.arms||'';}
+function badge(n){
+  const c=campOf(n),a=armsOf(n);
+  if(!c&&!a)return '';
+  return `<span class="cbadge">${c?`<span class="camp c${c}">${c}</span>`:''}${a?`<span class="arms">${ARMS_KANJI[a]||''}</span>`:''}</span>`;
+}
 function tArr(arr){return (arr||[]).map(tName);}
 function applyLang(lang){
   LANG=lang; store.set('stzb_lang',lang);
@@ -2924,6 +2964,7 @@ function applyLang(lang){
   const q=document.getElementById('q'); if(q)q.placeholder=L('searchPlaceholder');
   // 再描画
   try{initTierCounts&&initTierCounts();}catch(e){}
+  try{buildTierFilter&&buildTierFilter();}catch(e){}
   try{renderTier();}catch(e){}
   try{renderBoard();}catch(e){}
   try{setStickyOffset();}catch(e){}
@@ -3015,6 +3056,29 @@ function initTierCounts(){
     const span=b.querySelector('.tn-count'); if(span)span.textContent=(counts[b.dataset.tier]||0);
   });
 }
+/* Tier表の陣営/兵種フィルタ */
+let tierCF={camp:'',arms:''};
+function buildTierFilter(){
+  const bar=document.getElementById('tierFilter'); if(!bar)return;
+  const camps=['群','漢','晋','魏','呉','蜀'], arms=['歩兵','弓兵','騎馬兵'];
+  let html=`<span class="cf-label">${isZH()?'阵营':'陣営'}</span>`;
+  camps.forEach(c=>html+=`<button class="cf-chip camp${c}${tierCF.camp===c?' on':''}" data-camp="${c}">${c}</button>`);
+  html+=`<span class="cf-label" style="margin-left:6px">${isZH()?'兵种':'兵種'}</span>`;
+  arms.forEach(a=>html+=`<button class="cf-chip${tierCF.arms===a?' on':''}" data-arms="${a}">${ARMS_KANJI[a]}</button>`);
+  if(tierCF.camp||tierCF.arms)html+=`<button class="cf-chip cf-clear" id="tierCFclear">${L('clear')}</button>`;
+  bar.innerHTML=html;
+  const clr=bar.querySelector('#tierCFclear'); if(clr)clr.addEventListener('click',()=>{tierCF={camp:'',arms:''};buildTierFilter();renderTier();});
+  bar.querySelectorAll('[data-camp]').forEach(b=>b.addEventListener('click',()=>{tierCF.camp=(tierCF.camp===b.dataset.camp)?'':b.dataset.camp;buildTierFilter();renderTier();}));
+  bar.querySelectorAll('[data-arms]').forEach(b=>b.addEventListener('click',()=>{tierCF.arms=(tierCF.arms===b.dataset.arms)?'':b.dataset.arms;buildTierFilter();renderTier();}));
+}
+function teamHasCF(t){
+  if(!tierCF.camp && !tierCF.arms)return true;
+  return t.members.some(m=>{
+    const okC=!tierCF.camp || campOf(m.gen)===tierCF.camp;
+    const okA=!tierCF.arms || armsOf(m.gen)===tierCF.arms;
+    return okC && okA;
+  });
+}
 function renderTier(){
   const grid=document.getElementById('tierGrid');
   const q=query.trim().toLowerCase();
@@ -3025,6 +3089,7 @@ function renderTier(){
   });
   // 所持フィルタ（ON時は組めない部隊を除外）
   if(ownFilterOn) list=list.filter(t=>ownsAll(t.members.map(m=>m.gen)));
+  list=list.filter(teamHasCF);
   document.querySelectorAll('#tierNav .tnav').forEach(b=>b.classList.toggle('dim',searching));
   document.getElementById('tierCount').textContent =
     searching ? ('「'+query.trim()+'」'+(isZH()?' 搜索结果：'+list.length+' 队（全部）':'の検索結果：'+list.length+'件（全Tier）')) : (list.length+' '+L('teamsUnit'));
@@ -3035,7 +3100,7 @@ function renderTier(){
   for(const t of list){
     const rows=t.members.map((m, i)=>`<tr>
       <td>${esc(posL[i]||m.pos)}</td>
-      <td class="g"${owned.has(m.gen)?'':' style="color:var(--seal)"'}>${esc(gName(m.gen))}${owned.has(m.gen)?'':' ✱'}</td>
+      <td class="g"${owned.has(m.gen)?'':' style="color:var(--seal)"'}><div class="gcell"><span>${esc(gName(m.gen))}${owned.has(m.gen)?'':' ✱'}</span>${badge(m.gen)}</div></td>
       <td>${joinSlash(tArr(m.t2))}</td>
       <td>${joinSlash(tArr(m.t3))}</td>
       <td>${esc(m.treasure)}</td>
@@ -3195,11 +3260,11 @@ function renderBoard(){
       const body=el(`<div class="mbody"></div>`);
       if(mode==='gen'){
         const label=m.gen?esc(gName(m.gen)):L('selectGen');
-        const btn=el(`<button type="button" class="pick${m.gen?(gd[m.gen]?' dup':''):' ph'}">${label}</button>`);
+        const btn=el(`<button type="button" class="pick${m.gen?(gd[m.gen]?' dup':''):' ph'}">${label}${m.gen?badge(m.gen):''}</button>`);
         btn.addEventListener('click',()=>openGeneralPicker(ti,k,m.gen));
         body.appendChild(btn);
       }else{
-        body.appendChild(el(`<div class="gname${gd[m.gen]?' dup':''}">${m.gen?esc(gName(m.gen)):'<span style="color:var(--muted)">―</span>'}</div>`));
+        body.appendChild(el(`<div class="gname${gd[m.gen]?' dup':''}">${m.gen?esc(gName(m.gen))+badge(m.gen):'<span style="color:var(--muted)">―</span>'}</div>`));
       }
       const tac=el(`<div class="tacs"></div>`);
       tac.appendChild(tacticControl(ti,k,'t2',m,td));
@@ -3539,21 +3604,49 @@ const pickList=document.getElementById('pickList');
 const pickSearch=document.getElementById('pickSearch');
 const pickTitle=document.getElementById('pickTitle');
 const pickJump=document.getElementById('pickJump');
-let pickCtx=null; // {groups, onPick, jump}
+const pickFilter=document.getElementById('pickFilter');
+let pickCtx=null;
+let pickCF={camp:'',arms:''};
 const SHORT={'おすすめ':'推奨','指揮戦法':'指','主動戦法':'主','追撃戦法':'追','受動戦法':'受','全戦法':'全','その他':'他','候補':'候補',
   '推荐':'推荐','指挥战法':'指','主动战法':'主','追击战法':'追','受动战法':'受','全部战法':'全','其他':'他'};
 
-function openPicker(title, groups, onPick, jump){
-  pickCtx={groups,onPick,jump:!!jump};
+function openPicker(title, groups, onPick, jump, filterGen){
+  pickCtx={groups,onPick,jump:!!jump,filterGen:!!filterGen};
+  pickCF={camp:'',arms:''};
   pickTitle.textContent=title;
   pickSearch.value='';
   pickSearch.placeholder=L('pickSearchPh');
   pickPop.hidden=false;
   buildJump();
+  buildFilter();
   renderPickList('');
   setTimeout(()=>pickSearch.focus(),50);
 }
 function closePicker(){pickPop.hidden=true;pickCtx=null;}
+function buildFilter(){
+  if(!pickCtx.filterGen){pickFilter.hidden=true;pickFilter.innerHTML='';return;}
+  pickFilter.hidden=false;
+  const camps=['群','漢','晋','魏','呉','蜀'], arms=['歩兵','弓兵','騎馬兵'];
+  let html=`<span class="cf-label">${isZH()?'阵营':'陣営'}</span>`;
+  camps.forEach(c=>html+=`<button class="cf-chip camp${c}" data-camp="${c}">${c}</button>`);
+  html+=`<span class="cf-label" style="margin-left:6px">${isZH()?'兵种':'兵種'}</span>`;
+  arms.forEach(a=>html+=`<button class="cf-chip" data-arms="${a}">${ARMS_KANJI[a]}</button>`);
+  html+=`<button class="cf-chip cf-clear" id="pickCFclear" hidden>${L('clear')}</button>`;
+  pickFilter.innerHTML=html;
+  const clr=pickFilter.querySelector('#pickCFclear');
+  clr.addEventListener('click',()=>{pickCF={camp:'',arms:''};syncFilterChips();renderPickList(pickSearch.value);});
+  pickFilter.querySelectorAll('[data-camp]').forEach(b=>b.addEventListener('click',()=>{
+    pickCF.camp=(pickCF.camp===b.dataset.camp)?'':b.dataset.camp;syncFilterChips();renderPickList(pickSearch.value);
+  }));
+  pickFilter.querySelectorAll('[data-arms]').forEach(b=>b.addEventListener('click',()=>{
+    pickCF.arms=(pickCF.arms===b.dataset.arms)?'':b.dataset.arms;syncFilterChips();renderPickList(pickSearch.value);
+  }));
+}
+function syncFilterChips(){
+  pickFilter.querySelectorAll('[data-camp]').forEach(b=>b.classList.toggle('on',pickCF.camp===b.dataset.camp));
+  pickFilter.querySelectorAll('[data-arms]').forEach(b=>b.classList.toggle('on',pickCF.arms===b.dataset.arms));
+  const clr=pickFilter.querySelector('#pickCFclear'); if(clr)clr.hidden=!(pickCF.camp||pickCF.arms);
+}
 function buildJump(){
   pickJump.innerHTML='';
   const labeled=pickCtx.jump?pickCtx.groups.filter(g=>g.label):[];
@@ -3574,7 +3667,15 @@ function renderPickList(q){
   const frag=document.createDocumentFragment();
   let total=0; const present=new Set();
   pickCtx.groups.forEach(g=>{
-    const items=g.items.filter(it=>it.always || !q || String(it.label).toLowerCase().includes(q) || String(it.value).toLowerCase().includes(q));
+    const items=g.items.filter(it=>{
+      if(it.always)return true;
+      if(q && !(String(it.label).toLowerCase().includes(q) || String(it.value).toLowerCase().includes(q)))return false;
+      if(pickCtx.filterGen){
+        if(pickCF.camp && it.camp!==pickCF.camp)return false;
+        if(pickCF.arms && it.arms!==pickCF.arms)return false;
+      }
+      return true;
+    });
     const real=items.filter(it=>!it.always);
     if(g.label && real.length){
       const a=document.createElement('div');a.className='pickanchor';a.dataset.label=g.label;frag.appendChild(a);
@@ -3585,7 +3686,7 @@ function renderPickList(q){
       if(!it.always)total++;
       const row=document.createElement('div');
       row.className='pickitem'+(it.sel?' sel':'')+(it.clear?' clear':'');
-      row.innerHTML=`<span>${esc(it.label)}</span>${it.meta?`<span class="meta${it.reco?' reco':''}">${esc(it.meta)}</span>`:''}`;
+      row.innerHTML=`<span>${esc(it.label)}${it.badge||''}</span>${it.meta?`<span class="meta${it.reco?' reco':''}">${esc(it.meta)}</span>`:''}`;
       row.addEventListener('click',()=>{const f=pickCtx.onPick;closePicker();f(it.value);});
       frag.appendChild(row);
     });
@@ -3593,7 +3694,6 @@ function renderPickList(q){
   pickList.innerHTML='';
   if(total===0){const e=document.createElement('div');e.className='pickempty';e.textContent=L('none2');pickList.appendChild(e);}
   pickList.appendChild(frag);
-  // ジャンプチップの有効/無効
   if(pickCtx.jump){pickJump.querySelectorAll('.jumpchip').forEach(c=>{c.disabled=!present.has(c.dataset.target);});}
 }
 pickSearch.addEventListener('input',e=>renderPickList(e.target.value));
@@ -3607,9 +3707,10 @@ function openGeneralPicker(ti,k,current){
   GEN_SORTED.forEach(g=>{
     if(usedSet[g.name] && g.name!==current)return;
     if(ownFilterOn && !owned.has(g.name) && g.name!==current)return;
-    items.push({value:g.name,label:gName(g.name),meta:'（'+g.teams.length+L('teamsUnit')+'）',sel:g.name===current});
+    items.push({value:g.name,label:gName(g.name),badge:badge(g.name),camp:campOf(g.name),arms:armsOf(g.name),
+      meta:'（'+g.teams.length+L('teamsUnit')+'）',sel:g.name===current});
   });
-  openPicker(L('pickGen'),[{label:'',items}],(v)=>{setGeneral(ti,k,v);renderBoard();});
+  openPicker(L('pickGen'),[{label:'',items}],(v)=>{setGeneral(ti,k,v);renderBoard();},false,true);
 }
 /* 戦法ピッカー：上=おすすめ / 下=全戦法（種別ごと） */
 function openTacticPicker(ti,k,which,gen,current,otherTac){
@@ -3713,6 +3814,7 @@ document.getElementById('ownFilter').checked=ownFilterOn;
 updOwnCount();
 initBoard();
 initTierCounts();
+buildTierFilter();
 setStickyOffset();
 renderTier();
 // 復元：URL(#d=) 優先、なければ前回の自動保存
