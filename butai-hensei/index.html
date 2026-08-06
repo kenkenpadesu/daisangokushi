@@ -50,7 +50,7 @@ header{
   background:linear-gradient(180deg,var(--ink),var(--ink2));
   color:#f4efe4; border-bottom:3px solid var(--seal);
 }
-.hwrap{max-width:1180px;margin:0 auto;padding:14px 120px 14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hwrap{max-width:1180px;margin:0 auto;padding:14px 200px 14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 @media(max-width:640px){.hwrap{padding-right:110px}.topctrls{top:10px;right:10px}}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .seal{
@@ -366,7 +366,8 @@ body.dark .summary{background:#0b1119}
   background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22);
   padding:6px 10px 6px 12px; border-radius:999px; user-select:none;
 }
-.topctrls{position:fixed;top:14px;right:16px;z-index:60;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.topctrls{position:fixed;top:14px;right:16px;z-index:60;display:flex;flex-direction:row;gap:8px;align-items:center}
+@media(max-width:640px){.topctrls{flex-direction:column;align-items:flex-end;gap:6px}}
 .lang-toggle{display:inline-flex;align-items:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px;gap:2px}
 .langbtn{appearance:none;border:0;background:transparent;color:#cdd5df;font-family:inherit;font-weight:700;font-size:12px;padding:4px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .langbtn.on{background:#f4efe4;color:#16202b}
@@ -453,7 +454,10 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
     <div class="ownbar">
       <button class="own-open" id="ownOpen" data-i18n="ownSet">所持武将を設定</button>
       <label class="own-toggle"><input type="checkbox" id="ownFilter"> <span data-i18n="ownFilter">所持武将で絞る</span></label>
+      <button class="own-open" id="tacOpen" data-i18n="tacSet">所持戦法を設定</button>
+      <label class="own-toggle"><input type="checkbox" id="tacFilter"> <span data-i18n="tacFilter">所持戦法で絞る</span></label>
       <span class="own-count" id="ownCount"></span>
+      <span class="own-count" id="tacCount"></span>
     </div>
     <div class="cfilter" id="tierFilter"></div>
     <div class="tiernav" id="tierNav" role="tablist" aria-label="Tierで表示">
@@ -550,6 +554,20 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
         <button class="own-open" id="ownNone">すべて解除</button>
       </div>
       <div class="own-grid" id="ownGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="tacModal" role="dialog" aria-modal="true" aria-label="所持戦法の設定">
+  <div class="sheet">
+    <div class="sh"><h3 id="tacModalTitle">所持戦法を設定</h3><span class="own-count" id="tacCount2" style="color:#b9c2ce"></span><button class="x" id="tacClose" aria-label="閉じる">×</button></div>
+    <div class="body">
+      <input class="own-search" id="tacSearch" type="search" placeholder="戦法名で絞り込み" autocomplete="off">
+      <div class="own-actions">
+        <button class="own-open" id="tacAll">すべて選択</button>
+        <button class="own-open" id="tacNone">すべて解除</button>
+      </div>
+      <div class="own-grid" id="tacGrid"></div>
     </div>
   </div>
 </div>
@@ -2901,6 +2919,9 @@ const I18N={
   tabBoard:{ja:'⚔ マイ編成を作る',zh:'⚔ 自选编队'},
   ownSet:{ja:'所持武将を設定',zh:'设置拥有武将'},
   ownFilter:{ja:'所持武将で絞る',zh:'只看可组队伍'},
+  tacSet:{ja:'所持戦法を設定',zh:'设置拥有战法'},
+  tacFilter:{ja:'所持戦法で絞る',zh:'按拥有战法筛选'},
+  tacModalTitle:{ja:'所持戦法を設定',zh:'设置拥有战法'},
   searchPlaceholder:{ja:'武将名・部隊名・戦法で検索（全Tier）',zh:'搜索武将 / 队伍 / 战法（全部）'},
   modeTeam:{ja:'部隊で選ぶ',zh:'按队伍选'},
   modeGen:{ja:'武将で選ぶ（逆引き）',zh:'按武将选'},
@@ -2965,6 +2986,7 @@ function applyLang(lang){
   // 再描画
   try{initTierCounts&&initTierCounts();}catch(e){}
   try{buildTierFilter&&buildTierFilter();}catch(e){}
+  try{updTacCount&&updTacCount();}catch(e){}
   try{renderTier();}catch(e){}
   try{renderBoard();}catch(e){}
   try{setStickyOffset();}catch(e){}
@@ -3008,6 +3030,24 @@ function sdrAssign(slots){
    pool = that general's recommended tactics (freq order).
    ALL = every tactic in the DB (for the 全戦法 expansion). */
 const ALL_TACTICS = DATA.allTactics || [];
+/* ---------- 所持戦法 ---------- */
+let ownedTac = new Set(store.get('stzb_owned_tac', ALL_TACTICS)); // 既定は全所持
+let tacFilterOn = store.get('stzb_tacfilter', false);
+function saveOwnedTac(){store.set('stzb_owned_tac',[...ownedTac]);}
+function slotTacOK(arr){return !arr||!arr.length || arr.some(x=>ownedTac.has(x));} // 「/」候補はどれか1つ持てばOK
+function teamTacOK(t){return t.members.every(m=>slotTacOK(m.t2)&&slotTacOK(m.t3));}
+function missingTacOf(t){ // 満たせない枠を「候補/…」表記で返す
+  const out=[];
+  t.members.forEach(m=>{
+    [m.t2,m.t3].forEach(arr=>{ if(arr&&arr.length&&!arr.some(x=>ownedTac.has(x))) out.push(arr.map(tName).join('/')); });
+  });
+  return out;
+}
+function updTacCount(){
+  const s=`${isZH()?'拥有':'所持'} ${ownedTac.size}/${ALL_TACTICS.length}`;
+  const a=document.getElementById('tacCount');if(a)a.textContent=s;
+  const b=document.getElementById('tacCount2');if(b)b.textContent=s;
+}
 /* 戦法の所持上限（2/2など）。未登録は1。同じ武将には同一戦法を付けられない前提は別途担保。 */
 const STOCK = DATA.tacticStock || {};
 const TYPES = DATA.tacticTypes || {};
@@ -3089,6 +3129,7 @@ function renderTier(){
   });
   // 所持フィルタ（ON時は組めない部隊を除外）
   if(ownFilterOn) list=list.filter(t=>ownsAll(t.members.map(m=>m.gen)));
+  if(tacFilterOn) list=list.filter(teamTacOK);
   list=list.filter(teamHasCF);
   document.querySelectorAll('#tierNav .tnav').forEach(b=>b.classList.toggle('dim',searching));
   document.getElementById('tierCount').textContent =
@@ -3106,7 +3147,8 @@ function renderTier(){
       <td>${esc(m.treasure)}</td>
       <td>${esc(m.ciTiao)}</td></tr>`).join('');
     const miss=missingOf(t);
-    const locked = !ownFilterOn && miss.length>0;
+    const missT=missingTacOf(t);
+    const locked = (!ownFilterOn && miss.length>0) || (!tacFilterOn && missT.length>0);
     const tagChips=[
       ...(t.strongVs||[]).map(x=>`<span class="tag s"><span class="k">${L('strong')}</span>${esc(tName(x))}</span>`),
       ...(t.weakVs||[]).map(x=>`<span class="tag w"><span class="k">${L('weak')}</span>${esc(tName(x))}</span>`)
@@ -3122,7 +3164,8 @@ function renderTier(){
         <button class="addbtn" data-add="${esc(t.name)}">${isZH()?'＋ 加入':'＋ 編成へ'}</button>
       </div>
       ${tagChips?`<div class="tags">${tagChips}</div>`:''}
-      ${(locked&&miss.length)?`<div class="miss">${isZH()?'未拥有：':'未所持：'}${miss.map(x=>esc(gName(x))).join('・')}</div>`:''}
+      ${(locked&&miss.length)?`<div class="miss">${isZH()?'未拥有武将：':'未所持武将：'}${miss.map(x=>esc(gName(x))).join('・')}</div>`:''}
+      ${(locked&&missT.length)?`<div class="miss">${isZH()?'未拥有战法：':'未所持戦法：'}${missT.map(esc).join('・')}</div>`:''}
       <table class="mem"><thead><tr><th>${isZH()?'位置':'位置'}</th><th>${isZH()?'武将':'武将'}</th><th>${L('t2')}</th><th>${L('t3')}</th><th>${L('treasure')}</th><th>${L('ci')}</th></tr></thead>
       <tbody>${rows}</tbody></table>
       ${(isZH()?(t.note_zh||t.note):t.note)?`<div class="note">${esc(isZH()?(t.note_zh||t.note):t.note)}</div>`:''}
@@ -3807,11 +3850,40 @@ document.getElementById('ownAll').onclick=()=>{owned=new Set(ALL_GEN_NAMES);save
 document.getElementById('ownNone').onclick=()=>{owned=new Set();saveOwned();updOwnCount();renderOwnGrid(document.getElementById('ownSearch').value);renderTier();renderBoard();};
 document.getElementById('ownFilter').addEventListener('change',e=>{ownFilterOn=e.target.checked;store.set('stzb_ownfilter',ownFilterOn);renderTier();});
 
+/* ---------- 所持戦法 モーダル＆フィルタ ---------- */
+const tacModal=document.getElementById('tacModal');
+function renderTacGrid(filter){
+  const grid=document.getElementById('tacGrid');
+  const q=(filter||'').trim().toLowerCase();
+  grid.innerHTML='';
+  ALL_TACTICS.forEach(t=>{
+    const disp=tName(t);
+    if(q && !(String(disp).toLowerCase().includes(q) || String(t).toLowerCase().includes(q)))return;
+    const on=ownedTac.has(t);
+    const item=el(`<label class="own-item${on?' on':''}"><input type="checkbox" ${on?'checked':''}> ${esc(disp)}</label>`);
+    item.querySelector('input').addEventListener('change',e=>{
+      if(e.target.checked)ownedTac.add(t); else ownedTac.delete(t);
+      item.classList.toggle('on',e.target.checked);
+      saveOwnedTac();updTacCount();renderTier();
+    });
+    grid.appendChild(item);
+  });
+}
+document.getElementById('tacOpen').onclick=()=>{renderTacGrid('');tacModal.classList.add('open');};
+document.getElementById('tacClose').onclick=()=>tacModal.classList.remove('open');
+tacModal.addEventListener('click',e=>{if(e.target===tacModal)tacModal.classList.remove('open');});
+document.getElementById('tacSearch').addEventListener('input',e=>renderTacGrid(e.target.value));
+document.getElementById('tacAll').onclick=()=>{ownedTac=new Set(ALL_TACTICS);saveOwnedTac();updTacCount();renderTacGrid(document.getElementById('tacSearch').value);renderTier();};
+document.getElementById('tacNone').onclick=()=>{ownedTac=new Set();saveOwnedTac();updTacCount();renderTacGrid(document.getElementById('tacSearch').value);renderTier();};
+document.getElementById('tacFilter').addEventListener('change',e=>{tacFilterOn=e.target.checked;store.set('stzb_tacfilter',tacFilterOn);renderTier();});
+
 /* ---------- init ---------- */
 applyTheme(store.get('stzb_dark',false));
 applyLang(LANG);
 document.getElementById('ownFilter').checked=ownFilterOn;
+document.getElementById('tacFilter').checked=tacFilterOn;
 updOwnCount();
+updTacCount();
 initBoard();
 initTierCounts();
 buildTierFilter();
