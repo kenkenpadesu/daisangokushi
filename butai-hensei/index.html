@@ -183,6 +183,8 @@ body.dark #btnAuto{box-shadow:0 2px 11px rgba(224,85,91,.42)}
 .sbtn{appearance:none;font-family:inherit;font-weight:700;font-size:11px;padding:4px 9px;border-radius:8px;cursor:pointer;
   border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.10);color:#f4efe4;white-space:nowrap}
 .sbtn:hover{background:rgba(255,255,255,.18)}
+.sbtn.fitbtn{background:var(--seal);border-color:var(--seal);color:#fff}
+.sbtn.fitbtn:hover{background:var(--seal-d);border-color:var(--seal-d)}
 
 .boards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
@@ -224,6 +226,10 @@ select.dup{border-color:var(--warn);background:#fdecec;color:var(--warn);font-we
 .psum .pt{color:var(--seal-d)}
 .boardtools{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
 .boardtools .btn{font-size:11px;padding:5px 10px}
+.slottools{display:flex;gap:8px;justify-content:center;margin:16px 0 4px;flex-wrap:wrap}
+.slottools .btn{font-size:13px;padding:9px 18px}
+#btnAddSlot{font-weight:800;border-color:var(--line2)}
+#btnDelSlot{color:var(--muted)}
 
 /* ===== searchable picker (replaces native select for 武将/戦法) ===== */
 .pick{width:100%;text-align:left;appearance:none;cursor:pointer;
@@ -422,6 +428,23 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
 .own-item input{width:15px;height:15px;accent-color:var(--seal)}
 .own-item.on{border-color:var(--seal);background:rgba(179,39,45,.06)}
 .own-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+/* ===== 残りで組める部隊 モーダル ===== */
+.fit-lead{font-size:12.5px;color:var(--muted);margin:-2px 0 12px;line-height:1.6}
+.fit-target{display:inline-block;font-weight:800;color:var(--seal)}
+.fit-list{display:flex;flex-direction:column;gap:8px}
+.fit-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.fit-main{min-width:0;flex:1}
+.fit-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.fit-h .tier{padding:2px 7px;font-size:12px;min-width:38px}
+.fit-name{font-family:"Shippori Mincho",serif;font-weight:800;font-size:15px;line-height:1.3}
+.fit-score{font-size:12px;color:var(--muted)}
+.fit-mem{font-size:12.5px;color:var(--text);margin-top:4px;line-height:1.55}
+.fit-mem .fg{font-weight:700}
+.fit-mem .ft{color:var(--muted)}
+.fit-add{flex:none;border:1px solid var(--seal);background:var(--seal);color:#fff;font-family:inherit;font-weight:800;font-size:13px;padding:9px 15px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.fit-add:hover{filter:brightness(1.07)}
+.fit-add:active{transform:translateY(1px)}
+.fit-empty{padding:26px 10px;text-align:center;color:var(--muted);font-size:14px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -492,6 +515,7 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
         <button id="mode-gen" aria-pressed="false" data-i18n="modeGen">武将で選ぶ（逆引き）</button>
       </div>
       <button class="btn" id="btnNarrow" data-i18n="narrow">空き枠を絞る</button>
+      <button class="btn" id="btnFit" data-i18n="fitOpen">残りで組める部隊</button>
       <button class="btn primary" id="btnAuto" data-i18n="auto">戦法を自動割り当て</button>
       <button class="btn" id="btnReset" data-i18n="reset">リセット</button>
     </div>
@@ -506,6 +530,10 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
       <button class="btn" id="collapseAll" data-i18n="collapseAll">すべて畳む</button>
     </div>
     <div class="boards" id="boards"></div>
+    <div class="slottools" id="slotTools">
+      <button class="btn" id="btnAddSlot" data-i18n="addSlot">＋ 部隊を追加</button>
+      <button class="btn" id="btnDelSlot" data-i18n="delSlot">－ 枠を減らす</button>
+    </div>
   </section>
 </main>
 <footer class="site-foot">
@@ -575,6 +603,16 @@ body.dark .tag.w{background:rgba(224,85,91,.16);color:#f0888c}
         <button class="own-open" id="tacNone">すべて解除</button>
       </div>
       <div class="own-grid" id="tacGrid"></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="fitModal" role="dialog" aria-modal="true" aria-label="残りで組める部隊">
+  <div class="sheet">
+    <div class="sh"><h3 id="fitTitle" data-i18n="fitTitle">残りで組める部隊</h3><span class="own-count" id="fitCount" style="color:#b9c2ce"></span><button class="x" id="fitClose" aria-label="閉じる">×</button></div>
+    <div class="body">
+      <p class="fit-lead" id="fitLead"></p>
+      <input class="own-search" id="fitSearch" type="search" placeholder="" autocomplete="off">
+      <div class="fit-list" id="fitList"></div>
     </div>
   </div>
 </div>
@@ -2981,6 +3019,23 @@ const I18N={
   clear:{ja:'✕ クリア',zh:'✕ 清除'},
   sutaTab:{ja:'スタダ',zh:'开荒'},
   allTab:{ja:'すべて',zh:'全部'},
+  fitOpen:{ja:'残りで組める部隊',zh:'剩余可组队伍'},
+  fitShort:{ja:'＋ 残りで組む',zh:'＋ 剩余可组'},
+  fitTitle:{ja:'残りで組める部隊',zh:'剩余可组的队伍'},
+  fitAdd:{ja:'＋ 追加',zh:'＋ 加入'},
+  fitSearchPh:{ja:'部隊名・武将で絞り込み',zh:'按队伍名 / 武将筛选'},
+  fitEmpty:{ja:'残りの武将・戦法で組めるTier表の部隊はありません。<br>部隊を空けるか、リセットしてお試しください。',zh:'没有可用剩余武将 / 战法组成的队伍。<br>请腾出队伍或重置后再试。'},
+  fitNoSlot:{ja:'空き枠がありません。リセットするか、部隊を空けてください。',zh:'没有空位，请先重置或腾出队伍。'},
+  fitFull:{ja:'すべての部隊が埋まりました。',zh:'所有队伍已填满。'},
+  fitLead:{ja:'すでに使った武将・戦法を除いて、空き枠 <span class="fit-target">部隊{n}</span> に入れられるTier表の部隊です。',zh:'排除已用武将 / 战法，可放入空位 <span class="fit-target">队{n}</span> 的队伍。'},
+  fitDone:{ja:'部隊{n} に「{name}」を追加しました。',zh:'已把「{name}」加入队{n}。'},
+  addSlot:{ja:'＋ 部隊を追加',zh:'＋ 添加队伍'},
+  delSlot:{ja:'－ 枠を減らす',zh:'－ 减少队伍'},
+  addSlotDone:{ja:'部隊{n} を追加しました。',zh:'已添加队{n}。'},
+  delSlotDone:{ja:'{n}部隊に減らしました。',zh:'已减少到{n}队。'},
+  addSlotMax:{ja:'これ以上は増やせません（上限{n}部隊）。',zh:'已达上限（{n}队）。'},
+  delSlotMin:{ja:'これ以上は減らせません（最少{n}部隊）。',zh:'不能再减少了（最少{n}队）。'},
+  delSlotConfirm:{ja:'末尾の部隊に編成データがあります。削除しますか？',zh:'末尾队伍已有内容，确定删除吗？'},
 };
 let LANG=store.get('stzb_lang','ja');
 function isZH(){return LANG==='zh';}
@@ -3035,7 +3090,9 @@ function updOwnCount(){
   const b=document.getElementById('ownCount2');if(b)b.textContent=s;
 }
 const TIER_ORDER = DATA.meta.tierOrder;
-const NUM = 5;
+let NUM = 5;               // 初期部隊数（＋で増やせる）
+const MIN_TEAMS = 5;       // これ未満には減らせない
+const MAX_TEAMS = 10;      // 部隊数の上限
 
 /* ---------- utilities ---------- */
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
@@ -3226,6 +3283,28 @@ function isCollapsed(ti,bt){ if(panelState[ti]===undefined) return teamProgress(
 function usedGenerals(exceptTi){const s={};board.forEach((t,ti)=>{if(ti===exceptTi)return;t.members.forEach(m=>{if(m.gen)s[m.gen]=(s[m.gen]||0)+1;});});return s;}
 function usedGeneralsExceptSlot(ti,k){const s={};board.forEach((t,x)=>t.members.forEach((m,y)=>{if(x===ti&&y===k)return;if(m.gen)s[m.gen]=true;}));return s;}
 
+/* 戦法を優先順(部隊1→N)で整理：先の部隊を確定として、後の部隊は空いている候補へ回避。
+   現状値を優先するので、重複していない手動選択は変更しない。回避できない枠だけ現状維持＝重複(赤)表示。
+   ※武将モード（候補配列を持たないメンバー）は変更せず、確定値の消費だけ数える。 */
+function pickFreeTactic(cands,cur,used){
+  const order=(cur&&cands.indexOf(cur)>=0)?[cur,...cands.filter(x=>x!==cur)]:cands;
+  for(const t of order){ if((used[t]||0)<stockOf(t))return t; }
+  return null; // 空き無し
+}
+function rebuildTactics(){
+  const used={};
+  const bump=t=>{ if(t)used[t]=(used[t]||0)+1; };
+  board.forEach(bt=>{
+    bt.members.forEach(m=>{
+      if(!m.gen)return;
+      if(m.candT2&&m.candT2.length){ const p=pickFreeTactic(m.candT2,m.t2,used); if(p)m.t2=p; bump(m.t2); }
+      else bump(m.t2);
+      if(m.candT3&&m.candT3.length){ const p=pickFreeTactic(m.candT3,m.t3,used); if(p)m.t3=p; bump(m.t3); }
+      else bump(m.t3);
+    });
+  });
+}
+
 /* dup detection over the whole board */
 function dupSets(){
   const gc={},tc={};
@@ -3285,20 +3364,26 @@ function reverseName(ti){
   return (best.inter===3?'＝ ':'≒ ')+best.t.name+(best.inter<3?'（'+best.inter+'/3）':'');
 }
 
-/* team compatibility for narrowing (team mode) */
+/* 部隊選択の可否：他部隊の武将・確定戦法を「使用済み」として固定し、
+   この部隊の武将が未使用 かつ 戦法を在庫内に割り当てられる場合のみ true（＝1が優先）。 */
 function teamCompatible(t,ti){
   const used=usedGenerals(ti);
   const gens=t.members.map(m=>m.gen);
-  if(gens.some(g=>used[g]))return false;
-  if(new Set(gens).size!==gens.length)return false;
+  if(gens.some(g=>used[g]))return false;                 // 他部隊で使用中の武将を含む
+  if(new Set(gens).size!==gens.length)return false;       // テンプレ内で武将重複
+  const cnt={};                                           // 他部隊で確定済みの戦法（固定）
+  board.forEach((bt,x)=>{if(x===ti)return;bt.members.forEach(m=>{if(m.t2)cnt[m.t2]=(cnt[m.t2]||0)+1;if(m.t3)cnt[m.t3]=(cnt[m.t3]||0)+1;});});
   const slots=[];
-  board.forEach((bt,x)=>{if(x===ti)return;bt.members.forEach(m=>{if(m.candT2.length)slots.push(m.candT2);if(m.candT3.length)slots.push(m.candT3);});});
-  t.members.forEach(m=>{if(m.t2.length)slots.push(m.t2);if(m.t3.length)slots.push(m.t3);});
-  return capFeasible(slots);
+  t.members.forEach(m=>{if(m.t2&&m.t2.length)slots.push(m.t2);if(m.t3&&m.t3.length)slots.push(m.t3);});
+  function bt(i){ if(i===slots.length)return true;
+    for(const tac of slots[i]){ if((cnt[tac]||0)<stockOf(tac)){ cnt[tac]=(cnt[tac]||0)+1; if(bt(i+1))return true; cnt[tac]--; } }
+    return false; }
+  return bt(0);
 }
 
 /* ---------- Board render ---------- */
 function renderBoard(){
+  rebuildTactics();               // 表示前に優先順(部隊1→N)で戦法を整理
   const wrap=document.getElementById('boards');
   const {gd,td}=dupSets();
   wrap.innerHTML='';
@@ -3399,12 +3484,13 @@ function renderSummary(){
   s.innerHTML=`
     <div class="sum-info">
       <b>${L('sumTitle')}</b>
-      <span class="pill">${L('sumUnit')} ${filledTeams}/${NUM}</span>
+      <span class="pill">${L('sumUnit')} ${filledTeams}/${board.length}</span>
       <span class="pill">${L('sumGen')} ${gens.size}</span>
       <span class="pill">${L('sumTac')} ${tacs.size}</span>
       ${dupCount?`<span class="pill bad">${L('dup')} ${dupCount}</span>`:`<span class="pill good">${L('dupNone')}</span>`}
     </div>
     <div class="sum-actions">
+      <button class="sbtn fitbtn" data-act="fit">${L('fitShort')}</button>
       <button class="sbtn" data-act="save">${L('saveImg')}</button>
       <button class="sbtn" data-act="share">${L('share')}</button>
       <button class="sbtn" data-act="copy">${L('copy')}</button>
@@ -3423,19 +3509,22 @@ function addTeamToBoard(name){
   setTeam(idx,name);renderBoard();toast('部隊 '+(idx+1)+' に「'+name+'」を追加しました。');
 }
 function autoAssign(){
+  if(mode==='team'){
+    if(!board.some(t=>t.members.some(m=>m.gen))){toast('先に部隊または武将を選んでください。');return;}
+    rebuildTactics();               // 部隊1→N優先で整理（部隊1は崩さない）
+    renderBoard();
+    const {td}=dupSets();
+    toast(Object.keys(td).length?'一部は回避できない戦法が残っています（赤表示）。':'戦法を重複なしで整理しました。');
+    return;
+  }
   const slots=[],refs=[];
   const uniq=(a)=>a.filter((x,i)=>x&&a.indexOf(x)===i);
   allMembers().forEach(({m,ti,k})=>{
     if(!m.gen)return;
-    if(mode==='team'){
-      if(m.candT2.length){slots.push(m.candT2);refs.push([ti,k,'t2']);}
-      if(m.candT3.length){slots.push(m.candT3);refs.push([ti,k,'t3']);}
-    }else{
-      // 武将モード：現在値を優先しつつ、おすすめプールの中で重複回避
-      const base=m.pool&&m.pool.length?m.pool:[m.t2,m.t3].filter(Boolean);
-      slots.push(uniq([m.t2, ...base])); refs.push([ti,k,'t2']);
-      slots.push(uniq([m.t3, ...base])); refs.push([ti,k,'t3']);
-    }
+    // 武将モード：現在値を優先しつつ、おすすめプールの中で重複回避
+    const base=m.pool&&m.pool.length?m.pool:[m.t2,m.t3].filter(Boolean);
+    slots.push(uniq([m.t2, ...base])); refs.push([ti,k,'t2']);
+    slots.push(uniq([m.t3, ...base])); refs.push([ti,k,'t3']);
   });
   if(!slots.length){toast('先に部隊または武将を選んでください。');return;}
   if(!capFeasible(slots)){toast('この構成では戦法の重複を完全には回避できません。組み合わせを見直してください。');return;}
@@ -3445,7 +3534,7 @@ function autoAssign(){
 }
 function narrow(){ if(mode!=='team'){toast('「部隊で選ぶ」モードで使えます。');return;} renderBoard(); toast('空き枠を、まだ組める部隊だけに絞りました。'); }
 function copyBoard(){
-  let out='【率土之滨 5部隊編成】\n';
+  let out='【率土之滨 '+board.length+'部隊編成】\n';
   board.forEach((t,ti)=>{
     const filled=t.members.some(m=>m.gen);
     out+=`\n■ 部隊${ti+1}${t.name?'  '+dispName(t.name.replace(/^[＝≒]\s?/,'')):''}\n`;
@@ -3527,8 +3616,12 @@ function decodeBoard(code){
   try{
     const b=b64uToBytes(code); let p=0;
     const md=b[p++]; mode = md===1?'gen':'team';
+    // 部隊数はバイト長から復元（1部隊=10バイト）。旧5部隊URLもそのまま開ける。
+    let count=Math.floor((b.length-1)/10);
+    if(!(count>=MIN_TEAMS)) count=MIN_TEAMS;
+    if(count>MAX_TEAMS) count=MAX_TEAMS;
     const nb=[];
-    for(let t=0;t<NUM;t++){
+    for(let t=0;t<count;t++){
       const tIdx=b[p++];
       const team=blankTeam();
       if(tIdx!==255 && TEAMS[tIdx]) team.name=TEAMS[tIdx].name;
@@ -3566,6 +3659,9 @@ function autosave(){ store.set('stzb_board', encodeBoard()); }
 /* ---------- 共有カード画像を描画 ---------- */
 function drawShareCard(cb){
   const cv=document.getElementById('shareCanvas'); const g=cv.getContext('2d');
+  const N=board.length;
+  const pad=48, top=240, gap=22, ch=398, footer=300;   // 1部隊カード高=ch。全体高は部隊数で可変
+  cv.width=1206; cv.height=top+N*(ch+gap)+footer;
   const W=cv.width,H=cv.height;
   const PAPER='#f2ede2',INK='#16202b',CARD='#fbf9f3',CARD2='#f6f1e6',LINE='#ddd3c0',LINE2='#c9bfa9',
         TEXT='#1d2733',MUTED='#6f7887',SEAL='#b3272d';
@@ -3577,11 +3673,10 @@ function drawShareCard(cb){
   g.fillStyle=INK;g.fillRect(0,0,W,196);g.fillStyle=SEAL;g.fillRect(0,196,W,8);
   rr(48,44,92,92,16);g.fillStyle=SEAL;g.fill();
   g.fillStyle='#f4efe4';g.textAlign='center';g.textBaseline='middle';g.font='700 60px '+SERIF;g.fillText('碧',94,92);
-  g.textAlign='left';g.font='700 52px '+SERIF;g.fillText('率土之滨 5部隊編成',166,92);
+  g.textAlign='left';g.font='700 52px '+SERIF;g.fillText('率土之滨 '+N+'部隊編成',166,92);
   g.fillStyle='#b9c2ce';g.font='400 30px '+SANS;g.fillText('2026年 夏版（第3四半期） / 日本語版',168,140);
-  const pad=48, footer=300, top=240, avail=H-top-footer, gap=22, ch=Math.floor((avail-gap*4)/5);
   const teams=board;
-  for(let i=0;i<5;i++){
+  for(let i=0;i<N;i++){
     const t=teams[i]; const y=top+i*(ch+gap);
     g.fillStyle=CARD;rr(pad,y,W-2*pad,ch,22);g.fill();g.strokeStyle=LINE;g.lineWidth=2;g.stroke();
     g.fillStyle=CARD2;rr(pad,y,W-2*pad,76,22);g.fill();g.fillRect(pad,y+46,W-2*pad,30);
@@ -3610,7 +3705,7 @@ function drawShareCard(cb){
     }
   }
   // footer + QR
-  const fy=top+5*(ch+gap)+10;
+  const fy=top+N*(ch+gap)+10;
   const url=shareUrl();
   const qr=qrcode(0,'M');qr.addData(url);qr.make();const n=qr.getModuleCount();const qs=210;const cell=qs/n;
   const qx=W-pad-qs, qy=fy;
@@ -3833,8 +3928,8 @@ window.addEventListener('scroll',()=>{toTop.classList.toggle('show',window.scrol
 toTop.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 
 /* ---------- expand / collapse all panels ---------- */
-document.getElementById('expandAll').onclick=()=>{for(let i=0;i<NUM;i++)panelState[i]=true;renderBoard();};
-document.getElementById('collapseAll').onclick=()=>{for(let i=0;i<NUM;i++)panelState[i]=false;renderBoard();};
+document.getElementById('expandAll').onclick=()=>{for(let i=0;i<board.length;i++)panelState[i]=true;renderBoard();};
+document.getElementById('collapseAll').onclick=()=>{for(let i=0;i<board.length;i++)panelState[i]=false;renderBoard();};
 
 /* ---------- save / share events (in sticky summary bar) ---------- */
 const saveMenu=document.getElementById('saveMenu');
@@ -3847,6 +3942,7 @@ document.getElementById('summary').addEventListener('click',e=>{
   }
   else if(act==='share')doShare();
   else if(act==='copy')copyBoard();
+  else if(act==='fit')openFitModal();
 });
 saveMenu.addEventListener('click',e=>{const b=e.target.closest('[data-fmt]');if(!b)return;saveMenu.hidden=true;saveImage(b.dataset.fmt);});
 document.addEventListener('click',e=>{if(!saveMenu.hidden && !saveMenu.contains(e.target) && !e.target.closest('[data-act="save"]'))saveMenu.hidden=true;});
@@ -3911,6 +4007,105 @@ document.getElementById('tacAll').onclick=()=>{ownedTac=new Set(ALL_TACTICS);sav
 document.getElementById('tacNone').onclick=()=>{ownedTac=new Set();saveOwnedTac();updTacCount();renderTacGrid(document.getElementById('tacSearch').value);renderTier();};
 document.getElementById('tacFilter').addEventListener('change',e=>{tacFilterOn=e.target.checked;store.set('stzb_tacfilter',tacFilterOn);renderTier();});
 
+/* ---------- 残りで組める部隊 モーダル ---------- */
+const fitModal=document.getElementById('fitModal');
+let fitSlot=-1;
+/* 追加時：新部隊の戦法を、既存の確定戦法とカブらないよう候補の中から割り当て（他部隊は触らない） */
+function resolveFitTactics(ti){
+  const cnt={};
+  board.forEach((bt2,x)=>{if(x===ti)return;bt2.members.forEach(m=>{if(m.t2)cnt[m.t2]=(cnt[m.t2]||0)+1;if(m.t3)cnt[m.t3]=(cnt[m.t3]||0)+1;});});
+  const mem=board[ti].members,slots=[],refs=[];
+  mem.forEach((m,k)=>{ if(m.candT2&&m.candT2.length){slots.push(m.candT2);refs.push([k,'t2']);} if(m.candT3&&m.candT3.length){slots.push(m.candT3);refs.push([k,'t3']);} });
+  const out=new Array(slots.length).fill(null);
+  (function bt(i){ if(i===slots.length)return true;
+    for(const t of slots[i]){ if((cnt[t]||0)<stockOf(t)){ cnt[t]=(cnt[t]||0)+1; out[i]=t; if(bt(i+1))return true; cnt[t]--; out[i]=null; } }
+    return false; })(0);
+  refs.forEach(([k,w],i)=>{ if(out[i])mem[k][w]=out[i]; });
+}
+function fitCandidates(ti){
+  const out=[];
+  TIER_ORDER.forEach(tr=>{ TEAMS.forEach(t=>{ if(t.tier===tr && teamCompatible(t,ti)) out.push(t); }); });
+  return out;
+}
+function renderFitList(filter){
+  const wrap=document.getElementById('fitList');
+  const q=(filter||'').trim().toLowerCase();
+  const all=fitCandidates(fitSlot);
+  const list=q?all.filter(t=>tierMatch(t,q)):all;
+  document.getElementById('fitCount').textContent=`${list.length} ${L('teamsUnit')}`;
+  wrap.innerHTML='';
+  if(!list.length){wrap.appendChild(el(`<div class="fit-empty">${L('fitEmpty')}</div>`));return;}
+  list.forEach(t=>{
+    const disp=isZH()?(t.name_zh||t.name):((t.name_zh||t.name)+(t.name_zh&&t.name&&t.name!==t.name_zh?'（'+t.name+'）':''));
+    const mem=t.members.map(m=>`<span class="fg">${esc(gName(m.gen))}</span>`).join('・');
+    const tacs=[].concat(...t.members.map(m=>[m.t2,m.t3])).map(a=>(a&&a.length)?tName(a[0]):'').filter(Boolean).map(esc).join('・');
+    const item=el(`<div class="fit-item">
+      <div class="fit-main">
+        <div class="fit-h"><span class="tier ${cls(t.tier)}">${esc(t.tier==='スタダ'?L('sutaTab'):t.tier)}</span><span class="fit-name">${esc(disp)}</span>${t.score?`<span class="fit-score">${esc(t.score)}</span>`:''}</div>
+        <div class="fit-mem">${mem}${tacs?` <span class="ft">／ ${tacs}</span>`:''}</div>
+      </div>
+      <button class="fit-add" type="button" data-fit="${esc(t.name)}">${L('fitAdd')}</button>
+    </div>`);
+    item.querySelector('.fit-add').addEventListener('click',()=>addFromFit(t.name));
+    wrap.appendChild(item);
+  });
+}
+function openFitModal(ti){
+  if(mode!=='team')setMode('team');
+  const target=(ti==null||ti<0)?firstEmptySlot():ti;
+  if(target<0){toast(L('fitNoSlot'));return;}
+  fitSlot=target;
+  document.getElementById('fitLead').innerHTML=L('fitLead').replace('{n}',(fitSlot+1));
+  const se=document.getElementById('fitSearch'); if(se){se.value='';se.placeholder=L('fitSearchPh');}
+  renderFitList('');
+  fitModal.classList.add('open');
+}
+function addFromFit(name){
+  if(fitSlot<0)return;
+  const t=TEAMS.find(x=>x.name===name); if(!t)return;
+  setTeam(fitSlot,name);
+  resolveFitTactics(fitSlot);
+  renderBoard();
+  toast(L('fitDone').replace('{name}',dispName(name)).replace('{n}',(fitSlot+1)));
+  const next=firstEmptySlot();
+  if(next<0){fitModal.classList.remove('open');toast(L('fitFull'));return;}
+  fitSlot=next;
+  document.getElementById('fitLead').innerHTML=L('fitLead').replace('{n}',(fitSlot+1));
+  const se=document.getElementById('fitSearch'); if(se)se.value='';
+  renderFitList('');
+}
+document.getElementById('btnFit').onclick=()=>openFitModal();
+document.getElementById('fitClose').onclick=()=>fitModal.classList.remove('open');
+fitModal.addEventListener('click',e=>{if(e.target===fitModal)fitModal.classList.remove('open');});
+document.getElementById('fitSearch').addEventListener('input',e=>renderFitList(e.target.value));
+
+/* ---------- 部隊枠の増減（＋で6部隊目・7部隊目…） ---------- */
+function updSlotTools(){
+  const del=document.getElementById('btnDelSlot');
+  const add=document.getElementById('btnAddSlot');
+  if(del)del.hidden=(board.length<=MIN_TEAMS);
+  if(add)add.style.display=(board.length>=MAX_TEAMS)?'none':'';
+}
+function addSlot(){
+  if(board.length>=MAX_TEAMS){toast(L('addSlotMax').replace('{n}',MAX_TEAMS));return;}
+  board.push(blankTeam());
+  panelState[board.length-1]=true;        // 追加枠は開いた状態で表示
+  renderBoard();updSlotTools();
+  toast(L('addSlotDone').replace('{n}',board.length));
+  requestAnimationFrame(()=>{const ps=document.querySelectorAll('#boards .panel');const last=ps[ps.length-1];if(last)last.scrollIntoView({behavior:'smooth',block:'center'});});
+}
+function removeLastSlot(){
+  if(board.length<=MIN_TEAMS){toast(L('delSlotMin').replace('{n}',MIN_TEAMS));return;}
+  const last=board[board.length-1];
+  if(last.members.some(m=>m.gen) && !confirm(L('delSlotConfirm')))return;
+  board.pop();
+  delete panelState[board.length];
+  renderBoard();updSlotTools();
+  toast(L('delSlotDone').replace('{n}',board.length));
+}
+document.getElementById('btnAddSlot').onclick=addSlot;
+document.getElementById('btnDelSlot').onclick=removeLastSlot;
+
 /* ---------- init ---------- */
 applyTheme(store.get('stzb_dark',false));
 applyLang(LANG);
@@ -3929,6 +4124,7 @@ if(!restoreFromHash()){
   if(saved){ try{decodeBoard(saved);}catch(e){} }
 }
 renderBoard();
+updSlotTools();
 </script>
 </body>
 </html>
