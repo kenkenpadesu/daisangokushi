@@ -4312,5 +4312,160 @@ updSlotTools();
 })();
 
 </script>
+<script>
+/* ===== 追加: 「残りで最強編成を提案」 ===== */
+(function(){
+  'use strict';
+  if(typeof TEAMS==='undefined'||typeof teamCompatible!=='function'||typeof board==='undefined') return;
+
+  var LS_EX='stzb_propose_excl_v1';
+  function readExcl(){ try{ return new Set(store.get(LS_EX,[])||[]); }catch(e){ return new Set(); } }
+  function writeExcl(set){ try{ store.set(LS_EX,[...set]); }catch(e){} }
+
+  var TORD=(typeof TIER_ORDER!=='undefined')?TIER_ORDER:['T0','T0-','T1','T2-'];
+  function tierRank(t){ var i=TORD.indexOf(t); return i<0?99:i; }
+  function scoreNum(s){ var v=parseFloat(s); return isNaN(v)?-1:v; }
+
+  // 所持で絞る（設定済みのときだけ）：武将が全員所持＆各枠の戦法を1つは所持
+  function ownedOK(t){
+    try{
+      if(typeof owned!=='undefined' && owned && owned.size){
+        for(var i=0;i<t.members.length;i++){ if(!owned.has(t.members[i].gen)) return false; }
+      }
+      if(typeof ownedTac!=='undefined' && ownedTac && ownedTac.size && typeof slotTacOK==='function'){
+        for(var j=0;j<t.members.length;j++){ var m=t.members[j];
+          if(m.t2&&m.t2.length&&!slotTacOK(m.t2))return false;
+          if(m.t3&&m.t3.length&&!slotTacOK(m.t3))return false;
+        }
+      }
+    }catch(e){}
+    return true;
+  }
+
+  // 空き枠のindex（無ければ addSlot で増やす前提の擬似index=board.length）
+  function targetSlot(){
+    var i=(typeof firstEmptySlot==='function')?firstEmptySlot():board.findIndex(function(t){return !t.members.some(function(m){return m.gen;});});
+    return i;
+  }
+
+  function buildList(){
+    var excl=readExcl();
+    var slot=targetSlot();
+    // 空き枠が無ければ、末尾に1枠追加した想定で判定（実追加はadd時）
+    var probeTi = slot<0 ? board.length : slot;
+    var out=[];
+    TEAMS.forEach(function(t){
+      if(t.tier==='スタダ') return;
+      if(excl.has(t.name)) return;
+      var compat=false;
+      try{ compat=teamCompatible(t, probeTi); }catch(e){ compat=false; }
+      if(!compat) return;
+      out.push({ name:t.name, tier:t.tier, score:t.score||'', owned:ownedOK(t),
+        gens:t.members.map(function(m){return m.gen;}) });
+    });
+    // 並び：所持できる→Tier→スコア
+    out.sort(function(a,b){
+      if(a.owned!==b.owned) return a.owned?-1:1;
+      var r=tierRank(a.tier)-tierRank(b.tier); if(r) return r;
+      return scoreNum(b.score)-scoreNum(a.score);
+    });
+    return {list:out, slot:slot};
+  }
+
+  /* ---------- UI ---------- */
+  var css=[
+  '.pp-mask{position:fixed;inset:0;background:rgba(10,14,20,.55);display:none;align-items:flex-start;justify-content:center;padding:22px 10px;overflow:auto;z-index:80}',
+  '.pp-mask.open{display:flex}',
+  '.pp-modal{width:100%;max-width:560px;background:var(--paper,#efe9db);border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.4)}',
+  '.pp-mh{display:flex;align-items:center;gap:10px;background:var(--ink,#16202b);color:#f4efe4;padding:12px 14px}',
+  '.pp-mh h3{margin:0;font-size:16px;font-weight:800}.pp-mh .cnt{font-size:12px;color:#b9c2ce}.pp-mh .x{margin-left:auto;background:transparent;border:0;color:#f4efe4;font-size:20px;cursor:pointer}',
+  '.pp-mb{padding:14px}',
+  '.pp-note{font-size:11.5px;color:var(--muted,#6f7887);line-height:1.6;margin-bottom:10px}',
+  '.pp-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line,#ddd3c0);border-radius:10px;padding:9px 11px;margin-bottom:8px;background:var(--card,#f6f2e8)}',
+  '.pp-tier{flex:none;font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:2px 8px}',
+  '.pp-tier.T0{background:#c0392b}.pp-tier.T0-{background:#cf7a34}.pp-tier.T1{background:#2f6fb0}.pp-tier.T2-{background:#4f8f4a}',
+  '.pp-info{flex:1;min-width:0}',
+  '.pp-name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+  '.pp-gens{font-size:11px;color:var(--muted,#6f7887);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+  '.pp-row button{border:1px solid var(--line2,#c9bfa9);background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}',
+  '.pp-row button.add{background:var(--seal,#b3272d);color:#fff;border-color:var(--seal,#b3272d)}',
+  '.pp-row.noown{opacity:.55}',
+  '.pp-empty{font-size:12.5px;color:var(--muted,#6f7887);padding:10px 2px;line-height:1.7}',
+  '.pp-btn{background:var(--card,#f6f2e8);border:1px solid var(--line2,#c9bfa9);color:var(--text,#1d2733);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}',
+  '.pp-tabs{display:flex;gap:8px;margin-bottom:10px}',
+  '.pp-tab{font-size:12px;font-weight:700;border:1px solid var(--line2,#c9bfa9);background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer}',
+  '.pp-tab.on{background:var(--ink,#16202b);color:#f4efe4;border-color:var(--ink,#16202b)}'
+  ].join('\n');
+  var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  var mask=document.createElement('div'); mask.className='pp-mask';
+  mask.innerHTML='<div class="pp-modal"><div class="pp-mh"><h3>残りで最強編成を提案</h3><span class="cnt" id="ppCnt"></span><button class="x">×</button></div><div class="pp-mb"><div class="pp-note" id="ppNote"></div><div class="pp-tabs"><button class="pp-tab on" id="ppTabAll">提案</button><button class="pp-tab" id="ppTabExcl">除外リスト</button></div><div id="ppBody"></div></div></div>';
+  document.body.appendChild(mask);
+  mask.querySelector('.x').onclick=function(){mask.classList.remove('open');};
+  mask.addEventListener('click',function(e){if(e.target===mask)mask.classList.remove('open');});
+  var tabAll=mask.querySelector('#ppTabAll'), tabExcl=mask.querySelector('#ppTabExcl');
+  var view='all';
+  tabAll.onclick=function(){view='all';tabAll.classList.add('on');tabExcl.classList.remove('on');render();};
+  tabExcl.onclick=function(){view='excl';tabExcl.classList.add('on');tabAll.classList.remove('on');render();};
+
+  function ownFiltered(){ try{ return (typeof owned!=='undefined'&&owned&&owned.size&&owned.size<ALL_GEN_NAMES.length); }catch(e){ return false; } }
+
+  function render(){
+    var body=mask.querySelector('#ppBody');
+    var note=mask.querySelector('#ppNote');
+    var cnt=mask.querySelector('#ppCnt');
+    if(view==='excl'){
+      var ex=[...readExcl()];
+      note.textContent='「候補から外す」で隠した部隊。× で戻せます。';
+      cnt.textContent=ex.length+'件';
+      if(!ex.length){ body.innerHTML='<div class="pp-empty">除外した部隊はありません。</div>'; return; }
+      body.innerHTML='';
+      ex.forEach(function(nm){
+        var t=TEAMS.find(function(x){return x.name===nm;});
+        var row=document.createElement('div'); row.className='pp-row';
+        row.innerHTML='<span class="pp-tier '+((t&&t.tier)||'').replace(/[^A-Za-z0-9-]/g,'')+'">'+((t&&t.tier)||'?')+'</span><div class="pp-info"><div class="pp-name"></div></div><button class="undo">× 戻す</button>';
+        row.querySelector('.pp-name').textContent=nm;
+        row.querySelector('.undo').onclick=function(){ var s=readExcl(); s.delete(nm); writeExcl(s); render(); };
+        body.appendChild(row);
+      });
+      return;
+    }
+    var r=buildList();
+    var slotTxt = r.slot<0 ? ('空き枠がありません（追加すると部隊'+(board.length+1)+'として入ります）') : ('部隊 '+(r.slot+1)+' に入ります');
+    note.innerHTML='いま盤面にいる武将・戦法を<b>使用中として自動除外</b>し、残りで組めるTier部隊を強い順で提案します。'+(ownFiltered()?'<br>所持設定で絞り込み中（グレー=未所持で組めない）。':'')+'<br>'+slotTxt+'。';
+    cnt.textContent=r.list.length+'件';
+    if(!r.list.length){ body.innerHTML='<div class="pp-empty">組める部隊が見つかりませんでした。盤面を減らすか、除外リストを見直してください。</div>'; return; }
+    body.innerHTML='';
+    r.list.forEach(function(it){
+      var row=document.createElement('div'); row.className='pp-row'+(it.owned?'':' noown');
+      var tcls=it.tier.replace(/[^A-Za-z0-9-]/g,'');
+      row.innerHTML='<span class="pp-tier '+tcls+'">'+it.tier+'</span><div class="pp-info"><div class="pp-name"></div><div class="pp-gens"></div></div><button class="add">＋追加</button><button class="hide">候補外</button>';
+      row.querySelector('.pp-name').textContent=it.name+(it.score?('  '+it.score):'');
+      row.querySelector('.pp-gens').textContent=it.gens.map(function(g){return (typeof gName==='function')?gName(g):g;}).join('・');
+      row.querySelector('.add').onclick=function(){
+        // 空き枠が無ければ addSlot
+        if(targetSlot()<0){ if(board.length<MAX_TEAMS && typeof addSlot==='function'){ addSlot(); } else { (typeof toast==='function'&&toast('これ以上追加できません（上限'+MAX_TEAMS+'）')); return; } }
+        if(typeof addTeamToBoard==='function'){ addTeamToBoard(it.name); }
+        render();
+      };
+      row.querySelector('.hide').onclick=function(){ var s=readExcl(); s.add(it.name); writeExcl(s); render(); };
+      body.appendChild(row);
+    });
+  }
+
+  function open(){ view='all'; tabAll.classList.add('on'); tabExcl.classList.remove('on'); render(); mask.classList.add('open'); }
+
+  function mountBtn(){
+    if(document.getElementById('ppOpenBtn')) return;
+    var b=document.createElement('button'); b.id='ppOpenBtn'; b.type='button'; b.className='btn'; b.textContent='🧠 残りで最強編成を提案';
+    var anchor=document.getElementById('btnFit');
+    if(anchor&&anchor.parentNode){ anchor.parentNode.insertBefore(b, anchor.nextSibling); }
+    else { b.className='pp-btn'; b.style.cssText='position:fixed;right:12px;bottom:60px;z-index:70'; document.body.appendChild(b); }
+    b.onclick=open;
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountBtn); else mountBtn();
+})();
+
+</script>
 </body>
 </html>
