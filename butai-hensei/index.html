@@ -4199,7 +4199,7 @@ updSlotTools();
   '.slot-row button{border:1px solid var(--line2,#c9bfa9);background:#fff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}',
   '.slot-row button.load{background:var(--seal,#b3272d);color:#fff;border-color:var(--seal,#b3272d)}',
   '.slot-empty{font-size:12px;color:var(--muted,#6f7887);padding:8px 2px}',
-  '.slot-save{display:flex;gap:8px;margin-top:6px}.slot-save input{flex:1;padding:9px 11px;border:1px solid var(--line2,#c9bfa9);border-radius:9px;font-family:inherit;font-size:14px}',
+  '.slot-save{display:flex;flex-direction:column;gap:8px;margin-top:6px}.slot-save input{width:100%;height:42px;padding:9px 12px;border:1px solid var(--line2,#c9bfa9);border-radius:9px;font-family:inherit;font-size:14px}',
   '.slot-btn{background:var(--card,#f6f2e8);border:1px solid var(--line2,#c9bfa9);color:var(--text,#1d2733);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}',
   '.slot-btn.dark{background:var(--ink,#16202b);color:#f4efe4;border-color:var(--ink,#16202b)}'
   ].join('\n');
@@ -4252,7 +4252,7 @@ updSlotTools();
   function writeSlots(a){ try{ store.set(LS,a); }catch(e){} }
 
   var mask=document.createElement('div'); mask.className='slot-mask';
-  mask.innerHTML='<div class="slot-modal"><div class="slot-mh"><h3>保存した編成</h3><button class="x">×</button></div><div class="slot-mb"><div class="slot-save"><input type="text" id="slotName" placeholder="この編成に名前を付けて保存" maxlength="24"><button class="slot-btn dark" id="slotSave">現在の編成を保存</button></div><div id="slotList" style="margin-top:12px"></div></div></div>';
+  mask.innerHTML='<div class="slot-modal"><div class="slot-mh"><h3>保存した編成</h3><button class="x">×</button></div><div class="slot-mb"><div class="slot-save"><input type="text" id="slotName" placeholder="この編成に名前を付けて保存" maxlength="24"><button class="slot-btn dark" id="slotSave" style="width:100%">現在の編成を保存</button></div><div id="slotList" style="margin-top:12px"></div></div></div>';
   document.body.appendChild(mask);
   mask.querySelector('.x').onclick=function(){mask.classList.remove('open');};
   mask.addEventListener('click',function(e){if(e.target===mask)mask.classList.remove('open');});
@@ -4482,6 +4482,8 @@ updSlotTools();
   '.panel .ph{padding:10px 12px !important}',
   /* A: 上部の統一フォールド */
   '.mhx-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}',
+  '.mhx-sticky{position:sticky;top:var(--htop,70px);z-index:25;background:var(--paper);padding:8px 0 4px;margin:0 -2px 8px}',
+  '.mhx-sticky .modebar{margin-bottom:8px}',
   '.mhx-fold{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 12px;border-radius:9px;cursor:pointer}',
   '.mhx-fold[aria-expanded="true"]{background:var(--ink);color:#f4efe4;border-color:var(--ink)}',
   '.mhx-fold .mhx-car{font-size:12px;transition:transform .18s;width:14px;text-align:center}',
@@ -4541,8 +4543,11 @@ updSlotTools();
       '</div>';
 
     // 挿入：modebar の直後
-    modebar.parentNode.insertBefore(ctrl, modebar.nextSibling);
-    ctrl.parentNode.insertBefore(pf, ctrl.nextSibling);
+    var sticky=document.createElement('div'); sticky.className='mhx-sticky';
+    modebar.parentNode.insertBefore(sticky, modebar);
+    sticky.appendChild(modebar);
+    sticky.appendChild(ctrl);
+    sticky.parentNode.insertBefore(pf, sticky.nextSibling);
     pf.parentNode.insertBefore(pt, pf.nextSibling);
 
     // --- 元の散らばりボタンを隠す（ツールへ集約済み）---
