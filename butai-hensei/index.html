@@ -4490,7 +4490,7 @@ updSlotTools();
   '.mhx-fold[aria-expanded="true"] .mhx-car{transform:rotate(180deg)}',
   '.mhx-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--seal);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1}',
   '.mhx-fold[aria-expanded="true"] .mhx-badge{background:#fff;color:var(--ink)}',
-  '.mhx-panel{border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:9px;margin:0 0 8px}',
+  '.mhx-panel{border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:9px;margin:0 0 8px;max-height:60vh;overflow:auto}',
   '.mhx-panel[hidden]{display:none}',
   '.mhx-orow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}',
   '.mhx-orow+.mhx-orow{margin-top:6px}',
@@ -4547,8 +4547,8 @@ updSlotTools();
     modebar.parentNode.insertBefore(sticky, modebar);
     sticky.appendChild(modebar);
     sticky.appendChild(ctrl);
-    sticky.parentNode.insertBefore(pf, sticky.nextSibling);
-    pf.parentNode.insertBefore(pt, pf.nextSibling);
+    sticky.appendChild(pf);
+    sticky.appendChild(pt);
 
     // --- 元の散らばりボタンを隠す（ツールへ集約済み）---
     ['btnNarrow','btnFit','btnAuto','btnReset','ppOpenBtn','slotOpenBtn'].forEach(function(id){ var e=byId(id); if(e)e.classList.add('mhx-hide'); });
