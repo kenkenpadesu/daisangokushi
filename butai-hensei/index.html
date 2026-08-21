@@ -3426,7 +3426,7 @@ function renderBoard(){
     if(mode==='team'){
       const opts=[`<option value="">${L('selectTeam')}</option>`];
       TIER_ORDER.forEach(tr=>{
-        const inTier=TEAMS.filter(t=>t.tier===tr && (t.name===bt.name || teamCompatible(t,ti)));
+        const inTier=TEAMS.filter(t=>t.tier===tr && (t.name===bt.name || (teamCompatible(t,ti) && (!ownFilterOn||ownsAll(t.members.map(m=>m.gen))) && (!tacFilterOn||teamTacOK(t)))));
         if(!inTier.length)return;
         opts.push(`<optgroup label="${tr}">`);
         inTier.forEach(t=>{const _ord={'本営':0,'中衛':1,'前衛':2};const _gl=(t.members||[]).slice().sort((a,b)=>(_ord[a.pos]!=null?_ord[a.pos]:9)-(_ord[b.pos]!=null?_ord[b.pos]:9)).map(m=>isZH()?(m.gen_zh||m.gen):m.gen).filter(Boolean).join('／');const disp=(isZH()?(t.name_zh||t.name):t.name)+'（'+_gl+'）';opts.push(`<option value="${esc(t.name)}"${t.name===bt.name?' selected':''}>${esc(disp)}${t.score?' ('+esc(t.score)+')':''}</option>`);});
@@ -3998,7 +3998,7 @@ ownModal.addEventListener('click',e=>{if(e.target===ownModal)ownModal.classList.
 document.getElementById('ownSearch').addEventListener('input',e=>renderOwnGrid(e.target.value));
 document.getElementById('ownAll').onclick=()=>{owned=new Set(ALL_GEN_NAMES);saveOwned();updOwnCount();renderOwnGrid(document.getElementById('ownSearch').value);renderTier();renderBoard();};
 document.getElementById('ownNone').onclick=()=>{owned=new Set();saveOwned();updOwnCount();renderOwnGrid(document.getElementById('ownSearch').value);renderTier();renderBoard();};
-document.getElementById('ownFilter').addEventListener('change',e=>{ownFilterOn=e.target.checked;store.set('stzb_ownfilter',ownFilterOn);renderTier();});
+document.getElementById('ownFilter').addEventListener('change',e=>{ownFilterOn=e.target.checked;store.set('stzb_ownfilter',ownFilterOn);renderTier();try{renderBoard();}catch(e){}});
 
 /* ---------- 所持戦法 モーダル＆フィルタ ---------- */
 const tacModal=document.getElementById('tacModal');
@@ -4025,7 +4025,7 @@ tacModal.addEventListener('click',e=>{if(e.target===tacModal)tacModal.classList.
 document.getElementById('tacSearch').addEventListener('input',e=>renderTacGrid(e.target.value));
 document.getElementById('tacAll').onclick=()=>{ownedTac=new Set(ALL_TACTICS);saveOwnedTac();updTacCount();renderTacGrid(document.getElementById('tacSearch').value);renderTier();};
 document.getElementById('tacNone').onclick=()=>{ownedTac=new Set();saveOwnedTac();updTacCount();renderTacGrid(document.getElementById('tacSearch').value);renderTier();};
-document.getElementById('tacFilter').addEventListener('change',e=>{tacFilterOn=e.target.checked;store.set('stzb_tacfilter',tacFilterOn);renderTier();});
+document.getElementById('tacFilter').addEventListener('change',e=>{tacFilterOn=e.target.checked;store.set('stzb_tacfilter',tacFilterOn);renderTier();try{renderBoard();}catch(e){}});
 
 /* ---------- 残りで組める部隊 モーダル ---------- */
 const fitModal=document.getElementById('fitModal');
@@ -4464,6 +4464,152 @@ updSlotTools();
     b.onclick=open;
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mountBtn); else mountBtn();
+})();
+
+</script>
+<script>
+/* ===== 追加: マイ編成レイアウト改修（A: フィルタ上/編成状況下・統一 ＋ B: caret拡大） ===== */
+(function(){
+  'use strict';
+  var view=document.getElementById('view-board');
+  if(!view) return;
+
+  /* ---------- CSS ---------- */
+  var css=[
+  /* B: caret を大きく・押せる感 */
+  '.panel .caret{margin-left:8px !important;font-size:20px !important;color:var(--text) !important;width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06)}',
+  'body.dark .panel .caret{background:rgba(255,255,255,.12)}',
+  '.panel .ph{padding:10px 12px !important}',
+  /* A: 上部の統一フォールド */
+  '.mhx-ctrl{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}',
+  '.mhx-fold{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--card);color:var(--text);font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 12px;border-radius:9px;cursor:pointer}',
+  '.mhx-fold[aria-expanded="true"]{background:var(--ink);color:#f4efe4;border-color:var(--ink)}',
+  '.mhx-fold .mhx-car{font-size:12px;transition:transform .18s;width:14px;text-align:center}',
+  '.mhx-fold[aria-expanded="true"] .mhx-car{transform:rotate(180deg)}',
+  '.mhx-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--seal);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;line-height:1}',
+  '.mhx-fold[aria-expanded="true"] .mhx-badge{background:#fff;color:var(--ink)}',
+  '.mhx-panel{border:1px solid var(--line2);border-radius:10px;background:var(--card);padding:9px;margin:0 0 8px}',
+  '.mhx-panel[hidden]{display:none}',
+  '.mhx-orow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}',
+  '.mhx-orow+.mhx-orow{margin-top:6px}',
+  '.mhx-open{border:1px solid var(--line2);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:7px 11px;border-radius:8px;cursor:pointer}',
+  'body.dark .mhx-open{background:#111922}',
+  '.mhx-tg{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--line2);background:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}',
+  'body.dark .mhx-tg{background:#111922}',
+  '.mhx-tg input{width:15px;height:15px;accent-color:var(--seal)}',
+  '.mhx-cnt{font-size:11px;color:var(--muted)}',
+  '.mhx-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}',
+  '.mhx-tools button{text-align:left;border:1px solid var(--line2);background:#fff;color:var(--text);font:inherit;font-size:12px;font-weight:700;padding:8px 10px;border-radius:8px;cursor:pointer}',
+  'body.dark .mhx-tools button{background:#111922}',
+  /* A: 編成状況を下部固定 */
+  '#summary{position:fixed !important;left:0;right:0;bottom:0;top:auto !important;z-index:60;margin:0 !important;border-radius:0 !important;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px)) !important;box-shadow:0 -8px 24px rgba(0,0,0,.28)}',
+  /* 元の散らばりボタンを隠す（ツールへ集約） */
+  '.mhx-hide{display:none !important}'
+  ].join('\n');
+  var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  function byId(id){return document.getElementById(id);}
+  function proxyClick(id){ var el=byId(id); if(el) el.click(); }
+
+  function build(){
+    if(byId('mhxCtrl')) return;
+    var modebar=view.querySelector('.modebar');
+    var summary=byId('summary');
+    if(!modebar||!summary) return;
+
+    // --- 上部コントロール行（絞り込み / ツール）---
+    var ctrl=document.createElement('div'); ctrl.className='mhx-ctrl'; ctrl.id='mhxCtrl';
+    ctrl.innerHTML=
+      '<button class="mhx-fold" id="mhxFilter" aria-expanded="false"><span class="mhx-lab">絞り込み</span><span class="mhx-badge" id="mhxBadge" hidden>0</span><span class="mhx-car">▾</span></button>'+
+      '<button class="mhx-fold" id="mhxTool" aria-expanded="false"><span class="mhx-lab">ツール</span><span class="mhx-car">▾</span></button>';
+    var pf=document.createElement('div'); pf.className='mhx-panel'; pf.id='mhxPF'; pf.hidden=true;
+    pf.innerHTML=
+      '<div class="mhx-orow"><button class="mhx-open" id="mhxOwnSet">所持武将を設定</button>'+
+      '<label class="mhx-tg"><input type="checkbox" id="mhxOwnFil"> 所持武将で絞る</label>'+
+      '<span class="mhx-cnt" id="mhxOwnCnt"></span></div>'+
+      '<div class="mhx-orow"><button class="mhx-open" id="mhxTacSet">所持戦法を設定</button>'+
+      '<label class="mhx-tg"><input type="checkbox" id="mhxTacFil"> 所持戦法で絞る</label>'+
+      '<span class="mhx-cnt" id="mhxTacCnt"></span></div>';
+    var pt=document.createElement('div'); pt.className='mhx-panel'; pt.id='mhxPT'; pt.hidden=true;
+    pt.innerHTML='<div class="mhx-tools">'+
+      '<button data-px="ppOpenBtn">🧠 残りで最強編成を提案</button>'+
+      '<button data-px="btnFit">🧩 残りで組める部隊</button>'+
+      '<button data-px="slotOpenBtn">💾 保存した編成</button>'+
+      '<button data-px="btnNarrow">🔎 空き枠を絞る</button>'+
+      '<button data-px="btnAuto">⚡ 戦法を自動割り当て</button>'+
+      '<button data-px="btnReset">↩ リセット</button>'+
+      '</div>';
+
+    // 挿入：modebar の直後
+    modebar.parentNode.insertBefore(ctrl, modebar.nextSibling);
+    ctrl.parentNode.insertBefore(pf, ctrl.nextSibling);
+    pf.parentNode.insertBefore(pt, pf.nextSibling);
+
+    // --- 元の散らばりボタンを隠す（ツールへ集約済み）---
+    ['btnNarrow','btnFit','btnAuto','btnReset','ppOpenBtn','slotOpenBtn'].forEach(function(id){ var e=byId(id); if(e)e.classList.add('mhx-hide'); });
+
+    // --- フォールドの開閉 ---
+    function setOpen(btn,panel,open){ panel.hidden=!open; btn.setAttribute('aria-expanded',open?'true':'false'); }
+    var bF=byId('mhxFilter'), bT=byId('mhxTool');
+    bF.addEventListener('click',function(){ var o=pf.hidden; setOpen(bT,pt,false); setOpen(bF,pf,o); if(o)syncOwn(); });
+    bT.addEventListener('click',function(){ var o=pt.hidden; setOpen(bF,pf,false); setOpen(bT,pt,o); });
+
+    // --- ツール：既存ボタンへプロキシ ---
+    pt.querySelectorAll('[data-px]').forEach(function(b){ b.addEventListener('click',function(){ setOpen(bT,pt,false); proxyClick(b.getAttribute('data-px')); }); });
+
+    // --- 絞り込み：既存の所持コントロールへプロキシ＆同期 ---
+    byId('mhxOwnSet').addEventListener('click',function(){ proxyClick('ownOpen'); });
+    byId('mhxTacSet').addEventListener('click',function(){ proxyClick('tacOpen'); });
+    function mirror(srcId,dstId){ var s=byId(srcId),d=byId(dstId); if(!s||!d)return; d.checked=!!s.checked; }
+    function push(srcId,dstId){ var s=byId(srcId),d=byId(dstId); if(!s||!d)return; d.checked=s.checked; d.dispatchEvent(new Event('change',{bubbles:true})); }
+    byId('mhxOwnFil').addEventListener('change',function(){ push('mhxOwnFil','ownFilter'); updBadge(); });
+    byId('mhxTacFil').addEventListener('change',function(){ push('mhxTacFil','tacFilter'); updBadge(); });
+    // 逆方向（Tier表側で変えたら反映）
+    var of=byId('ownFilter'), tf=byId('tacFilter');
+    if(of)of.addEventListener('change',function(){ mirror('ownFilter','mhxOwnFil'); updBadge(); });
+    if(tf)tf.addEventListener('change',function(){ mirror('tacFilter','mhxTacFil'); updBadge(); });
+
+    function syncOwn(){
+      mirror('ownFilter','mhxOwnFil'); mirror('tacFilter','mhxTacFil');
+      var oc=byId('ownCount'), tc=byId('tacCount');
+      if(oc)byId('mhxOwnCnt').textContent=oc.textContent||'';
+      if(tc)byId('mhxTacCnt').textContent=tc.textContent||'';
+    }
+    function updBadge(){
+      var n=0; var of=byId('ownFilter'),tf=byId('tacFilter');
+      if(of&&of.checked)n++; if(tf&&tf.checked)n++;
+      var b=byId('mhxBadge'); if(b){ b.textContent=n; b.hidden=(n===0); }
+    }
+    // 言語ラベル
+    var lz=byId('langZh'), lj=byId('langJa');
+    function lang(zh){ var f=bF.querySelector('.mhx-lab'), t=bT.querySelector('.mhx-lab'); if(f)f.textContent=zh?'筛选':'絞り込み'; if(t)t.textContent=zh?'工具':'ツール'; }
+    if(lz)lz.addEventListener('click',function(){lang(true);});
+    if(lj)lj.addEventListener('click',function(){lang(false);});
+
+    syncOwn(); updBadge();
+
+    // --- 下部固定バーぶんの余白を確保 ---
+    function pad(){ try{ view.style.paddingBottom=(summary.offsetHeight+18)+'px'; }catch(e){} }
+    pad();
+    if(window.ResizeObserver){ new ResizeObserver(pad).observe(summary); }
+    window.addEventListener('resize',pad);
+
+    // --- 画像保存メニューを上向きに開く補正（下固定バー対策）---
+    var sm=byId('saveMenu');
+    if(sm&&window.MutationObserver){
+      new MutationObserver(function(){
+        if(sm.hidden) return;
+        // 一旦表示された直後、下にはみ出すなら上に出す
+        setTimeout(function(){
+          var h=sm.offsetHeight||160; var top=parseInt(sm.style.top||'0',10);
+          if(top+h>window.innerHeight-8){ sm.style.top=Math.max(8,window.innerHeight-h-90)+'px'; }
+        },0);
+      }).observe(sm,{attributes:true,attributeFilter:['hidden']});
+    }
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(build,0); });
+  else setTimeout(build,0);
 })();
 
 </script>
