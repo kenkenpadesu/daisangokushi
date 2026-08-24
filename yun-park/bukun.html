@@ -4,129 +4,89 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>同盟 武勲記録</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="同盟 武勲記録｜週次 武勲・勢力値・分隊">
+<meta property="og:description" content="同盟メンバーの週ごとの武勲・勢力値と増減、分隊別集計。検索・並び替えできます。">
+<meta property="og:image" content="https://kenkenpadesu.github.io/daisangokushi/ogp.png">
+<meta property="og:url" content="https://kenkenpadesu.github.io/daisangokushi/yun-park/bukun.html">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --ink:#17130d; --ink2:#1e1810; --panel:#241d14; --panel2:#2c2318;
-  --line:#3b3125; --line2:#4a3d2c;
-  --gold:#d6b25c; --gold-dim:#9f8340; --gold-soft:#e7cd8a;
-  --paper:#ece2cd; --muted:#a8997c;
-  --jade:#79c39a; --jade-dim:#3c6b52;
-  --verm:#dd6e5a; --verm-dim:#7a3a30;
-}
+:root{--ink:#17130d;--ink2:#1e1810;--panel:#241d14;--panel2:#2c2318;--line:#3b3125;--line2:#4a3d2c;
+--gold:#d6b25c;--gold-dim:#9f8340;--gold-soft:#e7cd8a;--paper:#ece2cd;--muted:#a8997c;
+--jade:#79c39a;--jade-dim:#3c6b52;--verm:#dd6e5a;--verm-dim:#7a3a30;}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{
-  background:
-    radial-gradient(1200px 500px at 50% -8%, #2a2015 0%, rgba(42,32,21,0) 60%),
-    linear-gradient(180deg,#17130d 0%, #141009 100%);
-  color:var(--paper); font-family:"Noto Sans JP",system-ui,sans-serif;
-  min-height:100vh; line-height:1.55; -webkit-font-smoothing:antialiased;
-}
-.wrap{max-width:1120px; margin:0 auto; padding:0 14px 80px}
-
-/* header */
-.masthead{padding:30px 4px 18px; border-bottom:1px solid var(--line); position:relative}
-.masthead::after{content:""; position:absolute; left:0; bottom:-1px; width:88px; height:2px; background:var(--gold)}
-.kicker{font-size:12px; letter-spacing:.42em; color:var(--gold-dim); font-weight:700; text-indent:.42em}
-.title{font-family:"Noto Serif JP",serif; font-weight:900; color:var(--gold-soft);
-  font-size:clamp(28px,7vw,46px); letter-spacing:.06em; line-height:1.08; margin-top:6px;
-  text-shadow:0 1px 0 #000, 0 0 22px rgba(214,178,92,.14)}
-.subtitle{color:var(--muted); font-size:13.5px; margin-top:8px; letter-spacing:.02em}
-.subtitle b{color:var(--paper); font-weight:500}
-
-/* stat tablets */
-.stats{display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 4px}
-.tablet{flex:1 1 120px; background:linear-gradient(180deg,var(--panel2),var(--panel));
-  border:1px solid var(--line); border-radius:3px; padding:11px 13px; position:relative; overflow:hidden}
-.tablet::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--gold-dim)}
-.tablet.new::before{background:var(--jade-dim)}
-.tablet.left::before{background:var(--verm-dim)}
-.tablet .k{font-size:11px; color:var(--muted); letter-spacing:.14em; font-weight:700}
-.tablet .v{font-family:"Noto Serif JP",serif; font-weight:700; font-size:26px; color:var(--paper);
-  font-variant-numeric:tabular-nums; margin-top:1px}
-.tablet.new .v{color:var(--jade)} .tablet.left .v{color:var(--verm)}
-.tablet .s{font-size:11px; color:var(--muted)}
-
-/* controls */
-.controls{position:sticky; top:0; z-index:40; padding:12px 0 11px;
-  background:linear-gradient(180deg,#161009 78%, rgba(22,16,9,0)); }
-.seg{display:inline-flex; background:var(--ink2); border:1px solid var(--line); border-radius:4px; padding:3px; gap:2px}
-.seg button{appearance:none; border:0; background:transparent; color:var(--muted); cursor:pointer;
-  font-family:inherit; font-size:12.5px; font-weight:700; letter-spacing:.03em; padding:7px 12px; border-radius:3px; white-space:nowrap}
-.seg button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318); color:var(--gold-soft); box-shadow:inset 0 0 0 1px var(--line2)}
-.row2{display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-top:10px}
-.search{flex:1 1 200px; min-width:150px; position:relative}
-.search input{width:100%; background:var(--ink2); border:1px solid var(--line); border-radius:4px;
-  color:var(--paper); font-family:inherit; font-size:14px; padding:9px 32px 9px 12px; outline:none}
-.search input:focus{border-color:var(--gold-dim); box-shadow:0 0 0 2px rgba(214,178,92,.12)}
+body{background:radial-gradient(1200px 500px at 50% -8%,#2a2015 0%,rgba(42,32,21,0) 60%),linear-gradient(180deg,#17130d,#141009);
+color:var(--paper);font-family:"Noto Sans JP",system-ui,sans-serif;min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 13px 70px}
+.masthead{padding:26px 4px 16px;border-bottom:1px solid var(--line);position:relative}
+.masthead::after{content:"";position:absolute;left:0;bottom:-1px;width:82px;height:2px;background:var(--gold)}
+.kicker{font-size:11.5px;letter-spacing:.4em;color:var(--gold-dim);font-weight:700;text-indent:.4em}
+.title{font-family:"Noto Serif JP",serif;font-weight:900;color:var(--gold-soft);font-size:clamp(26px,6.4vw,44px);
+letter-spacing:.05em;line-height:1.08;margin-top:5px;text-shadow:0 1px 0 #000,0 0 22px rgba(214,178,92,.14)}
+.subtitle{color:var(--muted);font-size:13px;margin-top:7px}.subtitle b{color:var(--paper);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
+.tablet{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:3px;padding:10px 12px;position:relative;overflow:hidden}
+.tablet::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold-dim)}
+.tablet.new::before{background:var(--jade-dim)}.tablet.left::before{background:var(--verm-dim)}
+.tablet .k{font-size:10.5px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+.tablet .v{font-family:"Noto Serif JP",serif;font-weight:700;font-size:clamp(20px,5vw,27px);color:var(--paper);font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.05}
+.tablet.new .v{color:var(--jade)}.tablet.left .v{color:var(--verm)}
+.tablet .s{font-size:10.5px;color:var(--muted);margin-top:2px}
+.controls{position:sticky;top:0;z-index:40;padding:11px 0 10px;background:linear-gradient(180deg,#161009 82%,rgba(22,16,9,0))}
+.seg{display:flex;background:var(--ink2);border:1px solid var(--line);border-radius:4px;padding:3px;gap:2px;overflow-x:auto}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:3px;white-space:nowrap}
+.seg button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--line2)}
+.row2{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:9px}
+.search{flex:1 1 190px;min-width:140px;position:relative}
+.search input{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:4px;color:var(--paper);font-family:inherit;font-size:15px;padding:9px 32px 9px 12px;outline:none}
+.search input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 2px rgba(214,178,92,.12)}
 .search input::placeholder{color:#7c715c}
-.search .x{position:absolute; right:8px; top:50%; transform:translateY(-50%); color:var(--muted);
-  cursor:pointer; font-size:18px; line-height:1; display:none; padding:2px}
-.sortlbl{font-size:11px; color:var(--muted); letter-spacing:.12em; font-weight:700; margin-right:-3px}
-.chips{display:flex; gap:6px; flex-wrap:wrap}
-.chip{appearance:none; border:1px solid var(--line); background:var(--ink2); color:var(--muted);
-  font-family:inherit; font-size:12px; font-weight:700; padding:6px 11px; border-radius:20px; cursor:pointer}
-.chip.on{border-color:var(--gold-dim); color:var(--gold-soft); background:#2b2216}
-
-.count{font-size:12px; color:var(--muted); margin:12px 2px 8px}
-.count b{color:var(--gold-soft); font-weight:700}
-
-/* table */
-.tw{overflow-x:auto; border:1px solid var(--line); border-radius:5px; background:var(--ink2);
-  -webkit-overflow-scrolling:touch}
-table{border-collapse:separate; border-spacing:0; width:100%; min-width:640px}
-thead th{position:sticky; top:0; z-index:20; background:#221a11; color:var(--gold-dim);
-  font-size:11px; font-weight:700; letter-spacing:.06em; text-align:right; white-space:nowrap;
-  padding:11px 12px; border-bottom:1px solid var(--line2); cursor:pointer; user-select:none}
-thead th .ar{color:var(--gold); font-size:9px; margin-left:3px; opacity:0}
-thead th.sorted .ar{opacity:1}
-th.name, td.name{text-align:left; position:sticky; left:0; z-index:10; background:var(--ink2);
-  border-right:1px solid var(--line); min-width:158px; max-width:200px}
-thead th.name{z-index:30; background:#221a11}
-tbody td{padding:10px 12px; text-align:right; font-size:13.5px; border-bottom:1px solid #241d13;
-  font-variant-numeric:tabular-nums; white-space:nowrap}
-tbody tr:hover td{background:#211a11}
-tbody tr:hover td.name{background:#241d12}
-tbody tr.hit td{background:#332612 !important}
-tbody tr.hit td.name{background:#3a2c15 !important}
-
-.rk{display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:20px;
-  font-size:11px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums;
-  border:1px solid var(--line2); border-radius:3px; padding:0 5px; margin-right:8px; vertical-align:middle}
-.rk.m1{color:#1c1608; background:linear-gradient(180deg,#e7cd8a,#c69f45); border-color:#c69f45}
-.rk.m2{color:#17130d; background:linear-gradient(180deg,#d7d7dc,#a9a9b2); border-color:#a9a9b2}
-.rk.m3{color:#17130d; background:linear-gradient(180deg,#d6a677,#b07b48); border-color:#b07b48}
+.search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:18px;line-height:1;display:none;padding:2px}
+.lbl{font-size:11px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{appearance:none;border:1px solid var(--line);background:var(--ink2);color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.chip.on{border-color:var(--gold-dim);color:var(--gold-soft);background:#2b2216}
+.count{font-size:12px;color:var(--muted);margin:11px 2px 8px}.count b{color:var(--gold-soft);font-weight:700}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--ink2);-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content}
+thead th{position:sticky;top:0;z-index:20;background:#221a11;color:var(--gold-dim);font-size:10.5px;font-weight:700;text-align:right;white-space:nowrap;padding:10px 11px;border-bottom:1px solid var(--line2);cursor:pointer;user-select:none;line-height:1.25}
+thead th .ar{color:var(--gold);font-size:9px;margin-left:2px;opacity:0}thead th.sorted .ar{opacity:1}
+.c-status{width:64px}.c-squad{width:78px}.c-num{width:94px}.c-delta{width:102px}
+th.name,td.name{text-align:left;position:sticky;left:0;z-index:10;background:var(--ink2);border-right:1px solid var(--line);width:132px;min-width:132px;max-width:132px}
+thead th.name{z-index:30;background:#221a11}
+tbody td{padding:9px 11px;text-align:right;font-size:13px;border-bottom:1px solid #241d13;font-variant-numeric:tabular-nums}
+tbody td.name{white-space:normal;word-break:break-word}tbody td:not(.name){white-space:nowrap}
+tbody tr:hover td{background:#211a11}tbody tr:hover td.name{background:#241d12}
+tbody tr.hit td{background:#332612 !important}tbody tr.hit td.name{background:#3a2c15 !important}
+.rk{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:19px;font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;border:1px solid var(--line2);border-radius:3px;padding:0 4px;margin-right:7px;vertical-align:middle}
+.rk.m1{color:#1c1608;background:linear-gradient(180deg,#e7cd8a,#c69f45);border-color:#c69f45}
+.rk.m2{color:#17130d;background:linear-gradient(180deg,#d7d7dc,#a9a9b2);border-color:#a9a9b2}
+.rk.m3{color:#17130d;background:linear-gradient(180deg,#d6a677,#b07b48);border-color:#b07b48}
 .rk.na{color:#6f6450}
-.nm{font-weight:500; color:var(--paper); font-size:13.5px; vertical-align:middle}
-
-.badge{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.04em;
-  padding:2px 8px; border-radius:20px; border:1px solid var(--line2); color:var(--muted)}
-.badge.n{color:var(--jade); border-color:var(--jade-dim); background:rgba(121,195,154,.08)}
-.badge.l{color:var(--verm); border-color:var(--verm-dim); background:rgba(221,110,90,.08)}
-
-.delta{font-weight:700}
-.delta.up{color:var(--jade)} .delta.dn{color:var(--verm)} .delta.ze{color:#6f6450}
-.delta .bar{display:block; height:2px; margin-top:4px; border-radius:2px; margin-left:auto; opacity:.55}
-.delta.up .bar{background:var(--jade)} .delta.dn .bar{background:var(--verm)}
-.dim{color:#6f6450}
-
-.note{font-size:12px; color:var(--muted); margin:16px 2px 0; padding:12px 14px;
-  border:1px solid var(--line); border-left:3px solid var(--gold-dim); border-radius:3px; background:var(--panel)}
-.note b{color:var(--gold-soft); font-weight:700}
-.foot{margin-top:22px; padding-top:14px; border-top:1px solid var(--line); color:#6f6450; font-size:11.5px; text-align:center; letter-spacing:.04em}
-
-.empty{padding:40px 16px; text-align:center; color:var(--muted); font-size:14px}
-
-@media(max-width:560px){
-  .wrap{padding:0 10px 70px}
-  .tablet{flex:1 1 calc(50% - 5px)}
-  tbody td, thead th{padding:9px 9px; font-size:13px}
-  th.name,td.name{min-width:140px}
-}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.nm{font-weight:500;color:var(--paper);font-size:13px;vertical-align:middle}
+.sq{font-size:11.5px;color:var(--gold-dim);font-weight:700}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.badge.n{color:var(--jade);border-color:var(--jade-dim);background:rgba(121,195,154,.08)}
+.badge.l{color:var(--verm);border-color:var(--verm-dim);background:rgba(221,110,90,.08)}
+.delta{font-weight:700;display:inline-block}.delta.up{color:var(--jade)}.delta.dn{color:var(--verm)}.delta.ze{color:#6f6450}
+.delta .bar{display:block;height:2px;margin-top:4px;border-radius:2px;margin-left:auto;opacity:.5}
+.delta.up .bar{background:var(--jade)}.delta.dn .bar{background:var(--verm)}
+.dim{color:#7d715b}
+.sqname{font-weight:700;color:var(--gold-soft);font-size:13.5px}
+.note{font-size:12px;color:var(--muted);margin:15px 2px 0;padding:11px 13px;border:1px solid var(--line);border-left:3px solid var(--gold-dim);border-radius:3px;background:var(--panel);line-height:1.55}
+.note b{color:var(--gold-soft);font-weight:700}
+.foot{margin-top:20px;padding-top:13px;border-top:1px solid var(--line);color:#6f6450;font-size:11px;text-align:center}
+.empty{padding:38px 16px;text-align:center;color:var(--muted);font-size:14px}
+@media(max-width:560px){.wrap{padding:0 10px 60px}.stats{gap:7px}.tablet{padding:9px 10px}
+.c-num{width:84px}.c-delta{width:94px}.c-status{width:56px}.c-squad{width:62px}
+th.name,td.name{width:112px;min-width:112px;max-width:112px}
+tbody td,thead th{padding:8px 8px;font-size:12.5px}.nm,.rk{font-size:12px}}
 </style>
 </head>
 <body>
@@ -136,209 +96,112 @@ tbody tr.hit td.name{background:#3a2c15 !important}
     <h1 class="title">週次 武勲・勢力値</h1>
     <p class="subtitle" id="sub"></p>
   </header>
-
   <section class="stats" id="stats"></section>
-
   <div class="controls">
-    <div class="seg" id="seg">
-      <button data-v="trend" class="on">推移</button>
-      <button data-v="w2">先週 8/17-23</button>
-      <button data-v="w1">先々週 8/10-16</button>
-    </div>
+    <div class="seg" id="seg"></div>
     <div class="row2">
-      <div class="search">
-        <input id="q" type="search" placeholder="メンバー名で検索" autocomplete="off">
-        <span class="x" id="qx">×</span>
-      </div>
-      <span class="sortlbl">並び替え</span>
-      <div class="chips" id="chips"></div>
+      <div class="search"><input id="q" type="search" placeholder="メンバー名で検索" autocomplete="off"><span class="x" id="qx">×</span></div>
+      <span class="lbl">並び替え</span><div class="chips" id="chips"></div>
     </div>
+    <div class="row2" id="sqrow"><span class="lbl">分隊</span><div class="chips" id="sqfilter"></div></div>
   </div>
-
   <div class="count" id="count"></div>
   <div class="tw"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
-
-  <p class="note"><b>武勲について：</b>武勲は毎週リセットされるため、週が違えば全体の水準も変わります（8/10-16は静かな週、8/17-23は活発な週）。個人の成長を見るなら<b>勢力値の増減</b>が素直な指標、武勲の増減は「その週どれだけ動いたか」の目安です。</p>
-  <div class="foot">データ：同盟成員一覧より集計 ・ 継続195 / 新加入3 / 脱退2</div>
+  <p class="note"><b>武勲について：</b>武勲は毎週リセットされるため週で水準が変わります。個人の伸びは<b>勢力値の増減</b>が素直な指標です。分隊の集計は最新週（8/17〜）の値で計算しています。</p>
+  <div class="foot" id="foot"></div>
 </div>
-
 <script>
-const DATA = {"w1": [["浪子｜星雲", 137000, 29406], ["剣権羽 kenkenpa", 126000, 20866], ["浪子｜雪花", 117000, 33921], ["トラ0713", 115000, 25874], ["浪子｜仙主", 108000, 32048], ["浪子｜文泰", 92323, 27713], ["主公5082", 75839, 21198], ["超人血盟軍", 74068, 21850], ["天順元宝", 64709, 28493], ["☆去亥☆", 55532, 26097], ["ゾウどうぞ", 50811, 15958], ["浪子｜薩普羅", 48121, 27837], ["盛三軍団", 47318, 25283], ["ゆなっこ", 47197, 18138], ["しみ犬", 46654, 20114], ["NAGOYA", 45734, 18787], ["ハッチ88", 44485, 15806], ["浪子｜六月", 41529, 25829], ["†鬼〆宗†", 41139, 17566], ["極悪の仏", 40282, 17288], ["はま爺", 40192, 19915], ["臨江仙", 39790, 26328], ["やま", 36976, 20251], ["じゅんじ", 36920, 25855], ["ボロ雑巾", 36497, 15109], ["浪子｜はく", 33828, 25947], ["虎の太公望", 32427, 15216], ["反社エネわん", 32217, 15433], ["浪子｜嚕嚕米", 31657, 15690], ["FICTA", 30629, 30916], ["団長", 29706, 23929], ["瑕丘鄭重", 29488, 18030], ["RB20", 29440, 14954], ["村長", 29372, 25276], ["ベニマル", 28228, 16662], ["ジョーサブ", 27907, 17578], ["猫ロック", 27134, 25070], ["片栗粉u1", 26562, 13729], ["MOTO", 26311, 19478], ["さしみ", 26241, 13512], ["seiji", 25872, 16623], ["あべゆういち", 25365, 13614], ["極悪女帝リザ", 25288, 25122], ["浪子｜教士", 25285, 27261], ["タロマス", 24770, 15517], ["くに", 23915, 14153], ["草津温泉", 23561, 17270], ["クロネコさん", 23404, 19979], ["えりす", 22751, 15852], ["パープル☆", 21837, 17899], ["佐々鬼", 20981, 13947], ["うみがめ座@", 20948, 13752], ["桃梨", 20425, 13703], ["イニミニ", 20241, 16497], ["だしい", 20128, 21564], ["烏合の集まり", 19999, 12901], ["外様", 19538, 11576], ["真田丸☆", 19166, 17097], ["ヴぇぼ", 19118, 16104], ["BARI", 18730, 13848], ["カム犬", 18640, 24364], ["ごこっと", 18130, 21165], ["浪子｜大猩猩", 17930, 21128], ["つっg", 17585, 21364], ["王騎大将軍✦", 17398, 17020], ["ゆう", 16772, 14607], ["浪子｜無涯", 16487, 20478], ["Ruu", 16151, 14069], ["ロドリゲス", 16012, 15513], ["ラック。", 15866, 20105], ["よる★かぜ", 15714, 11589], ["han", 15611, 16161], ["アイーン", 15536, 21417], ["カバオ卍", 15229, 15915], ["小竜", 15022, 16298], ["まりもX", 14711, 14017], ["浪子｜11", 14379, 15877], ["りょうしゅん", 14229, 14799], ["ジョージ", 13749, 10184], ["極悪ボンⒸ", 13399, 20057], ["ぞおき", 13331, 9387], ["ワンパンダ", 13320, 8854], ["大地の子", 13045, 12868], ["にゃんこ軍", 12633, 13220], ["魏無羨", 12612, 25875], ["浪子｜影子", 12116, 14992], ["行雲流水", 11635, 19960], ["浪子｜大黄螺旋丸", 11465, 25575], ["敦犬", 11457, 11698], ["さぶろー", 10988, 13769], ["メイプル", 10898, 18853], ["シュガー", 10730, 17436], ["コシヨシ", 10539, 17089], ["⚡SOU⚡", 10278, 14222], ["ワ-ドラ", 9818, 13630], ["HANABI", 9632, 16871], ["LEE", 9287, 19380], ["八宝菜", 9278, 10774], ["nim0su", 9054, 12949], ["モジャ", 8689, 18565], ["lovin.", 8448, 13905], ["ナムナム", 8320, 11052], ["マサイ", 8278, 11321], ["パパパ", 8274, 10595], ["アゲハたん★", 7886, 12618], ["便利屋", 7843, 9034], ["義孝01", 7118, 14152], ["浪子｜志村", 7099, 22683], ["荊州軍", 7045, 16432], ["たけとも33", 6932, 12855], ["ほむれず", 6920, 19558], ["くまモン", 6560, 16463], ["～凛～", 6518, 13275], ["浪子｜氹仔", 6415, 20340], ["HIMURO", 5726, 16163], ["くんちゃん", 5570, 21622], ["パンダマン", 5049, 6202], ["かばごん", 4771, 12557], ["カナデ", 4702, 9769], ["MARSAN", 4674, 12287], ["浪子｜貓侍", 4657, 19426], ["まるぞう", 4434, 16139], ["ボラギノール", 4341, 9522], ["さら猫", 4233, 20790], ["☀李信☀", 4143, 10607], ["ココ壱5辛", 3657, 14625], ["SHUNJI", 3650, 11098], ["李★漂", 3622, 16055], ["ヤムヤム", 3510, 10621], ["まーさんZ", 3480, 11642], ["そんそん", 3423, 14150], ["たけ33サブ", 3403, 12295], ["i.", 3264, 12999], ["トムトム", 3156, 12382], ["潯陽曹仁", 2945, 19351], ["甘興覇", 2523, 12659], ["ギリヤーク人", 2365, 15649], ["劉邦軍", 2269, 14865], ["餅", 2224, 20965], ["演員", 2210, 11905], ["空kou", 2138, 22817], ["仁義なきTUBE", 2053, 20400], ["ロストフ家", 1970, 17631], ["さすらい♪", 1933, 13355], ["盟主の犬隊長", 1869, 13474], ["廉", 1537, 11715], ["すじまーん", 1495, 11313], ["陽龍", 1494, 14229], ["浪子｜潮男", 1310, 10381], ["張良子房", 1260, 10847], ["俊志", 1156, 11305], ["成龍.", 1155, 11571], ["✖李信", 1124, 12301], ["シベリウス", 1091, 15335], ["奈凡", 958, 12348], ["漆喰(白)", 911, 10531], ["テムテム", 865, 11076], ["ケムケム", 839, 12688], ["海峡のジンベエ", 813, 15350], ["風魔", 748, 9755], ["河西虎su", 731, 11175], ["さすらい⚡", 725, 5176], ["浪子｜可倫堡", 723, 25336], ["滄浪｜虎賁", 582, 23946], ["R-102", 545, 14632], ["天陽。", 486, 13046], ["鷹布", 477, 13007], ["成龍", 423, 9585], ["飛五隊", 287, 11566], ["浪子｜雪山啤酒", 233, 20122], ["真・虎狼", 210, 9889], ["宇留千絵", 187, 14218], ["零度Niu", 136, 24178], ["カモンスキー", 117, 10763], ["犬ナオコ", 95, 12652], ["浪子｜朝日", 88, 26394], ["山本勘助", 47, 7391], ["拉麺", 9, 13361], ["漆喰(船)", 8, 10333], ["極悪剣心", 0, 9432], ["DOCTOR", 0, 17215], ["アキ♪♪", 0, 15928], ["浪子｜剣心", 0, 14922], ["アルバイトz", 0, 11405], ["ピスタチオ", 0, 11689], ["武劉祐徳", 0, 15750], ["猫の太公望", 0, 12629], ["にゃんこ戦争", 0, 11398], ["朝倉", 0, 15395], ["MOTI", 0, 13038], ["団長団", 0, 10842], ["名犬チーズ", 0, 10227], ["風船蔓", 0, 11109], ["元楽園jun", 0, 5636], ["からあげクン", 0, 6786], ["桂馬", 0, 5289], ["浪子｜工具人", 0, 341]], "w2": [["浪子｜雪花", 612000, 41926], ["剣権羽 kenkenpa", 580000, 25843], ["浪子｜星雲", 547000, 29567], ["トラ0713", 454000, 27869], ["浪子｜文泰", 412000, 33210], ["浪子｜仙主", 389000, 37025], ["天順元宝", 364000, 32206], ["臨江仙", 360000, 30401], ["浪子｜薩普羅", 329000, 28385], ["主公5082", 312000, 26744], ["村長", 310000, 30264], ["ゆなっこ", 310000, 27399], ["超人血盟軍", 309000, 26745], ["☆去亥☆", 301000, 31490], ["FICTA", 299000, 35469], ["NAGOYA", 293000, 27833], ["じゅんじ", 281000, 25282], ["しみ犬", 273000, 28324], ["浪子｜はく", 271000, 26426], ["seiji", 268000, 26074], ["盛三軍団", 253000, 27136], ["団長", 248000, 27894], ["LEE", 231000, 26990], ["ゾウどうぞ", 225000, 22715], ["瑕丘鄭重", 216000, 24538], ["浪子｜嚕嚕米", 213000, 18667], ["極悪の仏", 207000, 19747], ["やま", 203000, 28706], ["りょうしゅん", 202000, 20243], ["†鬼〆宗†", 193000, 21275], ["えりす", 189000, 22772], ["浪子｜貓侍", 185000, 24356], ["真田丸☆", 185000, 25616], ["カム犬", 185000, 25060], ["まりもX", 183000, 18297], ["だしい", 183000, 24435], ["ロドリゲス", 183000, 26004], ["ヴぇぼ", 179000, 20504], ["浪子｜朝日", 176000, 29734], ["浪子｜志村", 165000, 26334], ["パープル☆", 164000, 26325], ["浪子｜教士", 162000, 33347], ["クロネコさん", 161000, 23965], ["アイーン", 160000, 29786], ["ジョーサブ", 160000, 20066], ["烏合の集まり", 157000, 18064], ["つっg", 156000, 22275], ["さら猫", 154000, 25076], ["拉麺", 154000, 18609], ["ごこっと", 154000, 28144], ["浪子｜大黄螺旋丸", 151000, 26143], ["モジャ", 151000, 26759], ["反社エネわん", 149000, 20466], ["零度Niu", 149000, 25838], ["はま爺", 148000, 26812], ["桃梨", 148000, 18429], ["イニミニ", 146000, 22648], ["極悪女帝リザ", 143000, 26817], ["李★漂", 142000, 27512], ["荊州軍", 141000, 25809], ["浪子｜11", 139000, 23854], ["MOTO", 137000, 23885], ["タロマス", 135000, 22594], ["ほむれず", 134000, 22387], ["さしみ", 134000, 15175], ["極悪ボンⒸ", 133000, 25528], ["HANABI", 128000, 27907], ["ハッチ88", 128000, 20965], ["王騎大将軍✦", 126000, 25016], ["カバオ卍", 125000, 21669], ["Ruu", 125000, 17863], ["HIMURO", 124000, 17263], ["シュガー", 123000, 23808], ["大地の子", 122000, 25697], ["ラック。", 119000, 21159], ["ココ壱5辛", 119000, 23438], ["ボロ雑巾", 118000, 21850], ["メイプル", 116000, 25706], ["朝倉", 112000, 21251], ["海峡のジンベエ", 112000, 19495], ["あべゆういち", 111000, 22431], ["草津温泉", 111000, 20148], ["行雲流水", 111000, 25436], ["マサイ", 110000, 19111], ["片栗粉u1", 108000, 23664], ["潯陽曹仁", 105000, 28452], ["虎の太公望", 105000, 14717], ["猫ロック", 105000, 28770], ["ゆう", 105000, 22495], ["うみがめ座@", 103000, 19505], ["空kou", 103000, 24179], ["浪子｜影子", 102000, 22305], ["餅", 101000, 22592], ["～凛～", 101000, 19321], ["コシヨシ", 100000, 26590], ["くんちゃん", 99854, 28231], ["アゲハたん★", 99611, 15588], ["カナデ", 98449, 13019], ["浪子｜無涯", 96229, 26225], ["ベニマル", 96099, 20386], ["⚡SOU⚡", 95284, 20215], ["ぞおき", 95045, 14021], ["くまモン", 94991, 17230], ["佐々鬼", 94212, 23830], ["滄浪｜虎賁", 93079, 25431], ["アキ♪♪", 88896, 18252], ["MOTI", 87879, 15225], ["くに", 86892, 20365], ["トムトム", 85212, 17921], ["ギリヤーク人", 84386, 24887], ["ナムナム", 82316, 19053], ["✖李信", 81105, 15297], ["浪子｜大猩猩", 77999, 25992], ["まるぞう", 77817, 26231], ["鷹布", 76898, 16810], ["小竜", 76826, 25163], ["成龍.", 74778, 13732], ["仁義なきTUBE", 74022, 22753], ["ケムケム", 72326, 18412], ["外様", 70876, 19812], ["ワ-ドラ", 70562, 20858], ["よる★かぜ", 69981, 13451], ["ロストフ家", 69016, 25231], ["BARI", 68407, 24630], ["浪子｜氹仔", 67500, 26017], ["ボラギノール", 65871, 11354], ["RB20", 65606, 16389], ["浪子｜可倫堡", 64983, 26770], ["成龍", 63466, 11405], ["nim0su", 63252, 16371], ["劉邦軍", 62879, 21010], ["たけとも33", 59444, 15718], ["さぶろー", 59270, 16245], ["甘興覇", 58831, 16239], ["ヤムヤム", 58282, 18700], ["河西虎su", 57646, 13575], ["魏無羨", 55719, 24617], ["浪子｜潮男", 55448, 17660], ["漆喰(白)", 54316, 13726], ["浪子｜雪山啤酒", 54122, 22768], ["盟主の犬隊長", 53491, 17780], ["浪子｜剣心", 52998, 24689], ["han", 51988, 23688], ["SHUNJI", 51915, 17143], ["からあげクン", 51880, 10110], ["ジョージ", 51328, 13857], ["陽龍", 50874, 24132], ["テムテム", 47394, 16458], ["八宝菜", 47100, 12868], ["R-102", 47094, 19037], ["にゃんこ軍", 46308, 17806], ["便利屋", 45292, 14293], ["宇留千絵", 44764, 18470], ["lovin.", 44693, 19287], ["すじまーん", 44026, 13463], ["山本勘助", 39877, 15756], ["そんそん", 39820, 15642], ["猫の太公望", 39524, 22084], ["i.", 38765, 17057], ["ワンパンダ", 36787, 14252], ["敦犬", 36344, 15786], ["MARSAN", 35977, 20919], ["☀李信☀", 34969, 18432], ["天陽。", 34811, 14467], ["風魔", 34257, 12005], ["飛五隊", 34255, 15306], ["奈凡", 33968, 19798], ["アルバイトz", 33854, 15591], ["かばごん", 29737, 14315], ["たけ33サブ", 28910, 18818], ["漆喰(船)", 28728, 13096], ["名犬チーズ", 25320, 14088], ["義孝01", 25009, 15386], ["極悪剣心", 24502, 10604], ["ピスタチオ", 23790, 12590], ["犬ナオコ", 23681, 14805], ["パンダマン", 23003, 14160], ["俊志", 22108, 18575], ["DOCTOR", 21959, 18882], ["譙國征東軍", 21278, 26235], ["風船蔓", 20970, 18462], ["シベリウス", 20437, 22431], ["にゃんこ戦争", 20153, 12759], ["パパパ", 19642, 15847], ["さすらい♪", 19591, 25388], ["カモンスキー", 17730, 16414], ["団長団", 17669, 21021], ["演員", 16514, 17496], ["武劉祐徳", 14329, 20228], ["廉", 12385, 16778], ["まーさんZ", 12291, 15220], ["元楽園jun", 9948, 9521], ["朱和", 8448, 14594], ["桂馬", 6720, 7192], ["張良子房", 6228, 15668], ["真・虎狼", 6098, 12775], ["さすらい⚡", 857, 6600], ["5 (新加入)", 0, 12928]]};
-const W1 = DATA.w1.map(r=>({name:r[0], b:r[1], s:r[2]}));
-const W2 = DATA.w2.map(r=>({name:r[0], b:r[1], s:r[2]}));
-const m1=new Map(W1.map(r=>[r.name,r])), m2=new Map(W2.map(r=>[r.name,r]));
+const DATA={"w1": [["浪子｜星雲", 137000, 29406], ["剣権羽 kenkenpa", 126000, 20866], ["浪子｜雪花", 117000, 33921], ["トラ0713", 115000, 25874], ["浪子｜仙主", 108000, 32048], ["浪子｜文泰", 92323, 27713], ["主公5082", 75839, 21198], ["超人血盟軍", 74068, 21850], ["天順元宝", 64709, 28493], ["☆去亥☆", 55532, 26097], ["ゾウどうぞ", 50811, 15958], ["浪子｜薩普羅", 48121, 27837], ["盛三軍団", 47318, 25283], ["ゆなっこ", 47197, 18138], ["しみ犬", 46654, 20114], ["NAGOYA", 45734, 18787], ["ハッチ88", 44485, 15806], ["浪子｜六月", 41529, 25829], ["†鬼〆宗†", 41139, 17566], ["極悪の仏", 40282, 17288], ["はま爺", 40192, 19915], ["臨江仙", 39790, 26328], ["やま", 36976, 20251], ["じゅんじ", 36920, 25855], ["ボロ雑巾", 36497, 15109], ["浪子｜はく", 33828, 25947], ["虎の太公望", 32427, 15216], ["反社エネわん", 32217, 15433], ["浪子｜嚕嚕米", 31657, 15690], ["FICTA", 30629, 30916], ["団長", 29706, 23929], ["瑕丘鄭重", 29488, 18030], ["RB20", 29440, 14954], ["村長", 29372, 25276], ["ベニマル", 28228, 16662], ["ジョーサブ", 27907, 17578], ["猫ロック", 27134, 25070], ["片栗粉u1", 26562, 13729], ["MOTO", 26311, 19478], ["さしみ", 26241, 13512], ["seiji", 25872, 16623], ["あべゆういち", 25365, 13614], ["極悪女帝リザ", 25288, 25122], ["浪子｜教士", 25285, 27261], ["タロマス", 24770, 15517], ["くに", 23915, 14153], ["草津温泉", 23561, 17270], ["クロネコさん", 23404, 19979], ["えりす", 22751, 15852], ["パープル☆", 21837, 17899], ["佐々鬼", 20981, 13947], ["うみがめ座@", 20948, 13752], ["桃梨", 20425, 13703], ["イニミニ", 20241, 16497], ["だしい", 20128, 21564], ["烏合の集まり", 19999, 12901], ["外様", 19538, 11576], ["真田丸☆", 19166, 17097], ["ヴぇぼ", 19118, 16104], ["BARI", 18730, 13848], ["カム犬", 18640, 24364], ["ごこっと", 18130, 21165], ["浪子｜大猩猩", 17930, 21128], ["つっg", 17585, 21364], ["王騎大将軍✦", 17398, 17020], ["ゆう", 16772, 14607], ["浪子｜無涯", 16487, 20478], ["Ruu", 16151, 14069], ["ロドリゲス", 16012, 15513], ["ラック。", 15866, 20105], ["よる★かぜ", 15714, 11589], ["han", 15611, 16161], ["アイーン", 15536, 21417], ["カバオ卍", 15229, 15915], ["小竜", 15022, 16298], ["まりもX", 14711, 14017], ["浪子｜11", 14379, 15877], ["りょうしゅん", 14229, 14799], ["ジョージ", 13749, 10184], ["極悪ボンⒸ", 13399, 20057], ["ぞおき", 13331, 9387], ["ワンパンダ", 13320, 8854], ["大地の子", 13045, 12868], ["にゃんこ軍", 12633, 13220], ["魏無羨", 12612, 25875], ["浪子｜影子", 12116, 14992], ["行雲流水", 11635, 19960], ["浪子｜大黄螺旋丸", 11465, 25575], ["敦犬", 11457, 11698], ["さぶろー", 10988, 13769], ["メイプル", 10898, 18853], ["シュガー", 10730, 17436], ["コシヨシ", 10539, 17089], ["⚡SOU⚡", 10278, 14222], ["ワ-ドラ", 9818, 13630], ["HANABI", 9632, 16871], ["LEE", 9287, 19380], ["八宝菜", 9278, 10774], ["nim0su", 9054, 12949], ["モジャ", 8689, 18565], ["lovin.", 8448, 13905], ["ナムナム", 8320, 11052], ["マサイ", 8278, 11321], ["パパパ", 8274, 10595], ["アゲハたん★", 7886, 12618], ["便利屋", 7843, 9034], ["義孝01", 7118, 14152], ["浪子｜志村", 7099, 22683], ["荊州軍", 7045, 16432], ["たけとも33", 6932, 12855], ["ほむれず", 6920, 19558], ["くまモン", 6560, 16463], ["～凛～", 6518, 13275], ["浪子｜氹仔", 6415, 20340], ["HIMURO", 5726, 16163], ["くんちゃん", 5570, 21622], ["パンダマン", 5049, 6202], ["かばごん", 4771, 12557], ["カナデ", 4702, 9769], ["MARSAN", 4674, 12287], ["浪子｜貓侍", 4657, 19426], ["まるぞう", 4434, 16139], ["ボラギノール", 4341, 9522], ["さら猫", 4233, 20790], ["☀李信☀", 4143, 10607], ["ココ壱5辛", 3657, 14625], ["SHUNJI", 3650, 11098], ["李★漂", 3622, 16055], ["ヤムヤム", 3510, 10621], ["まーさんZ", 3480, 11642], ["そんそん", 3423, 14150], ["たけ33サブ", 3403, 12295], ["i.", 3264, 12999], ["トムトム", 3156, 12382], ["潯陽曹仁", 2945, 19351], ["甘興覇", 2523, 12659], ["ギリヤーク人", 2365, 15649], ["劉邦軍", 2269, 14865], ["餅", 2224, 20965], ["演員", 2210, 11905], ["空kou", 2138, 22817], ["仁義なきTUBE", 2053, 20400], ["ロストフ家", 1970, 17631], ["さすらい♪", 1933, 13355], ["盟主の犬隊長", 1869, 13474], ["廉", 1537, 11715], ["すじまーん", 1495, 11313], ["陽龍", 1494, 14229], ["浪子｜潮男", 1310, 10381], ["張良子房", 1260, 10847], ["俊志", 1156, 11305], ["成龍.", 1155, 11571], ["✖李信", 1124, 12301], ["シベリウス", 1091, 15335], ["奈凡", 958, 12348], ["漆喰(白)", 911, 10531], ["テムテム", 865, 11076], ["ケムケム", 839, 12688], ["海峡のジンベエ", 813, 15350], ["風魔", 748, 9755], ["河西虎su", 731, 11175], ["さすらい⚡", 725, 5176], ["浪子｜可倫堡", 723, 25336], ["滄浪｜虎賁", 582, 23946], ["R-102", 545, 14632], ["天陽。", 486, 13046], ["鷹布", 477, 13007], ["成龍", 423, 9585], ["飛五隊", 287, 11566], ["浪子｜雪山啤酒", 233, 20122], ["真・虎狼", 210, 9889], ["宇留千絵", 187, 14218], ["零度Niu", 136, 24178], ["カモンスキー", 117, 10763], ["犬ナオコ", 95, 12652], ["浪子｜朝日", 88, 26394], ["山本勘助", 47, 7391], ["拉麺", 9, 13361], ["漆喰(船)", 8, 10333], ["極悪剣心", 0, 9432], ["DOCTOR", 0, 17215], ["アキ♪♪", 0, 15928], ["浪子｜剣心", 0, 14922], ["アルバイトz", 0, 11405], ["ピスタチオ", 0, 11689], ["武劉祐徳", 0, 15750], ["猫の太公望", 0, 12629], ["にゃんこ戦争", 0, 11398], ["朝倉", 0, 15395], ["MOTI", 0, 13038], ["団長団", 0, 10842], ["名犬チーズ", 0, 10227], ["風船蔓", 0, 11109], ["元楽園jun", 0, 5636], ["からあげクン", 0, 6786], ["桂馬", 0, 5289], ["浪子｜工具人", 0, 341]], "w2": [["浪子｜雪花", 612000, 41926], ["剣権羽 kenkenpa", 580000, 25843], ["浪子｜星雲", 547000, 29567], ["トラ0713", 454000, 27869], ["浪子｜文泰", 412000, 33210], ["浪子｜仙主", 389000, 37025], ["天順元宝", 364000, 32206], ["臨江仙", 360000, 30401], ["浪子｜薩普羅", 329000, 28385], ["主公5082", 312000, 26744], ["村長", 310000, 30264], ["ゆなっこ", 310000, 27399], ["超人血盟軍", 309000, 26745], ["☆去亥☆", 301000, 31490], ["FICTA", 299000, 35469], ["NAGOYA", 293000, 27833], ["じゅんじ", 281000, 25282], ["しみ犬", 273000, 28324], ["浪子｜はく", 271000, 26426], ["seiji", 268000, 26074], ["盛三軍団", 253000, 27136], ["団長", 248000, 27894], ["LEE", 231000, 26990], ["ゾウどうぞ", 225000, 22715], ["瑕丘鄭重", 216000, 24538], ["浪子｜嚕嚕米", 213000, 18667], ["極悪の仏", 207000, 19747], ["やま", 203000, 28706], ["りょうしゅん", 202000, 20243], ["†鬼〆宗†", 193000, 21275], ["えりす", 189000, 22772], ["浪子｜貓侍", 185000, 24356], ["真田丸☆", 185000, 25616], ["カム犬", 185000, 25060], ["まりもX", 183000, 18297], ["だしい", 183000, 24435], ["ロドリゲス", 183000, 26004], ["ヴぇぼ", 179000, 20504], ["浪子｜朝日", 176000, 29734], ["浪子｜志村", 165000, 26334], ["パープル☆", 164000, 26325], ["浪子｜教士", 162000, 33347], ["クロネコさん", 161000, 23965], ["アイーン", 160000, 29786], ["ジョーサブ", 160000, 20066], ["烏合の集まり", 157000, 18064], ["つっg", 156000, 22275], ["さら猫", 154000, 25076], ["拉麺", 154000, 18609], ["ごこっと", 154000, 28144], ["浪子｜大黄螺旋丸", 151000, 26143], ["モジャ", 151000, 26759], ["反社エネわん", 149000, 20466], ["零度Niu", 149000, 25838], ["はま爺", 148000, 26812], ["桃梨", 148000, 18429], ["イニミニ", 146000, 22648], ["極悪女帝リザ", 143000, 26817], ["李★漂", 142000, 27512], ["荊州軍", 141000, 25809], ["浪子｜11", 139000, 23854], ["MOTO", 137000, 23885], ["タロマス", 135000, 22594], ["ほむれず", 134000, 22387], ["さしみ", 134000, 15175], ["極悪ボンⒸ", 133000, 25528], ["HANABI", 128000, 27907], ["ハッチ88", 128000, 20965], ["王騎大将軍✦", 126000, 25016], ["カバオ卍", 125000, 21669], ["Ruu", 125000, 17863], ["HIMURO", 124000, 17263], ["シュガー", 123000, 23808], ["大地の子", 122000, 25697], ["ラック。", 119000, 21159], ["ココ壱5辛", 119000, 23438], ["ボロ雑巾", 118000, 21850], ["メイプル", 116000, 25706], ["朝倉", 112000, 21251], ["海峡のジンベエ", 112000, 19495], ["あべゆういち", 111000, 22431], ["草津温泉", 111000, 20148], ["行雲流水", 111000, 25436], ["マサイ", 110000, 19111], ["片栗粉u1", 108000, 23664], ["潯陽曹仁", 105000, 28452], ["虎の太公望", 105000, 14717], ["猫ロック", 105000, 28770], ["ゆう", 105000, 22495], ["うみがめ座@", 103000, 19505], ["空kou", 103000, 24179], ["浪子｜影子", 102000, 22305], ["餅", 101000, 22592], ["～凛～", 101000, 19321], ["コシヨシ", 100000, 26590], ["くんちゃん", 99854, 28231], ["アゲハたん★", 99611, 15588], ["カナデ", 98449, 13019], ["浪子｜無涯", 96229, 26225], ["ベニマル", 96099, 20386], ["⚡SOU⚡", 95284, 20215], ["ぞおき", 95045, 14021], ["くまモン", 94991, 17230], ["佐々鬼", 94212, 23830], ["滄浪｜虎賁", 93079, 25431], ["アキ♪♪", 88896, 18252], ["MOTI", 87879, 15225], ["くに", 86892, 20365], ["トムトム", 85212, 17921], ["ギリヤーク人", 84386, 24887], ["ナムナム", 82316, 19053], ["✖李信", 81105, 15297], ["浪子｜大猩猩", 77999, 25992], ["まるぞう", 77817, 26231], ["鷹布", 76898, 16810], ["小竜", 76826, 25163], ["成龍.", 74778, 13732], ["仁義なきTUBE", 74022, 22753], ["ケムケム", 72326, 18412], ["外様", 70876, 19812], ["ワ-ドラ", 70562, 20858], ["よる★かぜ", 69981, 13451], ["ロストフ家", 69016, 25231], ["BARI", 68407, 24630], ["浪子｜氹仔", 67500, 26017], ["ボラギノール", 65871, 11354], ["RB20", 65606, 16389], ["浪子｜可倫堡", 64983, 26770], ["成龍", 63466, 11405], ["nim0su", 63252, 16371], ["劉邦軍", 62879, 21010], ["たけとも33", 59444, 15718], ["さぶろー", 59270, 16245], ["甘興覇", 58831, 16239], ["ヤムヤム", 58282, 18700], ["河西虎su", 57646, 13575], ["魏無羨", 55719, 24617], ["浪子｜潮男", 55448, 17660], ["漆喰(白)", 54316, 13726], ["浪子｜雪山啤酒", 54122, 22768], ["盟主の犬隊長", 53491, 17780], ["浪子｜剣心", 52998, 24689], ["han", 51988, 23688], ["SHUNJI", 51915, 17143], ["からあげクン", 51880, 10110], ["ジョージ", 51328, 13857], ["陽龍", 50874, 24132], ["テムテム", 47394, 16458], ["八宝菜", 47100, 12868], ["R-102", 47094, 19037], ["にゃんこ軍", 46308, 17806], ["便利屋", 45292, 14293], ["宇留千絵", 44764, 18470], ["lovin.", 44693, 19287], ["すじまーん", 44026, 13463], ["山本勘助", 39877, 15756], ["そんそん", 39820, 15642], ["猫の太公望", 39524, 22084], ["i.", 38765, 17057], ["ワンパンダ", 36787, 14252], ["敦犬", 36344, 15786], ["MARSAN", 35977, 20919], ["☀李信☀", 34969, 18432], ["天陽。", 34811, 14467], ["風魔", 34257, 12005], ["飛五隊", 34255, 15306], ["奈凡", 33968, 19798], ["アルバイトz", 33854, 15591], ["かばごん", 29737, 14315], ["たけ33サブ", 28910, 18818], ["漆喰(船)", 28728, 13096], ["名犬チーズ", 25320, 14088], ["義孝01", 25009, 15386], ["極悪剣心", 24502, 10604], ["ピスタチオ", 23790, 12590], ["犬ナオコ", 23681, 14805], ["パンダマン", 23003, 14160], ["俊志", 22108, 18575], ["DOCTOR", 21959, 18882], ["譙國征東軍", 21278, 26235], ["風船蔓", 20970, 18462], ["シベリウス", 20437, 22431], ["にゃんこ戦争", 20153, 12759], ["パパパ", 19642, 15847], ["さすらい♪", 19591, 25388], ["カモンスキー", 17730, 16414], ["団長団", 17669, 21021], ["演員", 16514, 17496], ["武劉祐徳", 14329, 20228], ["廉", 12385, 16778], ["まーさんZ", 12291, 15220], ["元楽園jun", 9948, 9521], ["朱和", 8448, 14594], ["桂馬", 6720, 7192], ["張良子房", 6228, 15668], ["真・虎狼", 6098, 12775], ["さすらい⚡", 857, 6600], ["5", 0, 12928]]}, SQUADS={"成龍.": "成龍", "廉": "成龍", "便利屋": "成龍", "Ruu": "成龍", "パパパ": "成龍", "LEE": "成龍", "漆喰(白)": "成龍", "荊州軍": "成龍", "ごこっと": "成龍", "張良子房": "成龍", "漆喰(船)": "成龍", "陽龍": "成龍", "成龍": "成龍", "ワンパンダ": "八宝菜", "パンダマン": "八宝菜", "にゃんこ戦争": "八宝菜", "すじまーん": "八宝菜", "さら猫": "八宝菜", "にゃんこ軍": "八宝菜", "敦犬": "八宝菜", "猫ロック": "八宝菜", "宇留千絵": "八宝菜", "MARSAN": "八宝菜", "八宝菜": "八宝菜", "からあげクン": "八宝菜", "まーさんZ": "八宝菜", "じゅんじ": "奇兵隊", "ラック。": "奇兵隊", "王騎大将軍✦": "奇兵隊", "トラ0713": "奇兵隊", "仁義なきTUBE": "奇兵隊", "劉邦軍": "奇兵隊", "飛五隊": "奇兵隊", "MOTO": "奇兵隊", "反社エネわん": "奇兵隊", "空kou": "奇兵隊", "MOTI": "奇兵隊", "虎の太公望": "奇兵隊", "猫の太公望": "奇兵隊", "つっg": "奇兵隊", "はま爺": "奇兵隊", "桃梨": "奇兵隊", "外様": "奇兵隊", "まりもX": "奇兵隊", "元楽園jun": "奇兵隊", "✖李信": "奇兵隊", "風魔": "奇兵隊", "⚡SOU⚡": "奇兵隊", "マサイ": "奇兵隊", "桂馬": "奇兵隊", "盛三軍団": "奇兵隊", "RB20": "奇兵隊", "餅": "奇兵隊", "佐々鬼": "奇兵隊", "アゲハたん★": "奇兵隊", "ボロ雑巾": "剣ぱ", "アルバイトz": "剣ぱ", "ギリヤーク人": "剣ぱ", "ロドリゲス": "剣ぱ", "SHUNJI": "剣ぱ", "俊志": "剣ぱ", "☀李信☀": "剣ぱ", "ベニマル": "剣ぱ", "たけ33サブ": "剣ぱ", "超人血盟軍": "剣ぱ", "主公5082": "剣ぱ", "たけとも33": "剣ぱ", "極悪の仏": "剣ぱ", "han": "剣ぱ", "ゆう": "剣ぱ", "だしい": "剣ぱ", "剣権羽 kenkenpa": "剣ぱ", "やま": "剣ぱ", "くに": "剣ぱ", "草津温泉": "剣ぱ", "うみがめ座@": "剣ぱ", "ロストフ家": "剣ぱ", "ハッチ88": "剣ぱ", "義孝01": "剣ぱ", "まるぞう": "剣ぱ", "潯陽曹仁": "剣ぱ", "カモンスキー": "剣ぱ", "seiji": "剣ぱ", "拉麺": "剣ぱ", "☆去亥☆": "煽り紳士", "メイプル": "煽り紳士", "パープル☆": "煽り紳士", "真田丸☆": "煽り紳士", "nim0su": "煽り紳士", "BARI": "煽り紳士", "片栗粉u1": "煽り紳士", "あべゆういち": "煽り紳士", "カナデ": "煽り紳士", "i.": "煽り紳士", "海峡のジンベエ": "煽り紳士", "シュガー": "煽り紳士", "†鬼〆宗†": "煽り紳士", "よる★かぜ": "煽り紳士", "李★漂": "煽り紳士", "ジョーサブ": "煽り紳士", "ヤムヤム": "煽り紳士", "大地の子": "煽り紳士", "テムテム": "煽り紳士", "トムトム": "煽り紳士", "ケムケム": "煽り紳士", "烏合の集まり": "煽り紳士", "山本勘助": "煽り紳士", "タロマス": "煽り紳士", "ワ-ドラ": "煽り紳士", "ナムナム": "煽り紳士", "～凛～": "煽り紳士", "えりす": "煽り紳士", "さぶろー": "煽り紳士", "ジョージ": "煽り紳士", "コシヨシ": "煽り紳士", "甘興覇": "煽り紳士", "浪子｜文泰": "浪子", "浪子｜氹仔": "浪子", "極悪ボンⒸ": "浪子", "極悪剣心": "浪子", "浪子｜可倫堡": "浪子", "モジャ": "浪子", "くんちゃん": "浪子", "極悪女帝リザ": "浪子", "奈凡": "浪子", "くまモン": "浪子", "アイーン": "浪子", "浪子｜潮男": "浪子", "5": "浪子", "浪子｜雪花": "浪子", "浪子｜教士": "浪子", "HIMURO": "浪子", "零度Niu": "浪子", "臨江仙": "浪子", "浪子｜無涯": "浪子", "浪子｜大黄螺旋丸": "浪子", "浪子｜貓侍": "浪子", "浪子｜影子": "浪子", "浪子｜嚕嚕米": "浪子", "浪子｜朝日": "浪子", "浪子｜薩普羅": "浪子", "浪子｜剣心": "浪子", "浪子｜11": "浪子", "浪子｜星雲": "浪子", "滄浪｜虎賁": "浪子", "天順元宝": "浪子", "浪子｜はく": "浪子", "浪子｜雪山啤酒": "浪子", "HANABI": "浪子", "浪子｜仙主": "浪子", "ヴぇぼ": "べぽ", "朱和": "べぽ", "アキ♪♪": "べぽ", "ゆなっこ": "べぽ", "団長": "べぽ", "村長": "べぽ", "カバオ卍": "べぽ", "NAGOYA": "べぽ", "りょうしゅん": "べぽ", "河西虎su": "べぽ", "鷹布": "べぽ", "朝倉": "べぽ", "ボラギノール": "べぽ", "犬ナオコ": "べぽ", "そんそん": "べぽ", "さしみ": "べぽ", "譙國征東軍": "べぽ", "イニミニ": "べぽ", "名犬チーズ": "べぽ", "行雲流水": "べぽ", "風船蔓": "べぽ", "かばごん": "べぽ", "シベリウス": "べぽ", "真・虎狼": "べぽ", "lovin.": "べぽ", "演員": "べぽ", "さすらい⚡": "べぽ", "さすらい♪": "べぽ", "浪子｜大猩猩": "べぽ", "クロネコさん": "べぽ", "瑕丘鄭重": "べぽ", "小竜": "べぽ", "ぞおき": "べぽ", "魏無羨": "べぽ", "ほむれず": "べぽ", "団長団": "べぽ", "DOCTOR": "べぽ", "盟主の犬隊長": "べぽ", "ココ壱5辛": "べぽ", "カム犬": "べぽ", "しみ犬": "べぽ", "浪子｜志村": "べぽ", "FICTA": "べぽ", "ゾウどうぞ": "べぽ", "武劉祐徳": "べぽ", "天陽。": "べぽ", "ピスタチオ": "べぽ", "R-102": "べぽ"}, SQUAD_ORDER=["成龍", "八宝菜", "奇兵隊", "剣ぱ", "煽り紳士", "浪子", "べぽ"];
+const WEEKS=[{label:'8/10〜',rows:DATA.w1},{label:'8/17〜',rows:DATA.w2}];
+const toObj=rows=>rows.map(r=>({name:r[0],b:r[1],s:r[2]}));
+WEEKS.forEach(w=>{w.data=toObj(w.rows);w.map=new Map(w.data.map(r=>[r.name,r]))});
+const latest=WEEKS[WEEKS.length-1], prev=WEEKS[WEEKS.length-2];
+const names=new Set([...prev.map.keys(),...latest.map.keys()]);
+let merged=[...names].map(n=>{const a=prev.map.get(n),b=latest.map.get(n);const st=(a&&b)?'継続':(b?'新加入':'脱退');
+  return{name:n,squad:SQUADS[n]||'',status:st,bL:b?b.b:null,bP:a?a.b:null,db:(a&&b)?b.b-a.b:null,sL:b?b.s:null,sP:a?a.s:null,ds:(a&&b)?b.s-a.s:null}});
+merged.sort((x,y)=>(y.bL??-1)-(x.bL??-1)); merged.forEach((r,i)=>r.rank=r.bL!=null?i+1:null);
+const nNew=merged.filter(r=>r.status==='新加入').length,nLeft=merged.filter(r=>r.status==='脱退').length,nCont=merged.filter(r=>r.status==='継続').length,upS=merged.filter(r=>r.ds>0).length;
+document.getElementById('sub').innerHTML='<b>'+prev.label+'</b> と <b>'+latest.label+'</b> を比較 ・ 全<b>'+names.size+'</b>名 ・ '+SQUAD_ORDER.length+'分隊';
+document.getElementById('foot').textContent='継続 '+nCont+' / 新加入 '+nNew+' / 脱退 '+nLeft+' ・ データ：同盟成員一覧より集計';
+const stats=[{k:latest.label+' 在籍',v:latest.data.length,s:'最新週',c:''},{k:'新加入',v:nNew,s:latest.label+' で加入',c:'new'},{k:'脱退',v:nLeft,s:latest.label+' で離脱',c:'left'},{k:'勢力値プラス',v:upS+'名',s:'継続'+nCont+'名中',c:''}];
+document.getElementById('stats').innerHTML=stats.map(t=>'<div class="tablet '+t.c+'"><div class="k">'+t.k+'</div><div class="v">'+(typeof t.v==='number'?t.v.toLocaleString('ja-JP'):t.v)+'</div><div class="s">'+t.s+'</div></div>').join('');
 
-// merged trend rows
-const names=new Set([...m1.keys(),...m2.keys()]);
-let merged=[...names].map(n=>{
-  const a=m1.get(n), b=m2.get(n);
-  let st = (a&&b)?'継続':(b?'新加入':'脱退');
-  return {name:n, status:st,
-    b1:a?a.b:null, b2:b?b.b:null, db:(a&&b)?b.b-a.b:null,
-    s1:a?a.s:null, s2:b?b.s:null, ds:(a&&b)?b.s-a.s:null};
-});
-// rank by 先週武勲 (脱退 last)
-merged.sort((x,y)=>(y.b2??-1)-(x.b2??-1));
-merged.forEach((r,i)=>r.rank = r.b2!=null ? i+1 : null);
-
-const nNew=merged.filter(r=>r.status==='新加入').length;
-const nLeft=merged.filter(r=>r.status==='脱退').length;
-const nCont=merged.filter(r=>r.status==='継続').length;
-const upS=merged.filter(r=>r.ds>0).length;
-
-document.getElementById('sub').innerHTML =
-  '先々週 <b>8/10–16</b> と 先週 <b>8/17–23</b> の比較 ・ 全<b>'+names.size+'</b>名';
-
-const stats=[
-  {k:'先週の在籍', v:W2.length, s:'8/17-23 時点', c:''},
-  {k:'継続', v:nCont, s:'両週とも在籍', c:''},
-  {k:'新加入', v:nNew, s:'先週から参加', c:'new'},
-  {k:'脱退', v:nLeft, s:'先週で離脱', c:'left'},
-  {k:'勢力値プラス', v:upS+'名', s:'継続'+nCont+'名中', c:''},
-];
-document.getElementById('stats').innerHTML = stats.map(t=>
-  '<div class="tablet '+t.c+'"><div class="k">'+t.k+'</div><div class="v">'+
-  (typeof t.v==='number'?t.v.toLocaleString('ja-JP'):t.v)+'</div><div class="s">'+t.s+'</div></div>').join('');
-
-const fmt=n=> n==null?'—':n.toLocaleString('ja-JP');
-const rankPill=(r,st)=>{
-  if(r==null) return '<span class="rk na">–</span>';
-  let c = r===1?'m1':r===2?'m2':r===3?'m3':'';
-  return '<span class="rk '+c+'">'+r+'</span>';
-};
+const fmt=n=>n==null?'—':n.toLocaleString('ja-JP');
+const rankPill=r=>{if(r==null)return '<span class="rk na">–</span>';const c=r===1?'m1':r===2?'m2':r===3?'m3':'';return '<span class="rk '+c+'">'+r+'</span>'};
 const maxAbs=(rows,key)=>Math.max(1,...rows.map(r=>Math.abs(r[key]||0)));
-function deltaCell(v, max){
-  if(v==null) return '<td class="dim">—</td>';
-  const cls = v>0?'up':v<0?'dn':'ze';
-  const ar = v>0?'▲':v<0?'▼':'';
-  const w = Math.min(100, Math.abs(v)/max*100);
-  const bar = v!==0 ? '<span class="bar" style="width:'+w+'%"></span>' : '';
-  const sign = v>0?'+':'';
-  return '<td><span class="delta '+cls+'">'+ar+' '+sign+v.toLocaleString('ja-JP')+bar+'</span></td>';
+function deltaCell(v,max){if(v==null)return '<td class="c-delta dim">—</td>';const cls=v>0?'up':v<0?'dn':'ze',ar=v>0?'▲':v<0?'▼':'',sign=v>0?'+':'';const w=Math.min(100,Math.abs(v)/max*100);const bar=v!==0?'<span class="bar" style="width:'+w+'%"></span>':'';return '<td class="c-delta"><span class="delta '+cls+'">'+ar+' '+sign+v.toLocaleString('ja-JP')+bar+'</span></td>'}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+function squadAgg(){const agg={};SQUAD_ORDER.forEach(s=>agg[s]={squad:s,n:0,sb:0,ss:0});
+  latest.data.forEach(r=>{const s=SQUADS[r.name];if(!agg[s])return;agg[s].n++;agg[s].sb+=r.b;agg[s].ss+=r.s});
+  return SQUAD_ORDER.map(s=>{const a=agg[s];return{squad:s,n:a.n,sb:a.sb,ab:a.n?Math.round(a.sb/a.n):0,ss:a.ss,as:a.n?Math.round(a.ss/a.n):0}})}
+
+const weekViews=[...WEEKS].reverse();
+let view='trend', squadFilter='all';
+const trendSorts=[{label:'ランキング',key:'bL',dir:-1},{label:'勢力値の伸び',key:'ds',dir:-1},{label:'武勲の伸び',key:'db',dir:-1},{label:'勢力値',key:'sL',dir:-1}];
+const weekSorts=[{label:'武勲',key:'b',dir:-1},{label:'勢力値',key:'s',dir:-1}];
+const squadSorts=[{label:'合計勢力値',key:'ss',dir:-1},{label:'合計武勲',key:'sb',dir:-1},{label:'平均勢力値',key:'as',dir:-1},{label:'平均武勲',key:'ab',dir:-1},{label:'人数',key:'n',dir:-1}];
+let sortKey='bL',sortDir=-1;
+const isTrend=()=>view==='trend', isSquad=()=>view==='squad';
+const activeWeek=()=>weekViews.find(w=>w.label===view);
+const sortsFor=()=>isSquad()?squadSorts:(isTrend()?trendSorts:weekSorts);
+
+function colsFor(){
+  if(isSquad())return[{h:'分隊',cls:'name'},{h:'人数',k:'n',cls:'c-num'},{h:'合計武勲',k:'sb',cls:'c-num'},{h:'平均武勲',k:'ab',cls:'c-num'},{h:'合計勢力値',k:'ss',cls:'c-num'},{h:'平均勢力値',k:'as',cls:'c-num'}];
+  if(isTrend())return[{h:'メンバー',cls:'name'},{h:'分隊',cls:'c-squad'},{h:'状態',cls:'c-status'},{h:'武勲 '+latest.label,k:'bL',cls:'c-num'},{h:'武勲 増減',k:'db',cls:'c-delta'},{h:'勢力値 '+latest.label,k:'sL',cls:'c-num'},{h:'勢力値 増減',k:'ds',cls:'c-delta'},{h:'武勲 '+prev.label,k:'bP',cls:'c-num dim'},{h:'勢力値 '+prev.label,k:'sP',cls:'c-num dim'}];
+  return[{h:'メンバー',cls:'name'},{h:'分隊',cls:'c-squad'},{h:'武勲',k:'b',cls:'c-num'},{h:'勢力値',k:'s',cls:'c-num'}];
 }
-
-// view + sort state
-let view='trend';
-const sortsByView={
-  trend:[
-    {id:'rank', label:'ランキング', key:'b2', dir:-1},
-    {id:'ds', label:'勢力値の伸び', key:'ds', dir:-1},
-    {id:'db', label:'武勲の伸び', key:'db', dir:-1},
-    {id:'s2', label:'勢力値', key:'s2', dir:-1},
-  ],
-  w2:[{id:'b',label:'武勲',key:'b',dir:-1},{id:'s',label:'勢力値',key:'s',dir:-1}],
-  w1:[{id:'b',label:'武勲',key:'b',dir:-1},{id:'s',label:'勢力値',key:'s',dir:-1}],
-};
-let sortKey='b2', sortDir=-1;
-
-function colsFor(v){
-  if(v==='trend') return [
-    {h:'メンバー',cls:'name'},{h:'状態',k:null},
-    {h:'武勲 先週',k:'b2'},{h:'武勲 増減',k:'db'},
-    {h:'勢力値 先週',k:'s2'},{h:'勢力値 増減',k:'ds'},
-    {h:'武勲 先々週',k:'b1'},{h:'勢力値 先々週',k:'s1'},
-  ];
-  return [{h:'メンバー',cls:'name'},{h:'武勲',k:'b'},{h:'勢力値',k:'s'}];
-}
-
 function currentRows(){
-  if(view==='trend') return merged.slice();
-  const src = view==='w2'?W2:W1;
-  const rows = src.map((r,i)=>({...r}));
+  if(isSquad())return squadAgg();
+  let rows=isTrend()?merged.slice():activeWeek().data.map(r=>({...r,squad:SQUADS[r.name]||''}));
   return rows;
 }
-
+function buildSeg(){
+  const b=['<button data-v="trend" class="'+(view==='trend'?'on':'')+'">推移</button>','<button data-v="squad" class="'+(view==='squad'?'on':'')+'">分隊</button>']
+   .concat(weekViews.map(w=>'<button data-v="'+w.label+'" class="'+(view===w.label?'on':'')+'">'+w.label+'</button>'));
+  document.getElementById('seg').innerHTML=b.join('');
+}
+function buildChips(){document.getElementById('chips').innerHTML=sortsFor().map(o=>'<button class="chip'+(o.key===sortKey?' on':'')+'" data-k="'+o.key+'" data-d="'+o.dir+'">'+o.label+'</button>').join('')}
+function buildSqFilter(){
+  document.getElementById('sqrow').style.display=isSquad()?'none':'flex';
+  const chips=['<button class="chip'+(squadFilter==='all'?' on':'')+'" data-s="all">全体</button>']
+   .concat(SQUAD_ORDER.map(s=>'<button class="chip'+(squadFilter===s?' on':'')+'" data-s="'+s+'">'+s+'</button>'));
+  document.getElementById('sqfilter').innerHTML=chips.join('');
+}
 function render(){
   const q=document.getElementById('q').value.trim().toLowerCase();
-  const cols=colsFor(view);
-  // header
-  document.getElementById('thead').innerHTML='<tr>'+cols.map(c=>{
-    const sorted = c.k && c.k===sortKey;
-    const ar = sorted ? (sortDir<0?'▼':'▲') : '';
-    return '<th class="'+(c.cls||'')+(sorted?' sorted':'')+'" data-k="'+(c.k||'')+'">'+
-      c.h+'<span class="ar">'+ar+'</span></th>';
-  }).join('')+'</tr>';
-
+  const cols=colsFor(),tbl=document.getElementById('tbl');
+  tbl.className=isSquad()?'squad':(isTrend()?'trend':'week');
+  document.getElementById('thead').innerHTML='<tr>'+cols.map(c=>{const sorted=c.k&&c.k===sortKey,ar=sorted?(sortDir<0?'▼':'▲'):'';return '<th class="'+(c.cls||'')+(sorted?' sorted':'')+'" data-k="'+(c.k||'')+'">'+c.h+'<span class="ar">'+ar+'</span></th>'}).join('')+'</tr>';
   let rows=currentRows();
-  // sort
-  if(sortKey){
-    rows.sort((a,b)=>{
-      let av=a[sortKey], bv=b[sortKey];
-      av=(av==null)?-Infinity:av; bv=(bv==null)?-Infinity:bv;
-      return (av-bv)*sortDir;
-    });
-  }
-  const filtered = q ? rows.filter(r=>r.name.toLowerCase().includes(q)) : rows;
-
-  const maxDb = view==='trend'?maxAbs(merged,'db'):1;
-  const maxDs = view==='trend'?maxAbs(merged,'ds'):1;
-
+  if(sortKey)rows.sort((a,b)=>{let av=a[sortKey],bv=b[sortKey];if(typeof av==='string'||typeof bv==='string')return String(av).localeCompare(String(bv),'ja')*sortDir;av=av==null?-Infinity:av;bv=bv==null?-Infinity:bv;return(av-bv)*sortDir});
+  if(!isSquad()&&squadFilter!=='all')rows=rows.filter(r=>r.squad===squadFilter);
+  const filtered=q?rows.filter(r=>(r.name||'').toLowerCase().includes(q)):rows;
+  const maxDb=isTrend()?maxAbs(merged,'db'):1,maxDs=isTrend()?maxAbs(merged,'ds'):1;
   const tb=document.getElementById('tbody');
-  if(!filtered.length){ tb.innerHTML='<tr><td class="empty" colspan="'+cols.length+'">「'+q+'」に一致するメンバーはいません</td></tr>'; updateCount(0,rows.length,q); return; }
-
+  if(!filtered.length){tb.innerHTML='<tr><td class="empty" colspan="'+cols.length+'">該当するデータがありません</td></tr>';setCount(0,rows.length,q);return}
   tb.innerHTML=filtered.map(r=>{
-    const hit = q && r.name.toLowerCase().includes(q);
-    if(view==='trend'){
-      const badge = r.status==='新加入'?'<span class="badge n">新加入</span>'
-        : r.status==='脱退'?'<span class="badge l">脱退</span>'
-        : '<span class="badge">継続</span>';
-      return '<tr class="'+(hit?'hit':'')+'">'
-        +'<td class="name">'+rankPill(r.rank,r.status)+'<span class="nm">'+esc(r.name)+'</span></td>'
-        +'<td>'+badge+'</td>'
-        +'<td>'+fmt(r.b2)+'</td>'
-        + deltaCell(r.db, maxDb)
-        +'<td>'+fmt(r.s2)+'</td>'
-        + deltaCell(r.ds, maxDs)
-        +'<td class="dim">'+fmt(r.b1)+'</td>'
-        +'<td class="dim">'+fmt(r.s1)+'</td>'
-        +'</tr>';
-    } else {
-      return '<tr class="'+(hit?'hit':'')+'">'
-        +'<td class="name"><span class="nm">'+esc(r.name)+'</span></td>'
-        +'<td>'+fmt(r.b)+'</td>'
-        +'<td>'+fmt(r.s)+'</td></tr>';
-    }
+    if(isSquad()){return '<tr><td class="name"><span class="sqname">'+esc(r.squad)+'</span></td><td class="c-num">'+fmt(r.n)+'</td><td class="c-num">'+fmt(r.sb)+'</td><td class="c-num">'+fmt(r.ab)+'</td><td class="c-num">'+fmt(r.ss)+'</td><td class="c-num">'+fmt(r.as)+'</td></tr>'}
+    const hit=q&&r.name.toLowerCase().includes(q);
+    if(isTrend()){const badge=r.status==='新加入'?'<span class="badge n">新加入</span>':r.status==='脱退'?'<span class="badge l">脱退</span>':'<span class="badge">継続</span>';
+      return '<tr class="'+(hit?'hit':'')+'"><td class="name">'+rankPill(r.rank)+'<span class="nm">'+esc(r.name)+'</span></td><td class="c-squad"><span class="sq">'+esc(r.squad)+'</span></td><td class="c-status">'+badge+'</td><td class="c-num">'+fmt(r.bL)+'</td>'+deltaCell(r.db,maxDb)+'<td class="c-num">'+fmt(r.sL)+'</td>'+deltaCell(r.ds,maxDs)+'<td class="c-num dim">'+fmt(r.bP)+'</td><td class="c-num dim">'+fmt(r.sP)+'</td></tr>'}
+    return '<tr class="'+(hit?'hit':'')+'"><td class="name"><span class="nm">'+esc(r.name)+'</span></td><td class="c-squad"><span class="sq">'+esc(r.squad)+'</span></td><td class="c-num">'+fmt(r.b)+'</td><td class="c-num">'+fmt(r.s)+'</td></tr>';
   }).join('');
-  updateCount(filtered.length, rows.length, q);
+  setCount(filtered.length,rows.length,q);
 }
-function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function updateCount(shown,total,q){
-  document.getElementById('count').innerHTML = q
-    ? '「'+esc(q)+'」で <b>'+shown+'</b> 件表示（全'+total+'名）'
-    : '<b>'+total+'</b> 名を表示';
+function setCount(shown,total,q){const el=document.getElementById('count');
+  if(isSquad()){el.innerHTML='<b>'+SQUAD_ORDER.length+'</b> 分隊 ・ 全'+latest.data.length+'名（'+latest.label+'）';return}
+  const suff=squadFilter!=='all'?'（'+squadFilter+'）':'';
+  el.innerHTML=q?'「'+esc(q)+'」で <b>'+shown+'</b> 件'+suff:'<b>'+shown+'</b> 名を表示'+suff;
 }
-
-function buildChips(){
-  const list=sortsByView[view];
-  document.getElementById('chips').innerHTML=list.map(o=>
-    '<button class="chip'+(o.key===sortKey?' on':'')+'" data-k="'+o.key+'" data-d="'+o.dir+'">'+o.label+'</button>').join('');
-}
-
-// events
-document.getElementById('seg').addEventListener('click',e=>{
-  const btn=e.target.closest('button'); if(!btn) return;
-  [...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===btn));
-  view=btn.dataset.v;
-  const def=sortsByView[view][0]; sortKey=def.key; sortDir=def.dir;
-  buildChips(); render();
-});
-document.getElementById('chips').addEventListener('click',e=>{
-  const c=e.target.closest('.chip'); if(!c) return;
-  const k=c.dataset.k;
-  if(k===sortKey){ sortDir*=-1; } else { sortKey=k; sortDir=parseInt(c.dataset.d); }
-  buildChips(); render();
-});
-document.getElementById('thead').addEventListener('click',e=>{
-  const th=e.target.closest('th'); if(!th||!th.dataset.k) return;
-  const k=th.dataset.k;
-  if(k===sortKey){ sortDir*=-1; } else { sortKey=k; sortDir=-1; }
-  buildChips(); render();
-});
-const q=document.getElementById('q'), qx=document.getElementById('qx');
-q.addEventListener('input',()=>{ qx.style.display=q.value?'block':'none'; render(); });
-qx.addEventListener('click',()=>{ q.value=''; qx.style.display='none'; render(); q.focus(); });
-
-buildChips(); render();
+document.getElementById('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;view=b.dataset.v;const def=sortsFor()[0];sortKey=def.key;sortDir=def.dir;buildSeg();buildChips();buildSqFilter();render()});
+document.getElementById('chips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;const k=c.dataset.k;if(k===sortKey)sortDir*=-1;else{sortKey=k;sortDir=parseInt(c.dataset.d)}buildChips();render()});
+document.getElementById('sqfilter').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;squadFilter=c.dataset.s;buildSqFilter();render()});
+document.getElementById('thead').addEventListener('click',e=>{const th=e.target.closest('th');if(!th||!th.dataset.k)return;const k=th.dataset.k;if(k===sortKey)sortDir*=-1;else{sortKey=k;sortDir=-1}buildChips();render()});
+const q=document.getElementById('q'),qx=document.getElementById('qx');
+q.addEventListener('input',()=>{qx.style.display=q.value?'block':'none';render()});
+qx.addEventListener('click',()=>{q.value='';qx.style.display='none';render();q.focus()});
+buildSeg();buildChips();buildSqFilter();render();
 </script>
 </body>
 </html>
