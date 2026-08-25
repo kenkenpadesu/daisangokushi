@@ -210,6 +210,15 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       </div>
     </div>
 
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+      <div class="lbl" style="font-size:12px;color:var(--gold-soft)">分隊分けの更新（任意）</div>
+      <div class="desc" style="margin:4px 0 10px 0">「名前,分隊名」を1行ずつ。<b>最新の所属で全部を置き換えます</b>（送るたびに前回の分隊分けは上書き）。分隊が変わった人だけでなく、全員分を入れてください。</div>
+      <textarea id="squadPaste" rows="5" placeholder="成龍,分隊A&#10;八宝菜太郎,分隊B" style="margin-bottom:8px"></textarea><br>
+      <input type="file" id="squadFile" accept=".csv,text/csv" style="margin-bottom:8px"><br>
+      <button id="squadBtn" class="abtn primary">分隊分けを反映する</button>
+      <span id="squadStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+    </div>
+
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
       <button id="reissueBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff">管理用キーを再発行する</button>
       <span id="reissueStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
@@ -344,6 +353,44 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       } catch (err) {
         status.textContent = '通信エラー: ' + err.message;
       }
+    });
+
+    // ---- 分隊分けの反映 ----
+    async function submitSquads(text) {
+      const status = document.getElementById('squadStatus');
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const tsvLines = [];
+      lines.forEach((line, i) => {
+        const cols = parseLine(line);
+        if (cols.length < 2) return;
+        if (i === 0 && (cols[0] === '名前' || cols[1] === '分隊')) return; // ヘッダー行スキップ
+        tsvLines.push(cols[0] + '\t' + cols[1]);
+      });
+      if (!tsvLines.length) { status.textContent = '「名前,分隊名」の形式で入力してください'; return; }
+      status.textContent = '送信中…';
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'setSquads', alliance: allianceId, token: key, tsv: tsvLines.join('\n') })
+        });
+        const data = await res.json();
+        if (data.error) { status.textContent = 'エラー: ' + data.error; }
+        else { status.textContent = '分隊分けを反映しました（' + data.added + '件）。3秒後に再読み込みします…'; setTimeout(() => location.reload(), 3000); }
+      } catch (err) {
+        status.textContent = '通信エラー: ' + err.message;
+      }
+    }
+    document.getElementById('squadBtn').addEventListener('click', () => {
+      const pasted = document.getElementById('squadPaste').value;
+      if (!pasted.trim()) { document.getElementById('squadStatus').textContent = '貼り付け欄が空です'; return; }
+      submitSquads(pasted);
+    });
+    document.getElementById('squadFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => submitSquads(reader.result);
+      reader.readAsText(file, 'UTF-8');
     });
 
     document.getElementById('reissueBtn').addEventListener('click', async () => {

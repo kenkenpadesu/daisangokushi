@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同盟登録 — 武勲・勢力値ダッシュボード</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#17130d;--ink2:#1e1810;--panel:#241d14;--panel2:#2c2318;--line:#3b3125;--line2:#4a3d2c;
+--gold:#d6b25c;--gold-dim:#9f8340;--gold-soft:#e7cd8a;--paper:#ece2cd;--muted:#a8997c;
+--jade:#79c39a;--jade-dim:#3c6b52;--verm:#dd6e5a;--verm-dim:#7a3a30;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:radial-gradient(1200px 500px at 50% -8%,#2a2015 0%,rgba(42,32,21,0) 60%),linear-gradient(180deg,#17130d,#141009);
+color:var(--paper);font-family:"Noto Sans JP",system-ui,sans-serif;min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 70px}
+.masthead{padding:30px 4px 16px;border-bottom:1px solid var(--line);position:relative}
+.masthead::after{content:"";position:absolute;left:0;bottom:-1px;width:82px;height:2px;background:var(--gold)}
+.kicker{font-size:11.5px;letter-spacing:.4em;color:var(--gold-dim);font-weight:700;text-indent:.4em}
+.title{font-family:"Noto Serif JP",serif;font-weight:900;color:var(--gold-soft);font-size:clamp(24px,6vw,36px);letter-spacing:.05em;line-height:1.1;margin-top:6px;text-shadow:0 1px 0 #000,0 0 22px rgba(214,178,92,.14)}
+.subtitle{color:var(--muted);font-size:13px;margin-top:8px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:6px;padding:20px 18px;margin-top:18px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--gold-soft);font-weight:700;letter-spacing:.05em;margin-bottom:5px}
+.field .hint{font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.5}
+.field input{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--paper);border-radius:4px;padding:10px 12px;font-family:inherit;font-size:15px;outline:none}
+.field input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 2px rgba(214,178,92,.12)}
+.field input::placeholder{color:#7c715c}
+.btn{width:100%;padding:12px;border:0;border-radius:4px;font-weight:700;cursor:pointer;font-family:inherit;font-size:15px;background:linear-gradient(180deg,#e7cd8a,#c69f45);color:#1c1608;margin-top:4px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{margin-top:16px;padding:13px 15px;border-radius:4px;font-size:13px;line-height:1.6;display:none}
+.msg.err{display:block;border:1px solid var(--verm-dim);background:rgba(221,110,90,.08);color:var(--verm)}
+.msg.ok{display:block;border:1px solid var(--jade-dim);background:rgba(121,195,154,.08);color:var(--paper)}
+.msg.ok b{color:var(--jade)}
+.urlbox{margin-top:10px;padding:10px;background:var(--ink2);border:1px solid var(--line2);border-radius:4px;font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--gold-soft)}
+.copybtn{margin-top:8px;padding:7px 14px;font-size:12px;border:1px solid var(--line2);background:var(--ink2);color:var(--gold-soft);border-radius:4px;cursor:pointer;font-family:inherit;font-weight:700}
+.note{font-size:11.5px;color:var(--muted);margin-top:18px;padding:12px 14px;border:1px solid var(--line);border-left:3px solid var(--gold-dim);border-radius:3px;background:var(--panel);line-height:1.6}
+.note b{color:var(--gold-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">同盟ダッシュボード ・ 新規登録</div>
+    <h1 class="title">同盟を登録する</h1>
+    <p class="subtitle">登録すると、あなたの同盟専用の閲覧URLと管理用URLが発行されます。</p>
+  </header>
+
+  <div class="card">
+    <div class="field">
+      <label>合言葉</label>
+      <div class="hint">登録には管理者から共有された合言葉が必要です。</div>
+      <input id="inviteCode" type="text" placeholder="合言葉" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>同盟名</label>
+      <div class="hint">画面に表示される名前です。日本語OK（例: ゆんぱーく）。</div>
+      <input id="displayName" type="text" placeholder="同盟名" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>英語表記（URL用ID）</label>
+      <div class="hint">URLに使う識別子です。半角英数字とハイフンのみ（例: yunpark）。あとから変更できません。</div>
+      <input id="allianceId" type="text" placeholder="yunpark" autocomplete="off" autocapitalize="off">
+    </div>
+
+    <div class="field">
+      <label>パスワード（管理用キー）</label>
+      <div class="hint">半角英数字6文字以上。データ更新のときに使います。管理用URLに含まれるので、他人に教えないでください。</div>
+      <input id="password" type="text" placeholder="半角英数字6文字以上" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>分隊名（任意）</label>
+      <div class="hint">分隊がある場合、カンマ区切りで並び順どおりに（例: 分隊A,分隊B,分隊C）。無ければ空欄でOK。</div>
+      <input id="squadOrder" type="text" placeholder="分隊A,分隊B,分隊C" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>登録者名</label>
+      <div class="hint">記録用です。あなたのゲーム内の名前など。</div>
+      <input id="registrant" type="text" placeholder="登録者名" autocomplete="off">
+    </div>
+
+    <button id="submitBtn" class="btn">この内容で登録する</button>
+
+    <div id="msg" class="msg"></div>
+  </div>
+
+  <div class="note">
+    <b>登録後の使い方：</b> 発行された「閲覧URL」を同盟メンバーに共有してください。「管理用URL」はあなただけが使い、毎週のデータ更新に使います。管理用URLはパスワードを含むので、公開・転送しないでください。
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ==== ここを自分のGASデプロイURLに書き換える（index.html と同じURL）====
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbw4P8tBv7jBM53nQ4mi9kfsU2zl62C0OKdnSUnxX1HluuQe5MdRKArTL2wdc9T8BNkU/exec";
+
+  // 発行URLの組み立てに使う、このダッシュボードの公開URL（末尾スラッシュまで）
+  const DASHBOARD_URL = location.href.replace(/register\.html.*$/, '') ;
+
+  const $ = id => document.getElementById(id);
+  const msg = $('msg');
+
+  function show(kind, html) { msg.className = 'msg ' + kind; msg.innerHTML = html; }
+
+  $('submitBtn').addEventListener('click', async () => {
+    const payload = {
+      action: 'register',
+      inviteCode: $('inviteCode').value.trim(),
+      displayName: $('displayName').value.trim(),
+      allianceId: $('allianceId').value.trim(),
+      password: $('password').value.trim(),
+      squadOrder: $('squadOrder').value.trim(),
+      registrant: $('registrant').value.trim()
+    };
+
+    // 画面側でも軽くチェック（本チェックはGAS側）
+    if (!payload.inviteCode) return show('err', '合言葉を入力してください。');
+    if (!payload.displayName) return show('err', '同盟名を入力してください。');
+    if (!/^[a-z0-9-]+$/i.test(payload.allianceId)) return show('err', '英語表記は半角英数字とハイフンのみで入力してください。');
+    if (!/^[a-z0-9]{6,}$/i.test(payload.password)) return show('err', 'パスワードは半角英数字6文字以上にしてください。');
+
+    const btn = $('submitBtn');
+    btn.disabled = true;
+    show('ok', '登録中…');
+
+    try {
+      const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (data.error) { show('err', data.error); btn.disabled = false; return; }
+
+      const viewUrl = DASHBOARD_URL + '?alliance=' + encodeURIComponent(data.allianceId);
+      const adminUrl = viewUrl + '&key=' + encodeURIComponent(data.token);
+      show('ok',
+        '<b>登録が完了しました。</b> 下のURLを控えてください。<br><br>' +
+        '■ 閲覧URL（メンバーに共有）<div class="urlbox" id="vurl">' + viewUrl + '</div>' +
+        '<button class="copybtn" data-t="vurl">閲覧URLをコピー</button><br><br>' +
+        '■ 管理用URL（あなた専用・公開しない）<div class="urlbox" id="aurl">' + adminUrl + '</div>' +
+        '<button class="copybtn" data-t="aurl">管理用URLをコピー</button>'
+      );
+      msg.querySelectorAll('.copybtn').forEach(b => {
+        b.addEventListener('click', () => {
+          const text = document.getElementById(b.dataset.t).textContent;
+          navigator.clipboard.writeText(text).then(() => { b.textContent = 'コピーしました'; setTimeout(() => { b.textContent = b.dataset.t === 'vurl' ? '閲覧URLをコピー' : '管理用URLをコピー'; }, 1500); });
+        });
+      });
+    } catch (err) {
+      show('err', '通信エラー: ' + err.message);
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
