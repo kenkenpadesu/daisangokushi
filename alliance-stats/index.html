@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同盟 武勲記録</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="同盟 武勲・勢力値 記録">
+<meta property="og:description" content="週次ランキング・分隊別集計・増減がひと目で。検索・並び替え対応、スマホ最適化。">
+<meta property="og:image" content="https://kenkenpadesu.github.io/daisangokushi/alliance-stats/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://kenkenpadesu.github.io/daisangokushi/alliance-stats/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/yun-park/ogp.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--ink:#17130d;--ink2:#1e1810;--panel:#241d14;--panel2:#2c2318;--line:#3b3125;--line2:#4a3d2c;
+--gold:#d6b25c;--gold-dim:#9f8340;--gold-soft:#e7cd8a;--paper:#ece2cd;--muted:#a8997c;
+--jade:#79c39a;--jade-dim:#3c6b52;--verm:#dd6e5a;--verm-dim:#7a3a30;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:radial-gradient(1200px 500px at 50% -8%,#2a2015 0%,rgba(42,32,21,0) 60%),linear-gradient(180deg,#17130d,#141009);
+color:var(--paper);font-family:"Noto Sans JP",system-ui,sans-serif;min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 13px 70px}
+.masthead{padding:26px 4px 16px;border-bottom:1px solid var(--line);position:relative}
+.masthead::after{content:"";position:absolute;left:0;bottom:-1px;width:82px;height:2px;background:var(--gold)}
+.kicker{font-size:11.5px;letter-spacing:.4em;color:var(--gold-dim);font-weight:700;text-indent:.4em}
+.title{font-family:"Noto Serif JP",serif;font-weight:900;color:var(--gold-soft);font-size:clamp(26px,6.4vw,44px);
+letter-spacing:.05em;line-height:1.08;margin-top:5px;text-shadow:0 1px 0 #000,0 0 22px rgba(214,178,92,.14)}
+.subtitle{color:var(--muted);font-size:13px;margin-top:7px}.subtitle b{color:var(--paper);font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
+.tablet{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:3px;padding:10px 12px;position:relative;overflow:hidden}
+.tablet::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold-dim)}
+.tablet.new::before{background:var(--jade-dim)}.tablet.left::before{background:var(--verm-dim)}
+.tablet .k{font-size:10.5px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+.tablet .v{font-family:"Noto Serif JP",serif;font-weight:700;font-size:clamp(20px,5vw,27px);color:var(--paper);font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.05}
+.tablet.new .v{color:var(--jade)}.tablet.left .v{color:var(--verm)}
+.tablet .s{font-size:10.5px;color:var(--muted);margin-top:2px}
+.controls{position:sticky;top:0;z-index:40;padding:11px 0 10px;background:linear-gradient(180deg,#161009 82%,rgba(22,16,9,0))}
+.seg{display:flex;background:var(--ink2);border:1px solid var(--line);border-radius:4px;padding:3px;gap:2px;overflow-x:auto}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:3px;white-space:nowrap}
+.seg button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--line2)}
+.row2{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:9px}
+.search{flex:1 1 190px;min-width:140px;position:relative}
+.search input{width:100%;background:var(--ink2);border:1px solid var(--line);border-radius:4px;color:var(--paper);font-family:inherit;font-size:15px;padding:9px 32px 9px 12px;outline:none}
+.search input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 2px rgba(214,178,92,.12)}
+.search input::placeholder{color:#7c715c}
+.search .x{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:18px;line-height:1;display:none;padding:2px}
+.lbl{font-size:11px;color:var(--muted);letter-spacing:.1em;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{appearance:none;border:1px solid var(--line);background:var(--ink2);color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.chip.on{border-color:var(--gold-dim);color:var(--gold-soft);background:#2b2216}
+.count{font-size:12px;color:var(--muted);margin:11px 2px 8px}.count b{color:var(--gold-soft);font-weight:700}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--ink2);-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content}
+thead th{position:sticky;top:0;z-index:20;background:#221a11;color:var(--gold-dim);font-size:10.5px;font-weight:700;text-align:right;white-space:nowrap;padding:10px 11px;border-bottom:1px solid var(--line2);cursor:pointer;user-select:none;line-height:1.25}
+thead th .ar{color:var(--gold);font-size:9px;margin-left:2px;opacity:0}thead th.sorted .ar{opacity:1}
+.c-status{width:64px}.c-squad{width:78px}.c-num{width:94px}.c-delta{width:102px}
+th.name,td.name{text-align:left;position:sticky;left:0;z-index:10;background:var(--ink2);border-right:1px solid var(--line);width:132px;min-width:132px;max-width:132px}
+thead th.name{z-index:30;background:#221a11}
+tbody td{padding:9px 11px;text-align:right;font-size:13px;border-bottom:1px solid #241d13;font-variant-numeric:tabular-nums}
+tbody td.name{white-space:normal;word-break:break-word}tbody td:not(.name){white-space:nowrap}
+tbody tr:hover td{background:#211a11}tbody tr:hover td.name{background:#241d12}
+tbody tr.hit td{background:#332612 !important}tbody tr.hit td.name{background:#3a2c15 !important}
+.rk{display:inline-flex;align-items:center;justify-content:center;min-width:21px;height:19px;font-size:10.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;border:1px solid var(--line2);border-radius:3px;padding:0 4px;margin-right:7px;vertical-align:middle}
+.rk.m1{color:#1c1608;background:linear-gradient(180deg,#e7cd8a,#c69f45);border-color:#c69f45}
+.rk.m2{color:#17130d;background:linear-gradient(180deg,#d7d7dc,#a9a9b2);border-color:#a9a9b2}
+.rk.m3{color:#17130d;background:linear-gradient(180deg,#d6a677,#b07b48);border-color:#b07b48}
+.rk.na{color:#6f6450}
+.nm{font-weight:500;color:var(--paper);font-size:13px;vertical-align:middle}
+.sq{font-size:11.5px;color:var(--gold-dim);font-weight:700}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.badge.n{color:var(--jade);border-color:var(--jade-dim);background:rgba(121,195,154,.08)}
+.badge.l{color:var(--verm);border-color:var(--verm-dim);background:rgba(221,110,90,.08)}
+.delta{font-weight:700;display:inline-block}.delta.up{color:var(--jade)}.delta.dn{color:var(--verm)}.delta.ze{color:#6f6450}
+.delta .bar{display:block;height:2px;margin-top:4px;border-radius:2px;margin-left:auto;opacity:.5}
+.delta.up .bar{background:var(--jade)}.delta.dn .bar{background:var(--verm)}
+.dim{color:#7d715b}
+.sqname{font-weight:700;color:var(--gold-soft);font-size:13.5px}
+.note{font-size:12px;color:var(--muted);margin:15px 2px 0;padding:11px 13px;border:1px solid var(--line);border-left:3px solid var(--gold-dim);border-radius:3px;background:var(--panel);line-height:1.55}
+.note b{color:var(--gold-soft);font-weight:700}
+.foot{margin-top:20px;padding-top:13px;border-top:1px solid var(--line);color:#6f6450;font-size:11px;text-align:center}
+.empty{padding:38px 16px;text-align:center;color:var(--muted);font-size:14px}
+@media(max-width:560px){.wrap{padding:0 10px 60px}.stats{gap:7px}.tablet{padding:9px 10px}
+.c-num{width:84px}.c-delta{width:94px}.c-status{width:56px}.c-squad{width:62px}
+th.name,td.name{width:112px;min-width:112px;max-width:112px}
+tbody td,thead th{padding:8px 8px;font-size:12.5px}.nm,.rk{font-size:12px}}
+
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:6px;padding:15px 15px 13px;margin-top:14px}
+.card h2{font-family:"Noto Serif JP",serif;font-size:16px;color:var(--gold-soft);font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:15px;background:var(--gold);border-radius:2px}
+.card .desc{font-size:11.5px;color:var(--muted);margin:3px 0 12px 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chartbox{position:relative;height:280px}.chartbox.sm{height:250px}
+.hd{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.hd .grow{flex:1}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{display:inline-flex;background:var(--ink2);border:1px solid var(--line);border-radius:4px;padding:3px;gap:2px}
+.toggle button{border:0;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;padding:6px 11px;border-radius:3px;cursor:pointer}
+.toggle button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft)}
+select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--paper);font-family:inherit;font-size:14px;padding:8px 12px;border-radius:4px;outline:none;max-width:210px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}.chartbox{height:250px}}
+
+/* ---- 状態表示（読み込み中・エラー）---- */
+#stateMsg{padding:60px 16px;text-align:center;color:var(--muted);font-size:14px}
+#stateMsg.err{color:var(--verm)}
+
+/* ---- 管理パネル ---- */
+#adminPanel input[type="text"], #adminPanel textarea{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--paper);border-radius:4px;padding:9px 11px;font-family:inherit;font-size:14px;outline:none}
+#adminPanel textarea{font-family:ui-monospace,monospace;font-size:12.5px}
+#adminPanel input[type="text"]:focus, #adminPanel textarea:focus{border-color:var(--gold-dim)}
+.abtn{padding:9px 18px;border:0;border-radius:4px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}
+.abtn.primary{background:var(--gold-dim);color:#17130d}
+.abtn.ok{background:var(--jade-dim);color:#fff}
+#previewTbl{width:100%;border-collapse:collapse}
+#previewTbl th{position:static;text-align:left;font-size:11px;padding:7px 9px;color:var(--gold-dim);border-bottom:1px solid var(--line2)}
+#previewTbl td{padding:6px 9px;font-size:12.5px;border-bottom:1px solid #241d13}
+#previewTbl td[contenteditable]:focus{background:#332612;outline:none}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="kicker">同盟成員 ・ 武勲記録</div>
+    <h1 class="title">週次 武勲・勢力値</h1>
+    <p class="subtitle" id="sub"></p>
+  </header>
+
+  <div id="stateMsg">読み込み中…</div>
+
+  <div id="dashboard" style="display:none">
+    <section class="stats" id="stats"></section>
+    <div class="controls">
+      <div class="seg" id="seg"></div>
+      <div class="row2" id="rowSearch">
+        <div class="search"><input id="q" type="search" placeholder="メンバー名で検索" autocomplete="off"><span class="x" id="qx">×</span></div>
+        <span class="lbl">並び替え</span><div class="chips" id="chips"></div>
+      </div>
+      <div class="row2" id="rowSquad"><span class="lbl">分隊</span><div class="chips" id="sqfilter"></div></div>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="tw" id="tableWrap"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+
+    <div id="graphView" style="display:none">
+      <div class="card">
+        <div class="hd"><h2>同盟全体の推移</h2></div>
+        <div class="desc">合計勢力値（成長）と 合計武勲（その週の活動量）</div>
+        <div class="grid2">
+          <div class="chartbox sm"><canvas id="c_alS"></canvas></div>
+          <div class="chartbox sm"><canvas id="c_alB"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>分隊別の推移</h2><span class="grow"></span>
+          <div class="toggles">
+            <div class="toggle" id="sq_metric"><button data-v="s" class="on">勢力値</button><button data-v="b">武勲</button></div>
+            <div class="toggle" id="sq_agg"><button data-v="sum" class="on">合計</button><button data-v="avg">平均</button></div>
+          </div>
+        </div>
+        <div class="desc">分隊ごと。凡例タップで表示/非表示。合計／平均を切替できます。</div>
+        <div class="chartbox"><canvas id="c_sq"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>個人の推移</h2><span class="grow"></span><select id="msel"></select></div>
+        <div class="desc">選んだメンバーの勢力値（左軸）と武勲（右軸）。</div>
+        <div class="chartbox"><canvas id="c_me"></canvas></div>
+      </div>
+    </div>
+
+    <p class="note" id="tnote"><b>武勲について：</b>武勲は毎週リセットされるため週で水準が変わります。個人の伸びは<b>勢力値の増減</b>が素直な指標です。分隊の集計は最新週の値です。</p>
+  </div>
+
+  <!-- ============ 管理パネル（?key= が付いたURLでのみ表示）============ -->
+  <div id="adminPanel" class="card" style="display:none">
+    <h2>データ管理</h2>
+    <div class="desc">このリンクを知っている人だけに表示されています。CSVファイルを選ぶか、読み取り結果を直接貼り付けてください。</div>
+
+    <div style="margin:10px 0">
+      <label class="lbl">週の期間ラベル（例: 8/17〜）</label><br>
+      <input id="weekLabelInput" type="text" placeholder="8/17〜" style="margin-top:4px">
+    </div>
+
+    <div style="margin:10px 0">
+      <label class="lbl">CSVファイル</label><br>
+      <input type="file" id="csvFile" accept=".csv,text/csv" style="margin-top:4px">
+    </div>
+
+    <div style="margin:10px 0">
+      <label class="lbl">または、ここに貼り付け（1行につき「名前,武勲,勢力値」）</label><br>
+      <textarea id="csvPaste" rows="6" style="margin-top:4px" placeholder="成龍,25843,580000&#10;八宝菜太郎,29567,547000"></textarea>
+    </div>
+
+    <button id="parseBtn" class="abtn primary">読み込む</button>
+    <span id="parseStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+
+    <div id="previewArea" style="margin-top:14px;display:none">
+      <div class="lbl">プレビュー（<span id="previewCount">0</span>件）— セルをクリックすると修正できます</div>
+      <div class="tw" style="margin-top:8px;overflow-x:auto">
+        <table id="previewTbl"><thead><tr><th>名前</th><th>武勲</th><th>勢力値</th></tr></thead><tbody id="previewBody"></tbody></table>
+      </div>
+      <div style="margin-top:10px">
+        <button id="submitBtn" class="abtn ok">この内容で反映する</button>
+        <span id="submitStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
+      <button id="reissueBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff">管理用キーを再発行する</button>
+      <span id="reissueStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+    </div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script src="app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ==== ここを自分のGASデプロイURLに書き換える ====
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbw4P8tBv7jBM53nQ4mi9kfsU2zl62C0OKdnSUnxX1HluuQe5MdRKArTL2wdc9T8BNkU/exec";
+
+  const params = new URLSearchParams(location.search);
+  const allianceId = params.get('alliance');
+  const key = params.get('key');
+
+  const stateEl = document.getElementById('stateMsg');
+  const dashEl = document.getElementById('dashboard');
+
+  function showError(msg) {
+    stateEl.textContent = msg;
+    stateEl.classList.add('err');
+    stateEl.style.display = 'block';
+    dashEl.style.display = 'none';
+  }
+
+  if (!allianceId) {
+    showError('URLに ?alliance=同盟ID を付けてアクセスしてください。');
+    return;
+  }
+  if (GAS_URL.includes('XXXXXXXX')) {
+    showError('GAS_URL が未設定です（bukun.html 内の GAS_URL を、デプロイしたウェブアプリのURLに書き換えてください）。');
+    return;
+  }
+
+  fetch(GAS_URL + '?alliance=' + encodeURIComponent(allianceId))
+    .then(res => res.json())
+    .then(json => {
+      if (json.error) { showError('データ取得エラー: ' + json.error); return; }
+      if (!json.weeks || !json.weeks.length) { showError('まだ週次データがありません。管理パネルから最初の週を登録してください。'); if (key) setupAdminPanel(); return; }
+      stateEl.style.display = 'none';
+      dashEl.style.display = 'block';
+      window.initApp(json);
+      if (key) setupAdminPanel();
+    })
+    .catch(err => showError('通信エラー: ' + err.message));
+
+  // ============ 管理パネル ============
+  function setupAdminPanel() {
+    document.getElementById('adminPanel').style.display = 'block';
+
+    function parseLine(line) {
+      const delim = line.includes('\t') ? '\t' : ',';
+      return line.split(delim).map(s => s.trim().replace(/^"|"$/g, ''));
+    }
+    function parseRows(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const rows = [];
+      lines.forEach((line, i) => {
+        const cols = parseLine(line);
+        if (cols.length < 3) return;
+        const [name, bukun, power] = cols;
+        if (i === 0 && isNaN(Number(bukun))) return; // ヘッダー行らしきものはスキップ
+        rows.push({ name, bukun: Number(bukun) || 0, power: Number(power) || 0 });
+      });
+      return rows;
+    }
+    function renderPreview(rows) {
+      const body = document.getElementById('previewBody');
+      body.innerHTML = '';
+      rows.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td contenteditable="true" data-idx="' + idx + '" data-field="name">' + r.name + '</td>' +
+          '<td contenteditable="true" data-idx="' + idx + '" data-field="bukun">' + r.bukun + '</td>' +
+          '<td contenteditable="true" data-idx="' + idx + '" data-field="power">' + r.power + '</td>';
+        body.appendChild(tr);
+      });
+      document.getElementById('previewCount').textContent = rows.length;
+      document.getElementById('previewArea').style.display = 'block';
+      body.querySelectorAll('[contenteditable]').forEach(cell => {
+        cell.addEventListener('input', () => {
+          const i = cell.dataset.idx, f = cell.dataset.field;
+          currentRows[i][f] = (f === 'name') ? cell.textContent.trim() : (Number(cell.textContent.trim()) || 0);
+        });
+      });
+    }
+
+    let currentRows = [];
+
+    document.getElementById('csvFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentRows = parseRows(reader.result);
+        renderPreview(currentRows);
+        document.getElementById('parseStatus').textContent = currentRows.length + '件読み込みました';
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    document.getElementById('parseBtn').addEventListener('click', () => {
+      const pasted = document.getElementById('csvPaste').value;
+      if (!pasted.trim()) { document.getElementById('parseStatus').textContent = '貼り付け欄が空です'; return; }
+      currentRows = parseRows(pasted);
+      renderPreview(currentRows);
+      document.getElementById('parseStatus').textContent = currentRows.length + '件読み込みました';
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const weekLabel = document.getElementById('weekLabelInput').value.trim();
+      const status = document.getElementById('submitStatus');
+      if (!weekLabel) { status.textContent = '週の期間ラベルを入力してください'; return; }
+      if (!currentRows.length) { status.textContent = 'データがありません'; return; }
+
+      const tsv = currentRows.map(r => r.name + '\t' + r.bukun + '\t' + r.power).join('\n');
+      status.textContent = '送信中…';
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'addWeek', alliance: allianceId, token: key, weekLabel, tsv })
+        });
+        const data = await res.json();
+        if (data.error) { status.textContent = 'エラー: ' + data.error; }
+        else { status.textContent = '反映しました（' + data.added + '件）。3秒後にページを再読み込みします…'; setTimeout(() => location.reload(), 3000); }
+      } catch (err) {
+        status.textContent = '通信エラー: ' + err.message;
+      }
+    });
+
+    document.getElementById('reissueBtn').addEventListener('click', async () => {
+      const status = document.getElementById('reissueStatus');
+      if (!confirm('管理用キーを再発行しますか？ 今のURLは使えなくなります。')) return;
+      status.textContent = '処理中…';
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'reissueToken', alliance: allianceId, oldToken: key })
+        });
+        const data = await res.json();
+        if (data.error) { status.textContent = 'エラー: ' + data.error; }
+        else { status.textContent = '新しいキー: ' + data.newToken + '（必ず控えてください。新しいURLは ?alliance=' + allianceId + '&key=' + data.newToken + ' です）'; }
+      } catch (err) {
+        status.textContent = '通信エラー: ' + err.message;
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
