@@ -14,7 +14,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://kenkenpadesu.github.io/daisangokushi/alliance-stats/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/yun-park/ogp.png">
+<meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/alliance-stats/ogp.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -121,6 +121,18 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 #previewTbl th{position:static;text-align:left;font-size:11px;padding:7px 9px;color:var(--gold-dim);border-bottom:1px solid var(--line2)}
 #previewTbl td{padding:6px 9px;font-size:12.5px;border-bottom:1px solid #241d13}
 #previewTbl td[contenteditable]:focus{background:#332612;outline:none}
+.rowf{margin-bottom:12px}
+.rowf label{display:block;font-size:11px;color:var(--gold-soft);font-weight:700;letter-spacing:.05em;margin-bottom:5px}
+.rowf input{width:100%;background:var(--ink2);border:1px solid var(--line);color:var(--paper);border-radius:4px;padding:10px 12px;font-family:inherit;font-size:15px;outline:none}
+.rowf input:focus{border-color:var(--gold-dim);box-shadow:0 0 0 2px rgba(214,178,92,.12)}
+.rowf input::placeholder{color:#7c715c}
+.regmsg{margin-top:14px;padding:12px 14px;border-radius:4px;font-size:13px;line-height:1.6;display:none}
+.regmsg.err{display:block;border:1px solid var(--verm-dim);background:rgba(221,110,90,.08);color:var(--verm)}
+.regmsg.ok{display:block;border:1px solid var(--jade-dim);background:rgba(121,195,154,.08);color:var(--paper)}
+.regmsg.ok b{color:var(--jade)}
+.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--gold-soft)}
+.urlbox{margin-top:8px;padding:10px;background:var(--ink2);border:1px solid var(--line2);border-radius:4px;font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--gold-soft)}
+.copybtn{margin-top:8px;padding:7px 14px;font-size:12px;border:1px solid var(--line2);background:var(--ink2);color:var(--gold-soft);border-radius:4px;cursor:pointer;font-family:inherit;font-weight:700}
 </style>
 </head>
 <body>
@@ -134,7 +146,40 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
   <div id="stateMsg">読み込み中…</div>
 
+  <!-- ============ 入口ページ（?alliance= が無いとき）============ -->
+  <div id="homeView" style="display:none">
+    <div class="card">
+      <h2>新しい同盟を登録する</h2>
+      <div class="desc">登録すると、あなたの同盟専用の閲覧URLと管理用パスワードが使えるようになります。</div>
+      <button id="openRegBtn" class="abtn primary" style="margin-top:6px">新しい同盟を登録する</button>
+
+      <div id="regForm" style="display:none;margin-top:16px">
+        <div class="rowf"><label class="lbl">同盟名（画面に表示。日本語OK）</label><input id="reg_displayName" type="text" placeholder="ゆんぱーく"></div>
+        <div class="rowf"><label class="lbl">英語表記（URL用ID・半角英数字とハイフンのみ）</label><input id="reg_allianceId" type="text" placeholder="yunpark" autocapitalize="off"></div>
+        <div class="rowf"><label class="lbl">管理用パスワード（半角英数字6文字以上）</label><input id="reg_password" type="text" placeholder="半角英数字6文字以上"></div>
+        <div class="rowf"><label class="lbl">分隊名（任意・カンマ区切りで並び順どおり）</label><input id="reg_squadOrder" type="text" placeholder="分隊A,分隊B,分隊C"></div>
+        <div class="rowf"><label class="lbl">登録者名（記録用）</label><input id="reg_registrant" type="text" placeholder="あなたの名前"></div>
+        <button id="regSubmitBtn" class="abtn ok" style="margin-top:6px">この内容で登録する</button>
+        <div id="regMsg" class="regmsg"></div>
+      </div>
+    </div>
+    <div class="note">既に登録済みの同盟の方は、配布された<b>閲覧URL</b>（<span class="mono">?alliance=同盟ID</span> 付き）からアクセスしてください。</div>
+  </div>
+
   <div id="dashboard" style="display:none">
+    <!-- 管理者ログインの入口 -->
+    <div id="adminGate" style="display:none;margin:4px 0 2px;text-align:right">
+      <button id="adminOpenBtn" class="abtn" style="background:var(--ink2);border:1px solid var(--line2);color:var(--gold-soft)">管理者</button>
+    </div>
+    <div id="adminLogin" class="card" style="display:none">
+      <h2>管理者ログイン</h2>
+      <div class="desc">この同盟の管理用パスワードを入力してください。</div>
+      <div class="rowf"><input id="loginPass" type="password" placeholder="管理用パスワード" autocomplete="off"></div>
+      <button id="loginBtn" class="abtn ok">ログイン</button>
+      <button id="loginCancel" class="abtn" style="background:var(--ink2);border:1px solid var(--line2);color:var(--muted);margin-left:6px">閉じる</button>
+      <span id="loginStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+    </div>
+
     <section class="stats" id="stats"></section>
     <div class="controls">
       <div class="seg" id="seg"></div>
@@ -176,10 +221,10 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     <p class="note" id="tnote"><b>武勲について：</b>武勲は毎週リセットされるため週で水準が変わります。個人の伸びは<b>勢力値の増減</b>が素直な指標です。分隊の集計は最新週の値です。</p>
   </div>
 
-  <!-- ============ 管理パネル（?key= が付いたURLでのみ表示）============ -->
+  <!-- ============ 管理パネル（管理者ログイン成功時に表示）============ -->
   <div id="adminPanel" class="card" style="display:none">
     <h2>データ管理</h2>
-    <div class="desc">このリンクを知っている人だけに表示されています。CSVファイルを選ぶか、読み取り結果を直接貼り付けてください。</div>
+    <div class="desc">CSVファイルを選ぶか、読み取り結果を直接貼り付けてください。</div>
 
     <div style="margin:10px 0">
       <label class="lbl">週の期間ラベル（例: 8/17〜）</label><br>
@@ -220,7 +265,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     </div>
 
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
-      <button id="reissueBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff">管理用キーを再発行する</button>
+      <button id="reissueBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff">管理用パスワードを変更する</button>
       <span id="reissueStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
     </div>
   </div>
@@ -238,49 +283,147 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
   const params = new URLSearchParams(location.search);
   const allianceId = params.get('alliance');
-  const key = params.get('key');
 
   const stateEl = document.getElementById('stateMsg');
   const dashEl = document.getElementById('dashboard');
+  const homeEl = document.getElementById('homeView');
+
+  // ダッシュボードURL（末尾スラッシュまで。登録後のURL組み立てに使う）
+  const DASHBOARD_URL = location.origin + location.pathname;
+
+  let adminToken = null; // 管理者ログイン成功時にセットされる
 
   function showError(msg) {
     stateEl.textContent = msg;
     stateEl.classList.add('err');
     stateEl.style.display = 'block';
     dashEl.style.display = 'none';
+    homeEl.style.display = 'none';
   }
 
+  // ---- ?alliance= が無い → 入口ページ ----
   if (!allianceId) {
-    showError('URLに ?alliance=同盟ID を付けてアクセスしてください。');
+    document.querySelector('.masthead .title').textContent = '同盟 武勲・勢力値 記録';
+    document.querySelector('.masthead .kicker').textContent = '同盟ダッシュボード ・ 入口';
+    stateEl.style.display = 'none';
+    homeEl.style.display = 'block';
+    setupHome();
     return;
   }
   if (GAS_URL.includes('XXXXXXXX')) {
-    showError('GAS_URL が未設定です（bukun.html 内の GAS_URL を、デプロイしたウェブアプリのURLに書き換えてください）。');
+    showError('GAS_URL が未設定です（index.html 内の GAS_URL を、デプロイしたウェブアプリのURLに書き換えてください）。');
     return;
   }
 
+  // ---- ?alliance= あり → その同盟のダッシュボード ----
   fetch(GAS_URL + '?alliance=' + encodeURIComponent(allianceId))
     .then(res => res.json())
     .then(json => {
       if (json.error) { showError('データ取得エラー: ' + json.error); return; }
-      if (!json.weeks || !json.weeks.length) { showError('まだ週次データがありません。管理パネルから最初の週を登録してください。'); if (key) setupAdminPanel(); return; }
       stateEl.style.display = 'none';
       dashEl.style.display = 'block';
-      window.initApp(json);
-      if (key) setupAdminPanel();
+      document.getElementById('adminGate').style.display = 'block';
+      setupAdminLogin();
+      if (!json.weeks || !json.weeks.length) {
+        stateEl.textContent = 'まだ週次データがありません。「管理者」からログインして最初の週を登録してください。';
+        stateEl.style.display = 'block';
+      } else {
+        window.initApp(json);
+      }
     })
     .catch(err => showError('通信エラー: ' + err.message));
 
+  // ============ 入口ページ（新規登録）============
+  function setupHome() {
+    const $ = id => document.getElementById(id);
+    $('openRegBtn').addEventListener('click', () => {
+      $('regForm').style.display = 'block';
+      $('openRegBtn').style.display = 'none';
+    });
+    $('regSubmitBtn').addEventListener('click', async () => {
+      const msg = $('regMsg');
+      const show = (kind, html) => { msg.className = 'regmsg ' + kind; msg.innerHTML = html; };
+      const payload = {
+        action: 'register',
+        displayName: $('reg_displayName').value.trim(),
+        allianceId: $('reg_allianceId').value.trim(),
+        password: $('reg_password').value.trim(),
+        squadOrder: $('reg_squadOrder').value.trim(),
+        registrant: $('reg_registrant').value.trim()
+      };
+      if (!payload.displayName) return show('err', '同盟名を入力してください。');
+      if (!/^[a-z0-9-]+$/i.test(payload.allianceId)) return show('err', '英語表記は半角英数字とハイフンのみで入力してください。');
+      if (!/^[a-z0-9]{6,}$/i.test(payload.password)) return show('err', 'パスワードは半角英数字6文字以上にしてください。');
+
+      const btn = $('regSubmitBtn'); btn.disabled = true;
+      show('ok', '登録中…');
+      try {
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (data.error) { show('err', data.error); btn.disabled = false; return; }
+        const viewUrl = DASHBOARD_URL + '?alliance=' + encodeURIComponent(data.allianceId);
+        show('ok',
+          '<b>登録が完了しました。</b> 下のURLをメンバーに共有してください。<br>' +
+          '管理するときは、このURLを開いて右上の「管理者」から、登録したパスワードでログインします。' +
+          '<div class="urlbox" id="vurl">' + viewUrl + '</div>' +
+          '<button class="copybtn" id="copyVurl">閲覧URLをコピー</button>');
+        $('copyVurl').addEventListener('click', () => {
+          navigator.clipboard.writeText(viewUrl).then(() => { $('copyVurl').textContent = 'コピーしました'; });
+        });
+        $('regForm').querySelectorAll('input').forEach(i => i.disabled = true);
+      } catch (err) { show('err', '通信エラー: ' + err.message); btn.disabled = false; }
+    });
+  }
+
+  // ============ 管理者ログイン ============
+  function setupAdminLogin() {
+    const $ = id => document.getElementById(id);
+    $('adminOpenBtn').addEventListener('click', () => {
+      $('adminLogin').style.display = 'block';
+      $('adminGate').style.display = 'none';
+      $('loginPass').focus();
+    });
+    $('loginCancel').addEventListener('click', () => {
+      $('adminLogin').style.display = 'none';
+      $('adminGate').style.display = 'block';
+    });
+    async function tryLogin() {
+      const pass = $('loginPass').value.trim();
+      const status = $('loginStatus');
+      if (!pass) { status.textContent = 'パスワードを入力してください'; return; }
+      status.textContent = '確認中…';
+      try {
+        // token照合はGAS側で行う。verify専用アクションで確認。
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'verify', alliance: allianceId, token: pass }) });
+        const data = await res.json();
+        if (data.ok) {
+          adminToken = pass;
+          $('adminLogin').style.display = 'none';
+          status.textContent = '';
+          setupAdminPanel();
+          document.getElementById('adminPanel').style.display = 'block';
+        } else {
+          status.textContent = 'パスワードが違います';
+        }
+      } catch (err) { status.textContent = '通信エラー: ' + err.message; }
+    }
+    $('loginBtn').addEventListener('click', tryLogin);
+    $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+  }
+
+
   // ============ 管理パネル ============
+  let adminPanelReady = false;
   function setupAdminPanel() {
-    document.getElementById('adminPanel').style.display = 'block';
+    if (adminPanelReady) return;
+    adminPanelReady = true;
 
     function parseLine(line) {
       const delim = line.includes('\t') ? '\t' : ',';
       return line.split(delim).map(s => s.trim().replace(/^"|"$/g, ''));
     }
     function parseRows(text) {
-      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const lines = text.replace(/^\ufeff/, '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const rows = [];
       lines.forEach((line, i) => {
         const cols = parseLine(line);
@@ -345,7 +488,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       try {
         const res = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'addWeek', alliance: allianceId, token: key, weekLabel, tsv })
+          body: JSON.stringify({ action: 'addWeek', alliance: allianceId, token: adminToken, weekLabel, tsv })
         });
         const data = await res.json();
         if (data.error) { status.textContent = 'エラー: ' + data.error; }
@@ -358,7 +501,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     // ---- 分隊分けの反映 ----
     async function submitSquads(text) {
       const status = document.getElementById('squadStatus');
-      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const lines = text.replace(/^\ufeff/, '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const tsvLines = [];
       lines.forEach((line, i) => {
         const cols = parseLine(line);
@@ -371,7 +514,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       try {
         const res = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'setSquads', alliance: allianceId, token: key, tsv: tsvLines.join('\n') })
+          body: JSON.stringify({ action: 'setSquads', alliance: allianceId, token: adminToken, tsv: tsvLines.join('\n') })
         });
         const data = await res.json();
         if (data.error) { status.textContent = 'エラー: ' + data.error; }
@@ -395,16 +538,19 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
     document.getElementById('reissueBtn').addEventListener('click', async () => {
       const status = document.getElementById('reissueStatus');
-      if (!confirm('管理用キーを再発行しますか？ 今のURLは使えなくなります。')) return;
+      const np = prompt('新しい管理用パスワードを入力してください（半角英数字6文字以上）');
+      if (np === null) return;
+      const newPass = np.trim();
+      if (!/^[a-z0-9]{6,}$/i.test(newPass)) { status.textContent = '半角英数字6文字以上にしてください'; return; }
       status.textContent = '処理中…';
       try {
         const res = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'reissueToken', alliance: allianceId, oldToken: key })
+          body: JSON.stringify({ action: 'changePassword', alliance: allianceId, oldToken: adminToken, newToken: newPass })
         });
         const data = await res.json();
         if (data.error) { status.textContent = 'エラー: ' + data.error; }
-        else { status.textContent = '新しいキー: ' + data.newToken + '（必ず控えてください。新しいURLは ?alliance=' + allianceId + '&key=' + data.newToken + ' です）'; }
+        else { adminToken = newPass; status.textContent = 'パスワードを変更しました。次回から新しいパスワードでログインしてください。'; }
       } catch (err) {
         status.textContent = '通信エラー: ' + err.message;
       }
