@@ -133,6 +133,39 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 .mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--gold-soft)}
 .urlbox{margin-top:8px;padding:10px;background:var(--ink2);border:1px solid var(--line2);border-radius:4px;font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--gold-soft)}
 .copybtn{margin-top:8px;padding:7px 14px;font-size:12px;border:1px solid var(--line2);background:var(--ink2);color:var(--gold-soft);border-radius:4px;cursor:pointer;font-family:inherit;font-weight:700}
+.jump{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.jump a{flex:1 1 auto;text-align:center;text-decoration:none;padding:14px 18px;border-radius:6px;font-weight:700;font-size:15px}
+.jump .go-reg{background:linear-gradient(180deg,#e7cd8a,#c69f45);color:#1c1608;box-shadow:0 2px 12px rgba(214,178,92,.25)}
+.jump .go-help{background:var(--ink2);border:1px solid var(--line2);color:var(--gold-soft);font-family:inherit;cursor:pointer}
+/* 使い方モーダル */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,7,3,.72);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto}
+.modal{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:10px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-family:"Noto Serif JP",serif;font-size:18px;color:var(--gold-soft);font-weight:700}
+.modal-x{border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+.modal-body{padding:18px}
+.step{display:flex;gap:11px;margin-bottom:13px;font-size:13.5px;color:var(--paper);line-height:1.6}
+.stepno{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--gold-dim);color:#1c1608;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
+.airec{margin:16px 0;padding:13px 15px;border:1px solid var(--line);border-radius:6px;background:var(--ink2)}
+.airec-t{font-size:12px;font-weight:700;color:var(--gold-soft);letter-spacing:.05em;margin-bottom:9px}
+.airow{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--paper);margin-bottom:6px}
+.airow b{flex:0 0 76px;font-weight:700}
+.airow .ok2{color:var(--jade)}
+.airow .mid{color:var(--gold-soft)}
+.aihint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+.prompt-block{margin-top:16px}
+.prompt-label{font-size:12px;font-weight:700;color:var(--gold-soft);margin-bottom:6px}
+.prompt-pre{background:var(--ink);border:1px solid var(--line2);border-radius:6px;padding:12px;font-family:ui-monospace,monospace;font-size:12px;color:var(--paper);white-space:pre-wrap;word-break:break-word;line-height:1.55;margin:0}
+.prompt-block .copybtn{margin-top:8px}
+.helpwide{display:block;width:100%;margin:2px 0 14px;padding:12px;background:var(--ink2);border:1px solid var(--line2);color:var(--gold-soft);font-weight:700;font-size:14px;border-radius:6px;cursor:pointer;font-family:inherit}
+.anchor{scroll-margin-top:14px}
+.share{margin-top:14px;border:1px solid var(--jade-dim);border-radius:8px;overflow:hidden}
+.share .shead{background:rgba(121,195,154,.10);padding:12px 14px;font-size:13px;font-weight:700;color:var(--jade)}
+.share .sbody{padding:14px}
+.urlbig{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:6px;overflow:hidden;background:var(--ink2)}
+.urlbig .u{flex:1;padding:14px;font-family:ui-monospace,monospace;font-size:13px;color:var(--gold-soft);word-break:break-all;display:flex;align-items:center}
+.urlbig .c{flex:0 0 auto;border:0;background:var(--jade-dim);color:#fff;font-weight:700;font-family:inherit;font-size:14px;padding:0 20px;cursor:pointer;white-space:nowrap}
+.sharehint{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -148,21 +181,25 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
   <!-- ============ 入口ページ（?alliance= が無いとき）============ -->
   <div id="homeView" style="display:none">
-    <div class="card">
+    <div class="jump">
+      <a href="#reg" class="go-reg">＋ 新しい同盟を登録する</a>
+      <button type="button" class="go-help" id="openHelpBtn">使い方を見る</button>
+    </div>
+
+    <div class="card anchor" id="reg">
       <h2>新しい同盟を登録する</h2>
       <div class="desc">登録すると、あなたの同盟専用の閲覧URLと管理用パスワードが使えるようになります。</div>
-      <button id="openRegBtn" class="abtn primary" style="margin-top:6px">新しい同盟を登録する</button>
 
-      <div id="regForm" style="display:none;margin-top:16px">
+      <div id="regForm" style="margin-top:6px">
         <div class="rowf"><label class="lbl">同盟名（画面に表示。日本語OK）</label><input id="reg_displayName" type="text" placeholder="ゆんぱーく"></div>
         <div class="rowf"><label class="lbl">英語表記（URL用ID・半角英数字とハイフンのみ）</label><input id="reg_allianceId" type="text" placeholder="yunpark" autocapitalize="off"></div>
         <div class="rowf"><label class="lbl">管理用パスワード（半角英数字6文字以上）</label><input id="reg_password" type="text" placeholder="半角英数字6文字以上"></div>
-        <div class="rowf"><label class="lbl">分隊名（任意・カンマ区切りで並び順どおり）</label><input id="reg_squadOrder" type="text" placeholder="分隊A,分隊B,分隊C"></div>
-        <div class="rowf"><label class="lbl">登録者名（記録用）</label><input id="reg_registrant" type="text" placeholder="あなたの名前"></div>
+        <div class="rowf"><label class="lbl">登録者名（記録用）</label><input id="reg_registrant" type="text" placeholder="あなたのゲーム内の名前"></div>
         <button id="regSubmitBtn" class="abtn ok" style="margin-top:6px">この内容で登録する</button>
         <div id="regMsg" class="regmsg"></div>
       </div>
     </div>
+
     <div class="note">既に登録済みの同盟の方は、配布された<b>閲覧URL</b>（<span class="mono">?alliance=同盟ID</span> 付き）からアクセスしてください。</div>
   </div>
 
@@ -226,6 +263,8 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     <h2>データ管理</h2>
     <div class="desc">CSVファイルを選ぶか、読み取り結果を直接貼り付けてください。</div>
 
+    <button type="button" id="openHelpBtn2" class="abtn helpwide">使い方・AIプロンプトを見る</button>
+
     <div style="margin:10px 0">
       <label class="lbl">週の期間ラベル（例: 8/17〜）</label><br>
       <input id="weekLabelInput" type="text" placeholder="8/17〜" style="margin-top:4px">
@@ -246,6 +285,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
     <div id="previewArea" style="margin-top:14px;display:none">
       <div class="lbl">プレビュー（<span id="previewCount">0</span>件）— セルをクリックすると修正できます</div>
+      <div id="countCheck" style="margin:6px 0;font-size:12.5px;font-weight:700"></div>
       <div class="tw" style="margin-top:8px;overflow-x:auto">
         <table id="previewTbl"><thead><tr><th>名前</th><th>武勲</th><th>勢力値</th></tr></thead><tbody id="previewBody"></tbody></table>
       </div>
@@ -268,9 +308,70 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       <button id="reissueBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff">管理用パスワードを変更する</button>
       <span id="reissueStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
     </div>
+
+    <div class="share" id="shareBox" style="margin-top:20px">
+      <div class="shead">✓ 同盟員に共有するURL</div>
+      <div class="sbody">
+        <div class="urlbig">
+          <div class="u" id="shareUrl"></div>
+          <button class="c" id="shareCopyBtn">コピー</button>
+        </div>
+        <div class="sharehint">今週のデータを入れ終わったら、このURLを同盟チャットに貼ってください。メンバー全員が閲覧できます（パスワードは含まれません）。</div>
+      </div>
+    </div>
   </div>
 
   <div class="foot" id="foot"></div>
+</div>
+
+<!-- ============ 使い方モーダル ============ -->
+<div id="helpModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>使い方</h2>
+      <button id="helpClose" class="modal-x" aria-label="閉じる">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="step"><span class="stepno">1</span><div>ゲームの「同盟成員」画面のスクショを撮ります（全員分。スクロールで重複してもOK）。</div></div>
+      <div class="step"><span class="stepno">2</span><div>AIにスクショを渡し、下のプロンプトを貼って読み取ってもらいます。</div></div>
+      <div class="step"><span class="stepno">3</span><div>出てきた結果をコピーし、管理画面の貼り付け欄に入れて「反映」。プレビューで人数と誤読を確認できます。</div></div>
+
+      <div class="airec">
+        <div class="airec-t">どのAIを使う？</div>
+        <div class="airow"><b class="ok2">Claude</b><span>おすすめ。読み取り精度・人数の正確さが高い</span></div>
+        <div class="airow"><b class="ok2">ChatGPT</b><span>おすすめ。全員分をしっかり出せる</span></div>
+        <div class="airow"><b class="mid">Gemini</b><span>使えるが、読み飛ばしや誤読が出やすく修正が多め</span></div>
+        <div class="aihint">どのAIでも名前の細かい誤読は起きます。反映前にプレビューで確認・修正してください。前週比の人数チェックも表示されます。</div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">■ 週次データ用プロンプト（スクショと一緒にAIへ）</div>
+        <pre id="promptWeekly" class="prompt-pre">このゲーム「大三国志」の同盟成員一覧のスクショから、全員分を読み取ってください。
+
+出力：1行1人、「名前,武勲,勢力値」のカンマ区切り。見出し行なし。コードブロックで。
+
+ルール：
+・数字の3桁カンマは除く。「万」は数値化（58万→580000、13.7万→137000）
+・名前は画面のまま正確に（記号・全角半角も。剣権羽 と 剣権羽. は別人）
+・重複は1人にまとめる。読み飛ばし厳禁、1人残らず出す
+・最後に読み取った人数を報告</pre>
+        <button class="copybtn" data-target="promptWeekly">このプロンプトをコピー</button>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">■ 分隊分け用プロンプト（分隊参加者のスクショと一緒に）</div>
+        <pre id="promptSquad" class="prompt-pre">このゲーム「大三国志」の分隊参加者のスクショから、全員分を読み取ってください。
+
+出力：1行1人、「名前,分隊名」のカンマ区切り。見出し行なし。コードブロックで。分隊名は画面上部の見出し文字。
+
+ルール：
+・名前は画面のまま正確に（記号・全角半角も。剣権羽 と 剣権羽. は別人）
+・読み飛ばし厳禁、1人残らず出す
+・最後に読み取った人数を報告</pre>
+        <button class="copybtn" data-target="promptSquad">このプロンプトをコピー</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="app.js"></script>
@@ -292,6 +393,8 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
   const DASHBOARD_URL = location.origin + location.pathname;
 
   let adminToken = null; // 管理者ログイン成功時にセットされる
+  let allianceName = null; // 表示名（共有URLの一言に使う）
+  let prevWeekCount = null; // 直近の週の人数（前週比チェック用）
 
   function showError(msg) {
     stateEl.textContent = msg;
@@ -300,6 +403,28 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     dashEl.style.display = 'none';
     homeEl.style.display = 'none';
   }
+
+  // ---- 使い方モーダル（どの画面でも動く）----
+  (function () {
+    const modal = document.getElementById('helpModal');
+    const closeBtn = document.getElementById('helpClose');
+    ['openHelpBtn', 'openHelpBtn2'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) btn.addEventListener('click', () => { modal.style.display = 'flex'; });
+    });
+    if (closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+    modal.querySelectorAll('.copybtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = document.getElementById(btn.dataset.target).textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = 'コピーしました';
+          setTimeout(() => { btn.textContent = orig; }, 1500);
+        });
+      });
+    });
+  })();
 
   // ---- ?alliance= が無い → 入口ページ ----
   if (!allianceId) {
@@ -320,6 +445,10 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     .then(res => res.json())
     .then(json => {
       if (json.error) { showError('データ取得エラー: ' + json.error); return; }
+      allianceName = json.displayName || allianceId;
+      if (json.weeks && json.weeks.length) {
+        prevWeekCount = json.weeks[json.weeks.length - 1].rows.length;
+      }
       stateEl.style.display = 'none';
       dashEl.style.display = 'block';
       document.getElementById('adminGate').style.display = 'block';
@@ -336,10 +465,6 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
   // ============ 入口ページ（新規登録）============
   function setupHome() {
     const $ = id => document.getElementById(id);
-    $('openRegBtn').addEventListener('click', () => {
-      $('regForm').style.display = 'block';
-      $('openRegBtn').style.display = 'none';
-    });
     $('regSubmitBtn').addEventListener('click', async () => {
       const msg = $('regMsg');
       const show = (kind, html) => { msg.className = 'regmsg ' + kind; msg.innerHTML = html; };
@@ -348,7 +473,6 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
         displayName: $('reg_displayName').value.trim(),
         allianceId: $('reg_allianceId').value.trim(),
         password: $('reg_password').value.trim(),
-        squadOrder: $('reg_squadOrder').value.trim(),
         registrant: $('reg_registrant').value.trim()
       };
       if (!payload.displayName) return show('err', '同盟名を入力してください。');
@@ -363,14 +487,12 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
         if (data.error) { show('err', data.error); btn.disabled = false; return; }
         const viewUrl = DASHBOARD_URL + '?alliance=' + encodeURIComponent(data.allianceId);
         show('ok',
-          '<b>登録が完了しました。</b> 下のURLをメンバーに共有してください。<br>' +
-          '管理するときは、このURLを開いて右上の「管理者」から、登録したパスワードでログインします。' +
-          '<div class="urlbox" id="vurl">' + viewUrl + '</div>' +
-          '<button class="copybtn" id="copyVurl">閲覧URLをコピー</button>');
-        $('copyVurl').addEventListener('click', () => {
-          navigator.clipboard.writeText(viewUrl).then(() => { $('copyVurl').textContent = 'コピーしました'; });
-        });
+          '<b>登録が完了しました。</b><br>' +
+          'つづけて、下のリンクからダッシュボードを開き、右上の「管理者」から登録したパスワードでログインして、今週のデータを入れてください。<br>' +
+          '<div style="margin-top:10px"><a href="' + viewUrl + '" style="color:var(--gold-soft);font-weight:700">▶ このダッシュボードを開く</a></div>' +
+          '<div class="sharehint" style="margin-top:10px;font-size:11.5px;color:var(--muted)">データを入れ終わったら、管理画面の一番下に出る「同盟員に共有するURL」をコピーしてメンバーに配れます。</div>');
         $('regForm').querySelectorAll('input').forEach(i => i.disabled = true);
+        $('regSubmitBtn').style.display = 'none';
       } catch (err) { show('err', '通信エラー: ' + err.message); btn.disabled = false; }
     });
   }
@@ -418,6 +540,19 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     if (adminPanelReady) return;
     adminPanelReady = true;
 
+    // 同盟員に共有するURL（一言＋URL）
+    (function () {
+      const viewUrl = DASHBOARD_URL + '?alliance=' + encodeURIComponent(allianceId);
+      const shareText = '【' + (allianceName || allianceId) + ' 武勲記録】' + viewUrl;
+      document.getElementById('shareUrl').textContent = shareText;
+      document.getElementById('shareCopyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(shareText).then(() => {
+          const b = document.getElementById('shareCopyBtn');
+          b.textContent = 'コピー済'; setTimeout(() => { b.textContent = 'コピー'; }, 1500);
+        });
+      });
+    })();
+
     function parseLine(line) {
       const delim = line.includes('\t') ? '\t' : ',';
       return line.split(delim).map(s => s.trim().replace(/^"|"$/g, ''));
@@ -446,6 +581,26 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
         body.appendChild(tr);
       });
       document.getElementById('previewCount').textContent = rows.length;
+      // 前週比の人数チェック
+      const cc = document.getElementById('countCheck');
+      if (prevWeekCount == null) {
+        cc.textContent = '今回 ' + rows.length + '人（前週データなし）';
+        cc.style.color = 'var(--muted)';
+      } else {
+        const diff = rows.length - prevWeekCount;
+        const sign = diff > 0 ? '+' : '';
+        let label = '今回 ' + rows.length + '人 / 前週 ' + prevWeekCount + '人（' + sign + diff + '）';
+        if (diff <= -5) {
+          cc.style.color = 'var(--verm)';
+          label += ' ⚠ 前週より大きく減っています。読み飛ばしがないか確認してください';
+        } else if (diff < 0) {
+          cc.style.color = 'var(--gold-soft)';
+          label += '（脱退がなければ読み飛ばしの可能性）';
+        } else {
+          cc.style.color = 'var(--jade)';
+        }
+        cc.textContent = label;
+      }
       document.getElementById('previewArea').style.display = 'block';
       body.querySelectorAll('[contenteditable]').forEach(cell => {
         cell.addEventListener('input', () => {
