@@ -43,7 +43,7 @@ window.initApp = function (DATA) {
 
   // ---- helpers ----
   const fmt = n => n == null ? '—' : n.toLocaleString('ja-JP');
-  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   const rankPill = r => { if (r == null) return '<span class="rk na">–</span>'; const c = r === 1 ? 'm1' : r === 2 ? 'm2' : r === 3 ? 'm3' : ''; return '<span class="rk ' + c + '">' + r + '</span>'; };
   const maxAbs = (rows, key) => Math.max(1, ...rows.map(r => Math.abs(r[key] || 0)));
   function deltaCell(v, max) {
@@ -111,13 +111,13 @@ window.initApp = function (DATA) {
     let rows = currentRows();
     if (sortKey) rows.sort((a, b) => { let av = a[sortKey], bv = b[sortKey]; if (typeof av === 'string' || typeof bv === 'string') return String(av).localeCompare(String(bv), 'ja') * sortDir; av = av == null ? -Infinity : av; bv = bv == null ? -Infinity : bv; return (av - bv) * sortDir; });
     if (!isSquad() && squadFilter !== 'all') rows = rows.filter(r => r.squad === squadFilter);
-    const filtered = q ? rows.filter(r => (r.name || '').toLowerCase().includes(q)) : rows;
+    const filtered = q ? rows.filter(r => String(r.name || '').toLowerCase().includes(q)) : rows;
     const maxDb = isTrend() ? maxAbs(merged, 'db') : 1, maxDs = isTrend() ? maxAbs(merged, 'ds') : 1;
     const tb = document.getElementById('tbody');
     if (!filtered.length) { tb.innerHTML = '<tr><td class="empty" colspan="' + cols.length + '">該当するデータがありません</td></tr>'; setCount(0, rows.length, q); return; }
     tb.innerHTML = filtered.map(r => {
       if (isSquad()) return '<tr><td class="name"><span class="sqname">' + esc(r.squad) + '</span></td><td class="c-num">' + fmt(r.n) + '</td><td class="c-num">' + fmt(r.sb) + '</td><td class="c-num">' + fmt(r.ab) + '</td><td class="c-num">' + fmt(r.ss) + '</td><td class="c-num">' + fmt(r.as) + '</td></tr>';
-      const hit = q && r.name.toLowerCase().includes(q);
+      const hit = q && String(r.name).toLowerCase().includes(q);
       if (isTrend()) { const badge = r.status === '新加入' ? '<span class="badge n">新加入</span>' : r.status === '脱退' ? '<span class="badge l">脱退</span>' : '<span class="badge">継続</span>'; return '<tr class="' + (hit ? 'hit' : '') + '"><td class="name">' + rankPill(r.rank) + '<span class="nm">' + esc(r.name) + '</span></td><td class="c-squad"><span class="sq">' + esc(r.squad) + '</span></td><td class="c-status">' + badge + '</td><td class="c-num">' + fmt(r.bL) + '</td>' + deltaCell(r.db, maxDb) + '<td class="c-num">' + fmt(r.sL) + '</td>' + deltaCell(r.ds, maxDs) + '<td class="c-num dim">' + fmt(r.bP) + '</td><td class="c-num dim">' + fmt(r.sP) + '</td></tr>'; }
       return '<tr class="' + (hit ? 'hit' : '') + '"><td class="name"><span class="nm">' + esc(r.name) + '</span></td><td class="c-squad"><span class="sq">' + esc(r.squad) + '</span></td><td class="c-num">' + fmt(r.b) + '</td><td class="c-num">' + fmt(r.s) + '</td></tr>';
     }).join('');
