@@ -277,7 +277,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
     <div style="margin:10px 0">
       <label class="lbl">または、ここに貼り付け（1行につき「名前,武勲,勢力値」）</label><br>
-      <textarea id="csvPaste" rows="6" style="margin-top:4px" placeholder="成龍,25843,580000&#10;八宝菜太郎,29567,547000"></textarea>
+      <textarea id="csvPaste" rows="6" style="margin-top:4px" placeholder="メンバー名1,25843,580000&#10;メンバー名2,29567,547000"></textarea>
     </div>
 
     <button id="parseBtn" class="abtn primary">読み込む</button>
@@ -298,10 +298,18 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
       <div class="lbl" style="font-size:12px;color:var(--gold-soft)">分隊分けの更新（任意）</div>
       <div class="desc" style="margin:4px 0 10px 0">「名前,分隊名」を1行ずつ。<b>最新の所属で全部を置き換えます</b>（送るたびに前回の分隊分けは上書き）。分隊が変わった人だけでなく、全員分を入れてください。</div>
-      <textarea id="squadPaste" rows="5" placeholder="成龍,分隊A&#10;八宝菜太郎,分隊B" style="margin-bottom:8px"></textarea><br>
+      <textarea id="squadPaste" rows="5" placeholder="メンバー名1,分隊A&#10;メンバー名2,分隊B" style="margin-bottom:8px"></textarea><br>
       <input type="file" id="squadFile" accept=".csv,text/csv" style="margin-bottom:8px"><br>
       <button id="squadBtn" class="abtn primary">分隊分けを反映する</button>
       <span id="squadStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+    </div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line)">
+      <div class="lbl" style="font-size:12px;color:var(--gold-soft)">週データの削除</div>
+      <div class="desc" style="margin:4px 0 10px 0">間違えて入れた週を削除できます。選んだ週の全メンバー行が消えます（元に戻せません）。入れ直すときは、削除してから正しいデータを反映してください。</div>
+      <select id="delWeekSel" style="background:var(--ink2);border:1px solid var(--line);color:var(--paper);font-family:inherit;font-size:14px;padding:9px 12px;border-radius:4px;outline:none;max-width:220px"></select>
+      <button id="delWeekBtn" class="abtn primary" style="background:var(--verm-dim);color:#fff;margin-left:8px">この週を削除</button>
+      <span id="delWeekStatus" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
     </div>
 
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)">
@@ -395,6 +403,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
   let adminToken = null; // 管理者ログイン成功時にセットされる
   let allianceName = null; // 表示名（共有URLの一言に使う）
   let prevWeekCount = null; // 直近の週の人数（前週比チェック用）
+  let weekLabels = []; // 登録済みの週ラベル一覧（削除UI用）
 
   function showError(msg) {
     stateEl.textContent = msg;
@@ -448,6 +457,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
       allianceName = json.displayName || allianceId;
       if (json.weeks && json.weeks.length) {
         prevWeekCount = json.weeks[json.weeks.length - 1].rows.length;
+        weekLabels = json.weeks.map(w => w.label);
       }
       stateEl.style.display = 'none';
       dashEl.style.display = 'block';
@@ -550,6 +560,34 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
           const b = document.getElementById('shareCopyBtn');
           b.textContent = 'コピー済'; setTimeout(() => { b.textContent = 'コピー'; }, 1500);
         });
+      });
+    })();
+
+    // 週データの削除
+    (function () {
+      const sel = document.getElementById('delWeekSel');
+      const status = document.getElementById('delWeekStatus');
+      if (!weekLabels.length) {
+        sel.innerHTML = '<option value="">（削除できる週がありません）</option>';
+        sel.disabled = true;
+        document.getElementById('delWeekBtn').disabled = true;
+      } else {
+        sel.innerHTML = weekLabels.map(l => '<option>' + l + '</option>').join('');
+      }
+      document.getElementById('delWeekBtn').addEventListener('click', async () => {
+        const label = sel.value;
+        if (!label) return;
+        if (!confirm('「' + label + '」の週データを削除します。元に戻せません。よろしいですか？')) return;
+        status.textContent = '削除中…';
+        try {
+          const res = await fetch(GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'deleteWeek', alliance: allianceId, token: adminToken, weekLabel: label })
+          });
+          const data = await res.json();
+          if (data.error) { status.textContent = 'エラー: ' + data.error; }
+          else { status.textContent = '「' + label + '」を削除しました（' + data.deleted + '行）。3秒後に再読み込みします…'; setTimeout(() => location.reload(), 3000); }
+        } catch (err) { status.textContent = '通信エラー: ' + err.message; }
       });
     })();
 
