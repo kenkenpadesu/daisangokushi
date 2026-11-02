@@ -163,7 +163,7 @@
     document.getElementById('graphView').style.display = graph ? 'block' : 'none';
     document.getElementById('awardView').style.display = award ? 'block' : 'none';
     document.getElementById('tnote').style.display = tbl ? 'block' : 'none';
-    if (graph) initGraphs();
+    if (graph) { if (!graphInit) ycLoading(650, true); initGraphs(); }
     if (award) renderAwards();
     updateShareBtn();
   }
@@ -179,7 +179,7 @@
     const filtered = q ? rows.filter(r => (r.name || '').toLowerCase().includes(q)) : rows;
     const maxDb = isTrend() ? maxAbs(merged, 'db') : 1, maxDs = isTrend() ? maxAbs(merged, 'ds') : 1;
     const tb = document.getElementById('tbody');
-    if (!filtered.length) { tb.innerHTML = '<tr><td class="empty" colspan="' + cols.length + '">該当するデータがありません</td></tr>'; setCount(0, rows.length, q); return; }
+    if (!filtered.length) { tb.innerHTML = '<tr><td class="empty" colspan="' + cols.length + '">該当するデータがありません</td></tr>'; setCount(0, rows.length, q); if (q) ycNoHit(); return; }
     const sqCell = r => HAS_SQUADS ? '<td class="c-squad"><span class="sq">' + esc(r.squad) + '</span></td>' : '';
     tb.innerHTML = filtered.map(r => {
       if (isSquad()) return '<tr><td class="name"><span class="sqname">' + esc(r.squad) + '</span></td><td class="c-num">' + fmt(r.n) + '</td><td class="c-num">' + fmt(r.sb) + '</td><td class="c-num">' + fmt(r.ab) + '</td><td class="c-num">' + fmt(r.ss) + '</td><td class="c-num">' + fmt(r.as) + '</td></tr>';
@@ -200,7 +200,7 @@
     el.innerHTML = q ? '「' + esc(q) + '」で <b>' + shown + '</b> 件' + suff : '<b>' + shown + '</b> 名を表示' + suff;
   }
 
-  document.getElementById('seg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; view = b.dataset.v === 'week' ? weekSel : b.dataset.v; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); buildSqFilter(); applyView(); render(); });
+  document.getElementById('seg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ycLoading(450); view = b.dataset.v === 'week' ? weekSel : b.dataset.v; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); buildSqFilter(); applyView(); render(); });
   document.getElementById('wkchips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; view = weekSel = c.dataset.w; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); applyView(); render(); });
   document.getElementById('chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; const k = c.dataset.k; if (k === sortKey) sortDir *= -1; else { sortKey = k; sortDir = parseInt(c.dataset.d); } buildChips(); render(); });
   document.getElementById('sqfilter').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; squadFilter = c.dataset.s; buildSqFilter(); render(); });
@@ -403,11 +403,11 @@
     destroyPmCharts();
     pmBody.innerHTML = personHtml(name);
     pm.hidden = false; document.body.classList.add('modal-open'); pmBox.scrollTop = 0;
-    drawPersonCharts(name);
+    ycLoading(380); drawPersonCharts(name); ycUpdate(); ycPerson(name);
     try { history.replaceState(null, '', '#m=' + encodeURIComponent(name)); } catch (e) { }
   }
   function closePerson() {
-    destroyPmCharts(); pm.hidden = true; document.body.classList.remove('modal-open');
+    destroyPmCharts(); pm.hidden = true; document.body.classList.remove('modal-open'); ycUpdate();
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
   }
   document.addEventListener('click', e => { const el = e.target.closest('[data-name]'); if (el) openPerson(decodeURIComponent(el.dataset.name)); });
@@ -441,7 +441,7 @@
     const cv = document.createElement('canvas'); cv.width = SH_W; cv.height = SH_H; const c = cv.getContext('2d');
     const sample = rows.map(r => r.name).join('') + 'ゆんぱーく同盟武勲記録ランキングTOP10全名平均Season5〜★万剣奇兵隊べぽ煽り紳士春うらら成龍鬼軍団0123456789.';
     try { await Promise.all([T.title, T.big, T.name, T.nameTop, T.sub, T.val, T.small].map(f => document.fonts.load(f, sample))); } catch (e) { }
-    const [logo, tile] = await Promise.all([loadImg('favicon-180.png'), yuna ? loadImg('yuna-bg.png') : null]);
+    const [logo, tile, chara] = await Promise.all([loadImg('favicon-180.png'), yuna ? loadImg('yuna-bg.png') : null, yuna ? loadImg(ycCur) : null]);
     // 背景
     if (yuna) {
       const g = c.createLinearGradient(0, 0, 0, SH_H); g.addColorStop(0, '#fff3f9'); g.addColorStop(1, '#ffdcec'); c.fillStyle = g; c.fillRect(0, 0, SH_W, SH_H);
@@ -498,6 +498,7 @@
     });
     // フッター
     c.strokeStyle = yuna ? '#ffc6dd' : '#3b3125'; c.lineWidth = yuna ? 3 : 1; if (yuna) c.setLineDash([10, 7]); c.beginPath(); c.moveTo(70, 1246); c.lineTo(1010, 1246); c.stroke(); c.setLineDash([]);
+    if (yuna && chara) { const k = Math.min(230 / chara.width, 146 / chara.height), dw = Math.round(chara.width * k), dh = Math.round(chara.height * k); c.drawImage(chara, 560 - Math.round(dw / 2), 1332 - dh, dw, dh); }
     c.font = T.small; c.fillStyle = T.foot; c.fillText('同盟平均武勲 ', 70, 1292); const lw = c.measureText('同盟平均武勲 ').width;
     c.font = '700 ' + T.small.split(' ').slice(1).join(' '); c.fillStyle = T.footb; c.fillText((Math.round(avgOf(w, 'b') / 1000) / 10).toLocaleString('ja-JP') + '万', 70 + lw, 1292);
     c.font = T.small; c.fillStyle = T.foot; c.textAlign = 'right'; c.fillText('Season 5 ・ ゆんぱーく', 1010, 1292); c.textAlign = 'left';
@@ -505,9 +506,9 @@
   }
   async function shareTop10(btn) {
     const w = shareWeek(); if (!w || !w.play) return;
-    const label = btn.textContent; btn.disabled = true; btn.textContent = '画像を作っています…';
+    const label = btn.textContent, t0 = Date.now(); btn.disabled = true; btn.textContent = '画像を作っています…'; ycLoading(9000, true);
     try {
-      const cv = await drawShare(w, YUNA);
+      const cv = await drawShare(w, YUNA); setTimeout(ycLoadHide, Math.max(0, 700 - (Date.now() - t0)));
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
       const fname = 'yunpark_' + w.label.replace('〜', '').replace('/', '-') + '_TOP10.png';
       const file = new File([blob], fname, { type: 'image/png' });
@@ -515,7 +516,7 @@
       if (touch && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'ゆんぱーく ' + w.label + ' 武勲TOP10' }); btn.textContent = label; btn.disabled = false; return; } catch (e) { if (e && e.name === 'AbortError') { btn.textContent = label; btn.disabled = false; return; } } }
       const u = URL.createObjectURL(blob), el = document.createElement('a'); el.href = u; el.download = fname; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
       btn.textContent = '保存しました ✓';
-    } catch (e) { btn.textContent = '作れませんでした'; }
+    } catch (e) { ycLoadHide(); btn.textContent = '作れませんでした'; }
     setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1800);
   }
   function updateShareBtn() {
@@ -524,21 +525,93 @@
   }
   document.getElementById('sharebtn').addEventListener('click', e => shareTop10(e.currentTarget));
 
+  // ================= ゆなっこちゃん（ゆなっこモード専用）=================
+  const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
+  const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const YC_PEEK = ['yuna-chara1.webp', 'yuna-chara2.webp'], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  YC_PEEK.concat(['yuna-load.webp']).forEach(s => { const im = new Image(); im.src = s; });
+  let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
+  const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
+  function ycLines() {
+    const L = ['今週もおつかれさま♡', 'ちゃんと水分とってる?', 'もっともっと頑張っちゃお〜!', 'えへへ、つっついた?', 'ピンヒールで踏むわよ！'];
+    if (ycLw) {
+      const t = top10Of(ycLw)[0];
+      if (t) L.push('今週の武勲王は' + t.name + 'さんだよ!');
+      L.push('同盟の平均武勲は' + (Math.round(avgOf(ycLw, 'b') / 1000) / 10).toLocaleString('ja-JP') + '万!');
+    }
+    return L;
+  }
+  function ycSay(msg, mood, ms) {
+    if (!YUNA) return;
+    ycB.textContent = msg; ycB.classList.add('show'); ycLast = msg;
+    clearTimeout(ycTimer); ycTimer = setTimeout(() => ycB.classList.remove('show'), ms || 3400);
+    if (mood) { yc.classList.remove('sad', 'cheer'); void yc.offsetWidth; yc.classList.add(mood); setTimeout(() => yc.classList.remove(mood), 1500); }
+  }
+  function ycHearts(n) {
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('span'); s.className = 'yc-h'; s.textContent = ['♥', '✦', '♥', '✿'][i % 4];
+      s.style.setProperty('--dx', (Math.random() * 90 - 70) + 'px'); s.style.setProperty('--dy', (-40 - Math.random() * 70) + 'px'); s.style.animationDelay = (i * 60) + 'ms';
+      ycIn.appendChild(s); setTimeout(() => s.remove(), 1500 + i * 60);
+    }
+  }
+  function ycConfetti() {
+    const cols = ['#ff6fae', '#ffb703', '#9b7bff', '#4fd1ab', '#ff8a5c', '#4aa8ff'];
+    for (let i = 0; i < 46; i++) {
+      const s = document.createElement('span'); s.className = 'yc-cf'; s.style.left = (Math.random() * 100) + 'vw'; s.style.background = cols[i % cols.length];
+      s.style.animationDuration = (1.6 + Math.random() * 1.4) + 's'; s.style.animationDelay = (Math.random() * 0.5) + 's'; s.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      document.body.appendChild(s); setTimeout(() => s.remove(), 3600);
+    }
+  }
+  function ycLoading(ms, force) {
+    if (!YUNA) return; const now = Date.now(); if (!force && now - ycLoadLast < 1500) return;
+    ycLoadLast = now; ycLd.classList.add('show'); clearTimeout(ycLoadT); ycLoadT = setTimeout(ycLoadHide, ms || 450);
+  }
+  function ycLoadHide() { clearTimeout(ycLoadT); ycLd.classList.remove('show'); }
+  function ycUpdate() {
+    if (!YUNA) { yc.classList.remove('on'); return; }
+    const y = window.scrollY, vh = window.innerHeight, max = Math.max(1, document.documentElement.scrollHeight - vh), p = Math.min(1, y / max);
+    const modal = !pm.hidden, show = y > 240 || ycTemp > Date.now() || modal;
+    if (show && !ycWasOn) { const o = YC_PEEK.filter(s => s !== ycCur); ycCur = o[Math.floor(Math.random() * o.length)]; ycImg.src = ycCur; }
+    ycWasOn = show; yc.classList.toggle('on', show);
+    yc.classList.toggle('end', p > .97 && y > 240);
+  }
+  function ycToTop() {
+    if (ycFlying) return;
+    ycSay('いってきまーす♡', null, 1400); ycHearts(8);
+    if (reduceMotion()) { window.scrollTo(0, 0); return; }
+    ycFlying = true; yc.classList.add('fly'); window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => { ycFlying = false; yc.classList.remove('fly'); ycUpdate(); }, 950);
+  }
+  function ycTalk() {
+    ycTaps++; clearTimeout(ycTapT); ycTapT = setTimeout(() => { ycTaps = 0; }, 1800);
+    if (ycTaps >= 10) { ycTaps = 0; ycConfetti(); ycHearts(10); ycSay('わーい！ありがとう♡', 'cheer', 3000); return; }
+    const L = ycLines().filter(t => t !== ycLast); ycSay(L[Math.floor(Math.random() * L.length)]); ycHearts(2);
+  }
+  function ycPerson(name) {
+    const a = AGG.get(name); if (!YUNA || !a || a.tierIdx < 0) return;
+    ycSay(name + 'さん、★' + BADGE_TIERS[a.tierIdx].label + 'おめでとう!', 'cheer', 4200); ycHearts(5);
+  }
+  function ycNoHit() { if (!YUNA) return; ycTemp = Date.now() + 4000; ycUpdate(); if (ycLast !== '見つからないよ〜' || !ycB.classList.contains('show')) ycSay('見つからないよ〜', 'sad', 3600); setTimeout(ycUpdate, 4100); }
+  document.getElementById('ycup').addEventListener('click', ycToTop);
+  document.getElementById('ycchr').addEventListener('click', ycTalk);
+  window.addEventListener('scroll', ycUpdate, { passive: true }); window.addEventListener('resize', ycUpdate);
+
   // ================= テーマ切替（ゆなっこモード）=================
   (function () {
     const b = document.getElementById('themebtn');
-    const paint = () => { b.textContent = YUNA ? '🌙 ダークに戻す' : '🎀 ゆなっこモード'; };
+    const paint = () => { b.textContent = YUNA ? '🌙 ダークモード' : '🎀 ゆなっこモード'; };
     paint();
     b.addEventListener('click', () => {
       const on = !document.documentElement.classList.contains('yuna');
       document.documentElement.classList.toggle('yuna', on);
       try { localStorage.setItem('theme', on ? 'yuna' : 'dark'); } catch (e) { }
-      setPalette(); paint(); chartDefaultsSet = false;
+      setPalette(); paint(); chartDefaultsSet = false; ycUpdate();
       if (graphInit) { ensureChartDefaults(); drawAlliance(); drawSquad(); drawMember(); }
       if (!pm.hidden && /^#m=/.test(location.hash)) { destroyPmCharts(); drawPersonCharts(decodeURIComponent(location.hash.slice(3))); }
     });
   })();
   // ---- init ----
+  ycUpdate();
   const sqCard = document.getElementById('sqCard');
   if (sqCard) sqCard.style.display = HAS_SQUADS ? '' : 'none';
   document.getElementById('tnote').innerHTML += ' <b>バッジ：</b>1週間の武勲が ' + BADGE_TIERS.map(t => '★' + t.label).join('・') + ' に届くと付きます（このページでは今シーズンの最高、各週のタブではその週の到達）。名前をタップすると個人ページが開きます。';

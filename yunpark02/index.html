@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700;900&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script>try{if(localStorage.getItem("theme")==="yuna")document.documentElement.classList.add("yuna")}catch(e){}</script>
+<script>var d=0;try{d=localStorage.getItem("theme")==="dark"}catch(e){}if(!d)document.documentElement.classList.add("yuna")</script>
 <style>
 :root{--ink:#17130d;--ink2:#1e1810;--panel:#241d14;--panel2:#2c2318;--line:#3b3125;--line2:#4a3d2c;
 --gold:#d6b25c;--gold-dim:#9f8340;--gold-soft:#e7cd8a;--paper:#ece2cd;--muted:#a8997c;
@@ -221,6 +221,12 @@ body.modal-open{overflow:hidden}
     <div id="pmBody"></div>
   </div>
 </div>
+<div class="yc" id="yc"><div class="yc-in" id="ycin">
+  <div class="yc-bubble" id="ycb"></div>
+  <button class="yc-up" id="ycup" type="button">↑ トップへ</button>
+  <button class="yc-chr" id="ycchr" type="button" aria-label="ゆなっこちゃん"><img id="ycimg" src="yuna-chara1.webp" alt=""></button>
+</div></div>
+<div class="yc-load" id="ycload"><img src="yuna-load.webp" alt=""><span>読み込み中<i>.</i><i>.</i><i>.</i></span></div>
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>
