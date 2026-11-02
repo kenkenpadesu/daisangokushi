@@ -165,6 +165,7 @@
     document.getElementById('tnote').style.display = tbl ? 'block' : 'none';
     if (graph) initGraphs();
     if (award) renderAwards();
+    updateShareBtn();
   }
   function render() {
     if (isGraph() || isAward()) return;
@@ -209,8 +210,16 @@
   qx.addEventListener('click', () => { q.value = ''; qx.style.display = 'none'; render(); q.focus(); });
 
   // ================= グラフ =================
-  const GOLD = '#d6b25c', JADE = '#79c39a', PAPER = '#ece2cd', MUTED = '#a8997c', GLINE = 'rgba(160,140,100,.14)';
-  const SQCOL = { '成龍': '#d6b25c', '八宝菜': '#79c39a', '奇兵隊': '#dd6e5a', '剣ぱ': '#7aa2d6', '煽り紳士': '#c58fd0', '浪子': '#e0a45c', 'べぽ': '#6fc3c0' };
+  let YUNA, GOLD, JADE, PAPER, MUTED, GLINE, SQCOL;
+  function setPalette() {
+    YUNA = document.documentElement.classList.contains('yuna');
+    GOLD = YUNA ? '#ff5fa2' : '#d6b25c'; JADE = YUNA ? '#13b38a' : '#79c39a'; PAPER = YUNA ? '#5a2744' : '#ece2cd';
+    MUTED = YUNA ? '#a8688a' : '#a8997c'; GLINE = YUNA ? 'rgba(255,111,174,.18)' : 'rgba(160,140,100,.14)';
+    SQCOL = YUNA
+      ? { 'べぽ': '#ff5fa2', '煽り紳士': '#9b7bff', '奇兵隊': '#ff8a5c', '春うらら': '#4fd1ab', '成龍': '#ffb703', '剣ぱーく': '#4aa8ff', '鬼軍団': '#c04fd1' }
+      : { 'べぽ': '#6fc3c0', '煽り紳士': '#c58fd0', '奇兵隊': '#dd6e5a', '春うらら': '#79c39a', '成龍': '#d6b25c', '剣ぱーく': '#7aa2d6', '鬼軍団': '#e0a45c' };
+  }
+  setPalette();
   const weekLabels = WEEKS.map(w => w.label);
   const gfmt = n => n == null ? '' : n.toLocaleString('ja-JP');
   const allianceSeries = (m, avg) => WEEKS.map(w => { const t = w.data.reduce((a, r) => a + (m === 's' ? r.s : r.b), 0); return avg ? Math.round(t / w.data.length) : t; });
@@ -231,7 +240,7 @@
   let graphInit = false, sqChart, meChart, alSChart, alBChart, chartDefaultsSet = false;
   function ensureChartDefaults() {
     if (chartDefaultsSet) return; chartDefaultsSet = true;
-    Chart.defaults.color = MUTED; Chart.defaults.font.family = '"Noto Sans JP",sans-serif'; Chart.defaults.font.size = 11;
+    Chart.defaults.color = MUTED; Chart.defaults.font.family = YUNA ? '"Zen Maru Gothic",sans-serif' : '"Noto Sans JP",sans-serif'; Chart.defaults.font.size = 11;
   }
   const gridX = () => ({ grid: { color: GLINE }, ticks: { color: MUTED } });
   const gridY = () => ({ grid: { color: GLINE }, ticks: { color: MUTED, callback: v => v >= 10000 ? (v / 10000) + '万' : v } });
@@ -240,7 +249,7 @@
       responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { labels: { usePointStyle: true, boxWidth: 8, padding: 12, color: PAPER } },
-        tooltip: { backgroundColor: '#26201a', borderColor: '#4a3d2c', borderWidth: 1, titleColor: GOLD, bodyColor: PAPER, padding: 10, callbacks: { label: c => ' ' + c.dataset.label + ': ' + gfmt(c.parsed.y) } }
+        tooltip: { backgroundColor: YUNA ? '#fff' : '#26201a', borderColor: YUNA ? '#ffb8d4' : '#4a3d2c', borderWidth: 1, titleColor: GOLD, bodyColor: PAPER, padding: 10, callbacks: { label: c => ' ' + c.dataset.label + ': ' + gfmt(c.parsed.y) } }
       },
       scales: dual
         ? { x: gridX(), y: Object.assign({ position: 'left' }, gridY()), y1: Object.assign({ position: 'right' }, gridY(), { grid: { drawOnChartArea: false } }) }
@@ -267,14 +276,14 @@
   }
   function activeToggle(id) { const on = document.querySelector('#' + id + ' button.on'); return on ? on.dataset.v : null; }
   function drawAlliance() {
-    const avg = activeToggle('al_agg') === 'avg', ttl = t => ({ legend: { display: false }, tooltip: baseOpts(false).plugins.tooltip, title: { display: true, text: t, color: '#e7cd8a', font: { size: 13, weight: '700' } } });
+    const avg = activeToggle('al_agg') === 'avg', ttl = t => ({ legend: { display: false }, tooltip: baseOpts(false).plugins.tooltip, title: { display: true, text: t, color: YUNA ? '#d6337f' : '#e7cd8a', font: { size: 13, weight: '700' } } });
     if (alSChart) alSChart.destroy(); if (alBChart) alBChart.destroy();
     alSChart = new Chart(document.getElementById('c_alS'), {
       type: 'line', data: { labels: weekLabels, datasets: [lineDS(avg ? '平均勢力値' : '合計勢力値', allianceSeries('s', avg), GOLD)] },
       options: Object.assign(baseOpts(false), { plugins: ttl(avg ? '平均勢力値' : '合計勢力値') })
     });
     alBChart = new Chart(document.getElementById('c_alB'), {
-      type: 'bar', data: { labels: weekLabels, datasets: [{ label: avg ? '平均武勲' : '合計武勲', data: allianceSeries('b', avg), backgroundColor: 'rgba(214,178,92,.85)', borderColor: GOLD }] },
+      type: 'bar', data: { labels: weekLabels, datasets: [{ label: avg ? '平均武勲' : '合計武勲', data: allianceSeries('b', avg), backgroundColor: YUNA ? 'rgba(255,111,174,.85)' : 'rgba(214,178,92,.85)', borderColor: GOLD }] },
       options: Object.assign(baseOpts(false), { plugins: ttl(avg ? '平均武勲（週ごと）' : '合計武勲（週ごと）') })
     });
   }
@@ -407,6 +416,128 @@
   pm.addEventListener('click', e => { if (e.target === pm) closePerson(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pm.hidden) closePerson(); });
 
+  // ================= 画像で共有（武勲TOP10）=================
+  const SH_W = 1080, SH_H = 1350;
+  const SH_THEME = {
+    dark: {
+      title: '900 56px "Noto Serif JP",serif', big: '900 46px "Noto Serif JP",serif', name: '700 38px "Noto Sans JP",sans-serif', nameTop: '900 44px "Noto Sans JP",sans-serif', sub: '700 22px "Noto Sans JP",sans-serif', val: '900 46px "Noto Serif JP",serif', small: '500 21px "Noto Sans JP",sans-serif',
+      ink: '#ece2cd', ink1: '#f3dc9b', kick: '#9f8340', title_c: '#e7cd8a', muted: '#a8997c', foot: '#8c7f66', footb: '#d6b25c', val_c: '#e7cd8a', sq: '#9f8340', row: '#2f261a', frame: '#4a3d2c', frame2: '#2e2518', track: '#2a2116', bar: ['#9f8340', '#e7cd8a'], hi: 'rgba(214,178,92,.10)', logoBd: '#4a3d2c',
+      medal: [['#f0d68a', '#c69f45', '#1c1608'], ['#e0e0e6', '#a9a9b2', '#17130d'], ['#dcae7f', '#b07b48', '#17130d']], medal0: ['#00000000', '#4a3d2c', '#a8997c'],
+      tier: [['#e0b48a', '#8a5f38', 'rgba(176,123,72,.16)'], ['#dcdce2', '#8b8b95', 'rgba(169,169,178,.14)'], ['#f0d68a', '#c69f45', 'rgba(198,159,69,.2)'], ['#ffd9cf', '#dd6e5a', 'rgba(221,110,90,.3)']]
+    },
+    yuna: {
+      title: '400 54px "Mochiy Pop One","Zen Maru Gothic",sans-serif', big: '400 44px "Mochiy Pop One","Zen Maru Gothic",sans-serif', name: '700 38px "Zen Maru Gothic",sans-serif', nameTop: '700 44px "Zen Maru Gothic",sans-serif', sub: '700 22px "Zen Maru Gothic",sans-serif', val: '400 42px "Mochiy Pop One","Zen Maru Gothic",sans-serif', small: '500 21px "Zen Maru Gothic",sans-serif',
+      ink: '#5a2744', ink1: '#d6337f', kick: '#ff6fae', title_c: '#ff4f9a', muted: '#b8709a', foot: '#b8709a', footb: '#d6337f', val_c: '#d6337f', sq: '#d6609a', row: '#ffd0e3', frame: '#ff9cc7', frame2: '#ffd0e3', track: '#ffe3ef', bar: ['#ff8fc0', '#ff4f9a'], hi: 'rgba(255,143,191,.22)', logoBd: '#ffffff',
+      medal: [['#ffe58a', '#ffc531', '#6a4300'], ['#eceaf7', '#c6c2e3', '#4c4a63'], ['#ffd0b0', '#ffa77a', '#6a3318']], medal0: ['#ffffff', '#ffc6dd', '#c4568a'],
+      tier: [['#b3541f', '#ffb590', '#ffeadd'], ['#5b5d86', '#c7c9ea', '#eef0ff'], ['#8a5a00', '#ffc531', '#fff1bd'], ['#ffffff', '#ff4f9a', '#ff6fae']]
+    }
+  };
+  const loadImg = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  const top10Of = w => w.data.slice().sort((p, q) => q.b - p.b).filter(r => w.rankB.get(r.name) <= 10).slice(0, 10);
+  const shareWeek = () => isWeek() ? activeWeek() : (isTrend() ? latest : null);
+  async function drawShare(w, yuna) {
+    const T = SH_THEME[yuna ? 'yuna' : 'dark'], rows = top10Of(w), max = rows[0].b;
+    const cv = document.createElement('canvas'); cv.width = SH_W; cv.height = SH_H; const c = cv.getContext('2d');
+    const sample = rows.map(r => r.name).join('') + 'ゆんぱーく同盟武勲記録ランキングTOP10全名平均Season5〜★万剣奇兵隊べぽ煽り紳士春うらら成龍鬼軍団0123456789.';
+    try { await Promise.all([T.title, T.big, T.name, T.nameTop, T.sub, T.val, T.small].map(f => document.fonts.load(f, sample))); } catch (e) { }
+    const [logo, tile] = await Promise.all([loadImg('favicon-180.png'), yuna ? loadImg('yuna-bg.png') : null]);
+    // 背景
+    if (yuna) {
+      const g = c.createLinearGradient(0, 0, 0, SH_H); g.addColorStop(0, '#fff3f9'); g.addColorStop(1, '#ffdcec'); c.fillStyle = g; c.fillRect(0, 0, SH_W, SH_H);
+      if (tile) { c.fillStyle = c.createPattern(tile, 'repeat'); c.fillRect(0, 0, SH_W, SH_H); }
+      c.fillStyle = 'rgba(255,255,255,.78)'; rr(c, 22, 22, SH_W - 44, SH_H - 44, 14); c.fill();
+      c.lineWidth = 4; c.strokeStyle = T.frame; c.setLineDash([12, 8]); rr(c, 22, 22, SH_W - 44, SH_H - 44, 14); c.stroke(); c.setLineDash([]);
+    } else {
+      const g = c.createLinearGradient(0, 0, 0, SH_H); g.addColorStop(0, '#1a140c'); g.addColorStop(1, '#120d07'); c.fillStyle = g; c.fillRect(0, 0, SH_W, SH_H);
+      const rg = c.createRadialGradient(540, -80, 0, 540, -80, 560); rg.addColorStop(0, 'rgba(51,39,26,1)'); rg.addColorStop(1, 'rgba(51,39,26,0)'); c.fillStyle = rg; c.fillRect(0, 0, SH_W, 500);
+      c.lineWidth = 2; c.strokeStyle = T.frame; rr(c, 22, 22, SH_W - 44, SH_H - 44, 14); c.stroke();
+    }
+    c.lineWidth = yuna ? 2 : 1; c.strokeStyle = T.frame2; rr(c, 30, 30, SH_W - 60, SH_H - 60, 9); c.stroke();
+    // ヘッダー
+    if (logo) {
+      c.save(); c.translate(118, 110); if (yuna) c.rotate(-5 * Math.PI / 180);
+      if (yuna) { c.shadowColor = 'rgba(255,111,174,.45)'; c.shadowBlur = 16; c.shadowOffsetY = 6; }
+      rr(c, -48, -48, 96, 96, 22); c.save(); c.clip(); c.drawImage(logo, -48, -48, 96, 96); c.restore();
+      c.shadowColor = 'transparent'; c.lineWidth = yuna ? 4 : 2; c.strokeStyle = T.logoBd; rr(c, -48, -48, 96, 96, 22); c.stroke(); c.restore();
+    }
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+    c.fillStyle = T.kick; c.font = '700 22px ' + T.sub.split('px ')[1]; if ('letterSpacing' in c) c.letterSpacing = '8px'; c.fillText('ゆんぱーく ・ 同盟武勲記録', 190, 96); if ('letterSpacing' in c) c.letterSpacing = '0px';
+    c.font = T.title; c.fillStyle = T.title_c; if (yuna) { c.save(); c.fillStyle = '#fff'; c.fillText('武勲ランキング TOP10', 193, 152); c.restore(); c.fillStyle = T.title_c; } c.fillText('武勲ランキング TOP10', 190, 149);
+    c.textAlign = 'right'; c.font = T.big; c.fillStyle = yuna ? '#c42a78' : T.ink; c.fillText(w.label, 1010, 118);
+    c.font = '500 20px ' + T.small.split('px ')[1]; c.fillStyle = T.muted; c.fillText('全' + w.data.length + '名', 1010, 152); c.textAlign = 'left';
+    // 行
+    const top = 196, RH = 100, barX = 165, barEnd = 770;
+    rows.forEach((r, i) => {
+      const y = top + i * RH, rank = w.rankB.get(r.name);
+      if (i < 3) { const g = c.createLinearGradient(70, 0, 1010, 0); g.addColorStop(0, T.hi); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(70, y, 940, RH); }
+      c.strokeStyle = T.row; c.lineWidth = yuna ? 2 : 1; if (yuna) c.setLineDash([8, 6]); c.beginPath(); c.moveTo(70, y + RH - 1); c.lineTo(1010, y + RH - 1); c.stroke(); c.setLineDash([]);
+      // メダル
+      const mx = 80, my = y + 19, ms = 62;
+      if (rank <= 3) { const m = T.medal[rank - 1], g = c.createLinearGradient(0, my, 0, my + ms); g.addColorStop(0, m[0]); g.addColorStop(1, m[1]); c.fillStyle = g; rr(c, mx, my, ms, ms, 8); c.fill(); c.fillStyle = m[2]; }
+      else { const m = T.medal0; c.fillStyle = m[0]; rr(c, mx, my, ms, ms, 8); c.fill(); c.lineWidth = yuna ? 3 : 2; c.strokeStyle = m[1]; rr(c, mx + 1, my + 1, ms - 2, ms - 2, 8); c.stroke(); c.fillStyle = m[2]; }
+      c.font = '900 ' + (rank >= 10 ? 30 : 34) + 'px ' + T.sub.split('px ')[1]; c.textAlign = 'center'; c.fillText(String(rank), mx + ms / 2, my + ms / 2 + 12); c.textAlign = 'left';
+      // 名前＋バッジ＋分隊
+      const k = tierIdxOf(r.b), sq = SQUADS[r.name] || '', ny = y + 46;
+      c.font = '700 22px ' + T.sub.split('px ')[1]; const sqW = sq ? c.measureText(sq).width : 0;
+      let bw = 0, bt = ''; if (k >= 0) { bt = '★' + BADGE_TIERS[k].label; c.font = '700 21px ' + T.sub.split('px ')[1]; bw = c.measureText(bt).width + 30 + 12; }
+      const maxNameW = barEnd - barX - bw - sqW - 24;
+      let px = i === 0 ? 44 : 38; const fam = T.name.split('px ')[1], wt = i === 0 ? '900' : '700';
+      c.font = (yuna ? '700' : wt) + ' ' + px + 'px ' + fam; while (c.measureText(r.name).width > maxNameW && px > 22) { px -= 2; c.font = (yuna ? '700' : wt) + ' ' + px + 'px ' + fam; }
+      let nm = r.name; if (c.measureText(nm).width > maxNameW) { while (nm.length > 1 && c.measureText(nm + '…').width > maxNameW) nm = nm.slice(0, -1); nm += '…'; }
+      c.fillStyle = i === 0 ? T.ink1 : T.ink; c.fillText(nm, barX, ny); const nw = c.measureText(nm).width;
+      if (k >= 0) { const tc = T.tier[k], bx = barX + nw + 12, bh = 32, by = ny - 28; c.font = '700 21px ' + T.sub.split('px ')[1];
+        if (yuna && k === 3) { const g = c.createLinearGradient(0, by, 0, by + bh); g.addColorStop(0, '#ff8fc0'); g.addColorStop(1, '#ff4f9a'); c.fillStyle = g; } else c.fillStyle = tc[2];
+        rr(c, bx, by, bw - 12, bh, 16); c.fill(); c.lineWidth = 2; c.strokeStyle = tc[1]; rr(c, bx, by, bw - 12, bh, 16); c.stroke(); c.fillStyle = tc[0]; c.textAlign = 'center'; c.fillText(bt, bx + (bw - 12) / 2, by + 23); c.textAlign = 'left'; }
+      if (sq) { c.font = '700 22px ' + T.sub.split('px ')[1]; c.fillStyle = T.sq; c.textAlign = 'right'; c.fillText(sq, barEnd - 10, ny - 4); c.textAlign = 'left'; }
+      // バー
+      const by2 = y + 64; c.fillStyle = T.track; rr(c, barX, by2, barEnd - barX, 10, 5); c.fill();
+      const g = c.createLinearGradient(barX, 0, barEnd, 0); g.addColorStop(0, T.bar[0]); g.addColorStop(1, T.bar[1]); c.fillStyle = g; rr(c, barX, by2, Math.max(10, (barEnd - barX) * r.b / max), 10, 5); c.fill();
+      // 武勲
+      c.font = T.val; c.fillStyle = T.val_c; c.textAlign = 'right'; c.fillText(fmtW(r.b), 1000, y + 66); c.textAlign = 'left';
+    });
+    // フッター
+    c.strokeStyle = yuna ? '#ffc6dd' : '#3b3125'; c.lineWidth = yuna ? 3 : 1; if (yuna) c.setLineDash([10, 7]); c.beginPath(); c.moveTo(70, 1246); c.lineTo(1010, 1246); c.stroke(); c.setLineDash([]);
+    c.font = T.small; c.fillStyle = T.foot; c.fillText('同盟平均武勲 ', 70, 1292); const lw = c.measureText('同盟平均武勲 ').width;
+    c.font = '700 ' + T.small.split(' ').slice(1).join(' '); c.fillStyle = T.footb; c.fillText((Math.round(avgOf(w, 'b') / 1000) / 10).toLocaleString('ja-JP') + '万', 70 + lw, 1292);
+    c.font = T.small; c.fillStyle = T.foot; c.textAlign = 'right'; c.fillText('Season 5 ・ ゆんぱーく', 1010, 1292); c.textAlign = 'left';
+    return cv;
+  }
+  async function shareTop10(btn) {
+    const w = shareWeek(); if (!w || !w.play) return;
+    const label = btn.textContent; btn.disabled = true; btn.textContent = '画像を作っています…';
+    try {
+      const cv = await drawShare(w, YUNA);
+      const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
+      const fname = 'yunpark_' + w.label.replace('〜', '').replace('/', '-') + '_TOP10.png';
+      const file = new File([blob], fname, { type: 'image/png' });
+      const touch = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+      if (touch && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'ゆんぱーく ' + w.label + ' 武勲TOP10' }); btn.textContent = label; btn.disabled = false; return; } catch (e) { if (e && e.name === 'AbortError') { btn.textContent = label; btn.disabled = false; return; } } }
+      const u = URL.createObjectURL(blob), el = document.createElement('a'); el.href = u; el.download = fname; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+      btn.textContent = '保存しました ✓';
+    } catch (e) { btn.textContent = '作れませんでした'; }
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1800);
+  }
+  function updateShareBtn() {
+    const w = shareWeek(), bar = document.getElementById('sharebar');
+    bar.style.display = (w && w.play) ? 'flex' : 'none';
+  }
+  document.getElementById('sharebtn').addEventListener('click', e => shareTop10(e.currentTarget));
+
+  // ================= テーマ切替（ゆなっこモード）=================
+  (function () {
+    const b = document.getElementById('themebtn');
+    const paint = () => { b.textContent = YUNA ? '🌙 ダークに戻す' : '🎀 ゆなっこモード'; };
+    paint();
+    b.addEventListener('click', () => {
+      const on = !document.documentElement.classList.contains('yuna');
+      document.documentElement.classList.toggle('yuna', on);
+      try { localStorage.setItem('theme', on ? 'yuna' : 'dark'); } catch (e) { }
+      setPalette(); paint(); chartDefaultsSet = false;
+      if (graphInit) { ensureChartDefaults(); drawAlliance(); drawSquad(); drawMember(); }
+      if (!pm.hidden && /^#m=/.test(location.hash)) { destroyPmCharts(); drawPersonCharts(decodeURIComponent(location.hash.slice(3))); }
+    });
+  })();
   // ---- init ----
   const sqCard = document.getElementById('sqCard');
   if (sqCard) sqCard.style.display = HAS_SQUADS ? '' : 'none';

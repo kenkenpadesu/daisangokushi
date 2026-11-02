@@ -19,8 +19,9 @@
 <meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/yunpark02/ogp.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700;900&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>try{if(localStorage.getItem("theme")==="yuna")document.documentElement.classList.add("yuna")}catch(e){}</script>
 <style>
 :root{--ink:#17130d;--ink2:#1e1810;--panel:#241d14;--panel2:#2c2318;--line:#3b3125;--line2:#4a3d2c;
 --gold:#d6b25c;--gold-dim:#9f8340;--gold-soft:#e7cd8a;--paper:#ece2cd;--muted:#a8997c;
@@ -154,11 +155,15 @@ body.modal-open{overflow:hidden}
 .pmcard{margin-top:14px}.pmcard h4{font-family:"Noto Serif JP",serif;font-size:14px;color:var(--gold-soft);font-weight:700;margin-bottom:6px}
 @media(max-width:640px){.agrid{grid-template-columns:1fr}}
 </style>
+<link rel="stylesheet" href="yuna.css">
+<link rel="stylesheet" href="share.css">
 </head>
 <body>
 
 <div class="wrap">
   <header class="masthead">
+    <img class="mlogo" src="favicon-180.png" alt="">
+    <button class="themebtn" id="themebtn" type="button"></button>
     <div class="kicker">同盟成員 ・ 武勲記録</div>
     <h1 class="title">週次 武勲・勢力値</h1>
     <p class="subtitle" id="sub"></p>
@@ -173,6 +178,7 @@ body.modal-open{overflow:hidden}
     </div>
     <div class="row2" id="rowSquad"><span class="lbl">分隊</span><div class="chips" id="sqfilter"></div></div>
   </div>
+  <div class="sharebar" id="sharebar"><button class="btn" id="sharebtn" type="button">📷 TOP10を画像で保存</button></div>
   <div class="count" id="count"></div>
   <div class="tw" id="tableWrap"><table id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
 

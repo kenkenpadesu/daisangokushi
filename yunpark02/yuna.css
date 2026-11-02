@@ -1,0 +1,69 @@
+/* ===== テーマ切替ボタン(両モード共通) ===== */
+.themebtn{position:absolute;right:4px;top:22px;appearance:none;border:1px solid var(--line2);background:var(--ink2);color:var(--gold-soft);font-family:inherit;font-size:12px;font-weight:700;padding:7px 13px;border-radius:20px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.mlogo{display:none}
+/* ===== ゆなっこモード ===== */
+html.yuna{--ink:#fffafd;--ink2:#ffffff;--panel:#ffffff;--panel2:#fff3f9;--line:#ffd6e7;--line2:#ffb8d4;
+--gold:#ff6fae;--gold-dim:#e86a9f;--gold-soft:#d6337f;--paper:#5a2744;--muted:#a8688a;
+--jade:#13b38a;--jade-dim:#98e3cb;--verm:#f0506e;--verm-dim:#ffb3c1;--cute:"Mochiy Pop One","Zen Maru Gothic",sans-serif}
+html.yuna body{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;font-weight:500;color:var(--paper);
+background:url(yuna-bg.png) 0 0/480px 480px repeat,radial-gradient(900px 420px at 50% -6%,#ffe0ee 0%,rgba(255,224,238,0) 70%),linear-gradient(180deg,#fff4f9,#ffe9f3 60%,#ffe1ee)}
+html.yuna .masthead{border-bottom:2px dashed #ffb8d4;padding-top:30px}
+html.yuna .masthead::after{background:linear-gradient(90deg,#ff6fae,#ffa6cc);height:4px;width:96px;border-radius:4px;bottom:-3px}
+html.yuna .mlogo{display:block;position:absolute;left:4px;top:22px;width:58px;height:58px;border-radius:18px;border:3px solid #fff;box-shadow:0 4px 14px rgba(255,111,174,.35);transform:rotate(-6deg)}
+html.yuna .masthead .kicker,html.yuna .masthead .title,html.yuna .masthead .subtitle{margin-left:72px}
+html.yuna .kicker{color:#ff6fae;letter-spacing:.25em}
+html.yuna .title{font-family:var(--cute);font-weight:400;color:#ff4f9a;text-shadow:2px 2px 0 #fff,0 4px 14px rgba(255,111,174,.3);letter-spacing:.04em}
+html.yuna .title::after{content:" ♥";color:#ff9cc7;font-size:.7em}
+html.yuna .subtitle b{color:#d6337f}
+html.yuna .themebtn{background:linear-gradient(180deg,#ff8fc0,#ff5fa2);border-color:#ff5fa2;color:#fff;box-shadow:0 3px 10px rgba(255,95,162,.35)}
+html.yuna .tablet{border:2px solid #ffd0e3;border-radius:16px;box-shadow:0 3px 0 #ffd0e3;background:linear-gradient(180deg,#fff,#fff3f9)}
+html.yuna .tablet::before{width:auto;height:5px;right:0;bottom:auto;background:linear-gradient(90deg,#ff8fc0,#ffc2dc)}
+html.yuna .tablet.new::before{background:linear-gradient(90deg,#4fd1ab,#a8ecd7)}html.yuna .tablet.left::before{background:linear-gradient(90deg,#ff7d96,#ffc0cb)}
+html.yuna .tablet .v{font-family:var(--cute);font-weight:400;color:#c42a78}
+html.yuna .tablet.new .v{color:var(--jade)}html.yuna .tablet.left .v{color:var(--verm)}
+html.yuna .controls{background:linear-gradient(180deg,#ffeaf4 82%,rgba(255,234,244,0))}
+html.yuna .seg{background:#fff;border:2px solid #ffc6dd;border-radius:999px;padding:4px}
+html.yuna .seg button{border-radius:999px;color:#b8709a}
+html.yuna .seg button.on{background:linear-gradient(180deg,#ff8fc0,#ff5fa2);color:#fff;box-shadow:0 3px 8px rgba(255,95,162,.4)}
+html.yuna .chip{border:2px solid #ffd0e3;background:#fff;color:#b8709a}
+html.yuna .chip.on{background:#ffdcec;border-color:#ff8fc0;color:#c42a78}
+html.yuna .search input,html.yuna .sel,html.yuna select#msel{border:2px solid #ffc6dd;border-radius:999px;background:#fff;color:var(--paper)}
+html.yuna .search input{padding-left:16px}html.yuna .search input::placeholder{color:#d9a3be}
+html.yuna .search input:focus{border-color:#ff6fae;box-shadow:0 0 0 3px rgba(255,111,174,.18)}
+html.yuna .tw{border:2px solid #ffc6dd;border-radius:18px;background:#fff;box-shadow:0 4px 0 #ffd6e7}
+html.yuna thead th{background:#ffe6f1;color:#c4568a}html.yuna thead th.name{background:#ffe6f1}html.yuna thead th .ar{color:#ff4f9a}
+html.yuna th.name,html.yuna td.name{background:#fff;border-right:1px solid #ffd6e7}
+html.yuna tbody td{border-bottom:1px solid #ffe6f0}
+html.yuna tbody tr:hover td{background:#fff3f9}html.yuna tbody tr:hover td.name{background:#fff0f7}
+html.yuna tbody tr.hit td{background:#ffe3ef !important}html.yuna tbody tr.hit td.name{background:#ffd9ea !important}
+html.yuna .rk{border-color:#ffc6dd;color:#b8709a;border-radius:8px}
+html.yuna .rk.m1{color:#6a4300;background:linear-gradient(180deg,#ffe58a,#ffc531);border-color:#ffc531}
+html.yuna .rk.m2{color:#4c4a63;background:linear-gradient(180deg,#eceaf7,#c6c2e3);border-color:#c6c2e3}
+html.yuna .rk.m3{color:#6a3318;background:linear-gradient(180deg,#ffd0b0,#ffa77a);border-color:#ffa77a}
+html.yuna .rk.na{color:#d3a8bf}
+html.yuna .nm{color:var(--paper);font-weight:700}html.yuna .nm[data-name]:hover{color:#ff4f9a;text-decoration-color:#ff8fc0}
+html.yuna .sq{color:#d6609a}html.yuna .dim{color:#d3a8bf}
+html.yuna .badge{border-color:#ffc6dd;color:#b8709a}
+html.yuna .badge.n{background:rgba(19,179,138,.1)}html.yuna .badge.l{background:rgba(240,80,110,.1)}
+html.yuna .note{background:#fff;border:2px solid #ffd0e3;border-left:6px solid #ff8fc0;border-radius:14px;color:var(--muted)}
+html.yuna .note b{color:#d6337f}
+html.yuna .foot{border-top:2px dashed #ffc6dd;color:#c48aa9}
+html.yuna .card,html.yuna .acard{border:2px solid #ffd0e3;border-radius:20px;background:linear-gradient(180deg,#fff,#fff6fb);box-shadow:0 4px 0 #ffd6e7}
+html.yuna .card h2,html.yuna .acard h3,html.yuna .pmcard h4{font-family:var(--cute);font-weight:400;color:#d6337f}
+html.yuna .card h2::before,html.yuna .acard h3::before{content:"♥";width:auto;height:auto;background:none;color:#ff6fae;font-size:.95em}
+html.yuna .acard li{border-top:1px dashed #ffd0e3}
+html.yuna .acard .val{color:#d6337f}html.yuna .acard li.first .nm{color:#d6337f}
+html.yuna .toggle{background:#fff;border:2px solid #ffc6dd;border-radius:999px}
+html.yuna .toggle button{border-radius:999px;color:#b8709a}
+html.yuna .toggle button.on{background:linear-gradient(180deg,#ff8fc0,#ff5fa2);color:#fff}
+html.yuna .btn{background:linear-gradient(180deg,#ff8fc0,#ff5fa2);border-color:#ff5fa2;color:#fff;border-radius:999px;box-shadow:0 3px 8px rgba(255,95,162,.35)}
+html.yuna .bdg{font-weight:700}
+html.yuna .bdg.t1{color:#b3541f;border-color:#ffb590;background:#ffeadd}
+html.yuna .bdg.t2{color:#5b5d86;border-color:#c7c9ea;background:#eef0ff}
+html.yuna .bdg.t3{color:#8a5a00;border-color:#ffc531;background:#fff1bd}
+html.yuna .bdg.t4{color:#fff;border-color:#ff4f9a;background:linear-gradient(180deg,#ff8fc0,#ff4f9a)}
+html.yuna .modal{background:rgba(142,48,98,.42)}
+html.yuna .mbox{background:linear-gradient(180deg,#fff,#fff1f8);border:3px solid #ffb8d4;border-radius:26px}
+html.yuna .pmn{font-family:var(--cute);font-weight:400;color:#ff4f9a}
+html.yuna .mclose{color:#d6609a}
+html.yuna .pmstats .tablet .v{font-size:clamp(15px,3.9vw,20px);letter-spacing:-.02em}

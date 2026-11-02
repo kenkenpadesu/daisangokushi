@@ -1,0 +1,3 @@
+/* 画像で共有ボタン */
+.sharebar{display:none;justify-content:flex-end;margin:10px 2px 0}
+.sharebar .btn:disabled{opacity:.6;cursor:default}
