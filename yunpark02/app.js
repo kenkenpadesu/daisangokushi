@@ -163,7 +163,7 @@
     document.getElementById('graphView').style.display = graph ? 'block' : 'none';
     document.getElementById('awardView').style.display = award ? 'block' : 'none';
     document.getElementById('tnote').style.display = tbl ? 'block' : 'none';
-    if (graph) { if (!graphInit) ycLoading(650, true); initGraphs(); }
+    if (graph) { if (!graphInit) ycLoading(1100, true); initGraphs(); }
     if (award) renderAwards();
     updateShareBtn();
   }
@@ -200,7 +200,7 @@
     el.innerHTML = q ? '「' + esc(q) + '」で <b>' + shown + '</b> 件' + suff : '<b>' + shown + '</b> 名を表示' + suff;
   }
 
-  document.getElementById('seg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ycLoading(450); view = b.dataset.v === 'week' ? weekSel : b.dataset.v; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); buildSqFilter(); applyView(); render(); });
+  document.getElementById('seg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ycLoading(1000); view = b.dataset.v === 'week' ? weekSel : b.dataset.v; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); buildSqFilter(); applyView(); render(); });
   document.getElementById('wkchips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; view = weekSel = c.dataset.w; const def = sortsFor()[0]; sortKey = def.key; sortDir = def.dir; buildSeg(); buildWkChips(); buildChips(); applyView(); render(); });
   document.getElementById('chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; const k = c.dataset.k; if (k === sortKey) sortDir *= -1; else { sortKey = k; sortDir = parseInt(c.dataset.d); } buildChips(); render(); });
   document.getElementById('sqfilter').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; squadFilter = c.dataset.s; buildSqFilter(); render(); });
@@ -403,7 +403,7 @@
     destroyPmCharts();
     pmBody.innerHTML = personHtml(name);
     pm.hidden = false; document.body.classList.add('modal-open'); pmBox.scrollTop = 0;
-    ycLoading(380); drawPersonCharts(name); ycUpdate(); ycPerson(name);
+    ycLoading(700); drawPersonCharts(name); ycUpdate(); ycPerson(name);
     try { history.replaceState(null, '', '#m=' + encodeURIComponent(name)); } catch (e) { }
   }
   function closePerson() {
@@ -528,7 +528,7 @@
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AV = '20261102b', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  const AV = '20261102c', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
   YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
@@ -565,8 +565,8 @@
   // yuna.css が古いまま（キャッシュ等）だと見た目が崩れるため、新しいCSSが読めているときだけ表示する
   const ycCssOk = () => !!getComputedStyle(document.documentElement).getPropertyValue('--yc-ok').trim();
   function ycLoading(ms, force) {
-    if (!YUNA || !ycCssOk()) return; const now = Date.now(); if (!force && now - ycLoadLast < 1500) return;
-    ycLoadLast = now; ycLd.classList.add('show'); clearTimeout(ycLoadT); ycLoadT = setTimeout(ycLoadHide, ms || 450);
+    if (!YUNA || !ycCssOk()) return; const now = Date.now(); if (!force && now - ycLoadLast < 2200) return;
+    ycLoadLast = now; ycLd.classList.add('show'); clearTimeout(ycLoadT); ycLoadT = setTimeout(ycLoadHide, ms || 1000);
   }
   function ycLoadHide() { clearTimeout(ycLoadT); ycLd.classList.remove('show'); }
   function ycUpdate() {

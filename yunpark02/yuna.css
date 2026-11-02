@@ -94,11 +94,12 @@ html.yuna .yc.on{display:block;position:fixed;right:10px;bottom:16px;z-index:130
 @keyframes ycbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @media(prefers-reduced-motion:reduce){.yc *{animation:none!important}}
 
-/* 読み込み中のゆなっこちゃん（ゆなっこモード専用・操作はふさがない）*/
+/* 読み込み中のゆなっこちゃん（ゆなっこモード専用・画面の中央・操作はふさがない）*/
 .yc-load{display:none}
-html.yuna .yc-load.show{display:flex;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:150;align-items:center;gap:8px;padding:6px 18px 6px 10px;background:rgba(255,255,255,.94);border:2px solid #ff9cc7;border-radius:999px;box-shadow:0 6px 18px rgba(255,111,174,.4);pointer-events:none;animation:ycpop .2s ease-out}
-.yc-load img{width:56px;height:auto;animation:ycbob .8s ease-in-out infinite}
-.yc-load span{font-size:13px;font-weight:700;color:#d6337f}
+html.yuna .yc-load{display:flex;flex-direction:column;align-items:center;gap:4px;position:fixed;inset:0;margin:auto;width:max-content;height:max-content;z-index:150;padding:16px 26px 14px;background:rgba(255,255,255,.9);border:3px solid #ff9cc7;border-radius:28px;box-shadow:0 10px 30px rgba(255,111,174,.45),0 0 0 100vmax rgba(255,255,255,.6);pointer-events:none;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s}
+html.yuna .yc-load.show{opacity:1;visibility:visible}
+.yc-load img{width:150px;height:auto;max-height:200px;object-fit:contain;animation:ycbob .9s ease-in-out infinite}
+.yc-load span{font-family:var(--cute);font-size:18px;color:#ff4f9a;letter-spacing:.04em}
 .yc-load i{font-style:normal;animation:ycdot 1s infinite}.yc-load i:nth-child(2){animation-delay:.2s}.yc-load i:nth-child(3){animation-delay:.4s}
 @keyframes ycdot{0%,60%,100%{opacity:.2}30%{opacity:1}}
 
