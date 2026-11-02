@@ -528,8 +528,8 @@
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const YC_PEEK = ['yuna-chara1.webp', 'yuna-chara2.webp'], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
-  YC_PEEK.concat(['yuna-load.webp']).forEach(s => { const im = new Image(); im.src = s; });
+  const AV = '20261102b', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
   function ycLines() {
@@ -562,13 +562,16 @@
       document.body.appendChild(s); setTimeout(() => s.remove(), 3600);
     }
   }
+  // yuna.css が古いまま（キャッシュ等）だと見た目が崩れるため、新しいCSSが読めているときだけ表示する
+  const ycCssOk = () => !!getComputedStyle(document.documentElement).getPropertyValue('--yc-ok').trim();
   function ycLoading(ms, force) {
-    if (!YUNA) return; const now = Date.now(); if (!force && now - ycLoadLast < 1500) return;
+    if (!YUNA || !ycCssOk()) return; const now = Date.now(); if (!force && now - ycLoadLast < 1500) return;
     ycLoadLast = now; ycLd.classList.add('show'); clearTimeout(ycLoadT); ycLoadT = setTimeout(ycLoadHide, ms || 450);
   }
   function ycLoadHide() { clearTimeout(ycLoadT); ycLd.classList.remove('show'); }
   function ycUpdate() {
-    if (!YUNA) { yc.classList.remove('on'); return; }
+    if (!YUNA || !ycCssOk()) { yc.classList.remove('on'); yc.hidden = true; return; }
+    yc.hidden = false;
     const y = window.scrollY, vh = window.innerHeight, max = Math.max(1, document.documentElement.scrollHeight - vh), p = Math.min(1, y / max);
     const modal = !pm.hidden, show = y > 240 || ycTemp > Date.now() || modal;
     if (show && !ycWasOn) { const o = YC_PEEK.filter(s => s !== ycCur); ycCur = o[Math.floor(Math.random() * o.length)]; ycImg.src = ycCur; }

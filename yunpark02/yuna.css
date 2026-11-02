@@ -101,3 +101,6 @@ html.yuna .yc-load.show{display:flex;position:fixed;left:50%;bottom:18px;transfo
 .yc-load span{font-size:13px;font-weight:700;color:#d6337f}
 .yc-load i{font-style:normal;animation:ycdot 1s infinite}.yc-load i:nth-child(2){animation-delay:.2s}.yc-load i:nth-child(3){animation-delay:.4s}
 @keyframes ycdot{0%,60%,100%{opacity:.2}30%{opacity:1}}
+
+/* 新しいCSSが読み込めているかの目印（app.js が確認する）*/
+html.yuna{--yc-ok:1}
