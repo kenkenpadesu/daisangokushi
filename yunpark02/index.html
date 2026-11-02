@@ -36,17 +36,17 @@ color:var(--paper);font-family:"Noto Sans JP",system-ui,sans-serif;min-height:10
 .title{font-family:"Noto Serif JP",serif;font-weight:900;color:var(--gold-soft);font-size:clamp(26px,6.4vw,44px);
 letter-spacing:.05em;line-height:1.08;margin-top:5px;text-shadow:0 1px 0 #000,0 0 22px rgba(214,178,92,.14)}
 .subtitle{color:var(--muted);font-size:13px;margin-top:7px}.subtitle b{color:var(--paper);font-weight:500}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:16px 0 4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0 4px}
 .tablet{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:3px;padding:10px 12px;position:relative;overflow:hidden}
 .tablet::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold-dim)}
 .tablet.new::before{background:var(--jade-dim)}.tablet.left::before{background:var(--verm-dim)}
 .tablet .k{font-size:10.5px;color:var(--muted);letter-spacing:.1em;font-weight:700}
 .tablet .v{font-family:"Noto Serif JP",serif;font-weight:700;font-size:clamp(20px,5vw,27px);color:var(--paper);font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.05}
 .tablet.new .v{color:var(--jade)}.tablet.left .v{color:var(--verm)}
-.tablet .s{font-size:10.5px;color:var(--muted);margin-top:2px}
-.controls{position:sticky;top:0;z-index:40;padding:11px 0 10px;background:linear-gradient(180deg,#161009 82%,rgba(22,16,9,0))}
+.tablet .s{font-size:10.5px;color:var(--muted);margin-top:2px}.tablet .s.up{color:var(--jade)}.tablet .s.dn{color:var(--verm)}
+.controls{position:sticky;top:0;z-index:40;padding:8px 0 8px;background:linear-gradient(180deg,#161009 82%,rgba(22,16,9,0))}
 .seg{display:flex;background:var(--ink2);border:1px solid var(--line);border-radius:4px;padding:3px;gap:2px;overflow-x:auto}
-.seg button{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:3px;white-space:nowrap}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 4px;flex:1 1 0;text-align:center;border-radius:3px;white-space:nowrap}
 .seg button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--line2)}
 .row2{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:9px}
 .search{flex:1 1 190px;min-width:140px;position:relative}
@@ -107,6 +107,52 @@ tbody td,thead th{padding:8px 8px;font-size:12.5px}.nm,.rk{font-size:12px}}
 .toggle button.on{background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft)}
 select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--paper);font-family:inherit;font-size:14px;padding:8px 12px;border-radius:4px;outline:none;max-width:210px}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}.chartbox{height:250px}}
+
+/* ---- 週の選択・平均 ---- */
+.subrow{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap}.subrow .chips{flex-wrap:nowrap}.subrow .lbl{flex:none}
+@media(min-width:900px){.stats{grid-template-columns:repeat(6,1fr)}}
+/* ---- バッジ ---- */
+.bdg{display:inline-block;margin-left:5px;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;border:1px solid;vertical-align:middle;white-space:nowrap;line-height:1.5}
+.bdg.t1{color:#e0b48a;border-color:#8a5f38;background:rgba(176,123,72,.16)}
+.bdg.t2{color:#dcdce2;border-color:#8b8b95;background:rgba(169,169,178,.14)}
+.bdg.t3{color:#f0d68a;border-color:#c69f45;background:rgba(198,159,69,.2)}
+.bdg.t4{color:#ffd9cf;border-color:#dd6e5a;background:linear-gradient(180deg,rgba(221,110,90,.35),rgba(221,110,90,.15))}
+.badge.lf{margin-left:5px;vertical-align:middle}
+.nm[data-name]{cursor:pointer}.nm[data-name]:hover{color:var(--gold-soft);text-decoration:underline;text-decoration-color:var(--gold-dim)}
+.wr{display:block;font-size:10px;color:var(--muted)}
+/* ---- 表彰 ---- */
+.ahead{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}.ahead .grow{flex:1}
+.sel{background:var(--ink2);border:1px solid var(--line);color:var(--paper);font-family:inherit;font-size:14px;padding:8px 12px;border-radius:4px;outline:none;max-width:210px}
+.btn{appearance:none;border:1px solid var(--gold-dim);background:#2b2216;color:var(--gold-soft);font-family:inherit;font-size:12.5px;font-weight:700;padding:8px 14px;border-radius:4px;cursor:pointer}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.acard{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:6px;padding:13px 14px 10px}
+.acard h3{font-family:"Noto Serif JP",serif;font-size:15px;color:var(--gold-soft);font-weight:700;display:flex;align-items:center;gap:8px}
+.acard h3::before{content:"";width:4px;height:14px;background:var(--gold);border-radius:2px}
+.acard .ad,.pmcard .ad{font-size:11px;color:var(--muted);margin:2px 0 8px 12px}
+.acard ol{list-style:none}
+.acard li{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #2e2518}
+.acard li .rk{margin-right:0;flex:none}
+.acard .who{flex:1;min-width:0;word-break:break-word}
+.acard .val{font-weight:700;color:var(--gold-soft);font-variant-numeric:tabular-nums;white-space:nowrap}
+.acard li.first .nm{font-size:15px;font-weight:700;color:var(--gold-soft)}.acard li.first .val{font-size:16px}
+.acard .more{font-size:11px;color:var(--muted);padding:6px 0 2px}
+/* ---- 個人ページ ---- */
+body.modal-open{overflow:hidden}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(10,7,3,.78);display:flex;align-items:flex-start;justify-content:center;padding:18px 10px;overflow-y:auto}
+.modal[hidden]{display:none}
+.mbox{position:relative;width:min(760px,100%);background:linear-gradient(180deg,#2a2217,#201910);border:1px solid var(--line2);border-radius:8px;padding:18px 16px 16px;margin:auto 0}
+.mclose{position:absolute;right:8px;top:6px;appearance:none;border:0;background:transparent;color:var(--muted);font-size:28px;line-height:1;cursor:pointer;padding:4px 8px}
+.pmhead{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding-right:34px}
+.pmt{flex:1 1 200px;min-width:0}
+.pmn{font-family:"Noto Serif JP",serif;font-weight:900;font-size:clamp(21px,5.6vw,30px);color:var(--gold-soft);line-height:1.2;word-break:break-word}
+.pms{font-size:12.5px;color:var(--muted);margin-top:3px}
+.pmstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}
+.pmstats .tablet .v{font-size:clamp(17px,4.6vw,23px)}
+.pmbdg{margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.pmb i{font-style:normal;font-size:11px;color:var(--muted)}.pmb .bdg{margin-left:3px}
+.pmnext{flex-basis:100%;font-size:11.5px;color:var(--muted)}
+.pmcard{margin-top:14px}.pmcard h4{font-family:"Noto Serif JP",serif;font-size:14px;color:var(--gold-soft);font-weight:700;margin-bottom:6px}
+@media(max-width:640px){.agrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -120,6 +166,7 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
   <section class="stats" id="stats"></section>
   <div class="controls">
     <div class="seg" id="seg"></div>
+    <div class="row2 subrow" id="rowWeek"><span class="lbl">週を選ぶ</span><div class="chips" id="wkchips"></div></div>
     <div class="row2" id="rowSearch">
       <div class="search"><input id="q" type="search" placeholder="メンバー名で検索" autocomplete="off"><span class="x" id="qx">×</span></div>
       <span class="lbl">並び替え</span><div class="chips" id="chips"></div>
@@ -131,8 +178,10 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
 
   <div id="graphView" style="display:none">
     <div class="card">
-      <div class="hd"><h2>同盟全体の推移</h2></div>
-      <div class="desc">合計勢力値（成長）と 合計武勲（その週の活動量）</div>
+      <div class="hd"><h2>同盟全体の推移</h2><span class="grow"></span>
+        <div class="toggle" id="al_agg"><button data-v="sum" class="on">合計</button><button data-v="avg">平均</button></div>
+      </div>
+      <div class="desc">勢力値（成長）と 武勲（その週の活動量）。合計／平均を切替できます。</div>
       <div class="grid2">
         <div class="chartbox sm"><canvas id="c_alS"></canvas></div>
         <div class="chartbox sm"><canvas id="c_alB"></canvas></div>
@@ -155,8 +204,16 @@ select#msel{background:var(--ink2);border:1px solid var(--line);color:var(--pape
     </div>
   </div>
 
+  <div id="awardView"></div>
+
   <p class="note" id="tnote"><b>武勲について：</b>武勲は毎週リセットされるため週で水準が変わります。個人の伸びは<b>勢力値の増減</b>が素直な指標です。分隊の集計は最新週の値です。</p>
   <div class="foot" id="foot"></div>
+</div>
+<div class="modal" id="pm" hidden>
+  <div class="mbox" id="pmBox" role="dialog" aria-modal="true" aria-label="個人ページ">
+    <button class="mclose" id="pmx" type="button" aria-label="閉じる">×</button>
+    <div id="pmBody"></div>
+  </div>
 </div>
 <script src="data.js"></script>
 <script src="app.js"></script>
