@@ -528,12 +528,29 @@
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AV = '20261102c', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  const AV = '20261109b', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
   YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
+  // ボイス: セリフ → 音声ファイル。録音が増えたら、ここに1行足してファイルを voice/ に置く
+  const YC_VOICE = { '今日もおつかれさま♡': 'voice/otsukare.mp3' };
+  let ycVoiceOn = true, ycAudio = null; // 初期はオン（自分でオフにした人だけオフ）
+  try { if (localStorage.getItem('yc_voice') === 'off') ycVoiceOn = false; } catch (e) { }
+  const ycSnd = document.getElementById('ycsnd');
+  function ycSndPaint() { ycSnd.textContent = ycVoiceOn ? '🔊' : '🔇'; ycSnd.setAttribute('aria-pressed', ycVoiceOn ? 'true' : 'false'); ycSnd.title = ycVoiceOn ? 'ボイス：オン' : 'ボイス：オフ'; }
+  function ycPlay(msg) {
+    if (!ycVoiceOn || !YC_VOICE[msg]) return;
+    try { if (ycAudio) ycAudio.pause(); ycAudio = new Audio(YC_VOICE[msg] + '?v=' + AV); const p = ycAudio.play(); if (p && p.catch) p.catch(() => { }); } catch (e) { }
+  }
+  ycSndPaint();
+  ycSnd.addEventListener('click', () => {
+    ycVoiceOn = !ycVoiceOn; try { localStorage.setItem('yc_voice', ycVoiceOn ? 'on' : 'off'); } catch (e) { }
+    if (!ycVoiceOn && ycAudio) ycAudio.pause();
+    ycSndPaint();
+    if (ycVoiceOn) ycSay('ボイス、オンにしたよ♡', null, 1800);
+  });
   function ycLines() {
-    const L = ['今週もおつかれさま♡', 'ちゃんと水分とってる?', 'もっともっと頑張っちゃお〜!', 'えへへ、つっついた?', 'ピンヒールで踏むわよ！'];
+    const L = ['今日もおつかれさま♡', 'ちゃんと水分とってる?', 'もっともっと頑張っちゃお〜!', 'えへへ、つっついた?', 'ピンヒールで踏むわよ！'];
     if (ycLw) {
       const t = top10Of(ycLw)[0];
       if (t) L.push('今週の武勲王は' + t.name + 'さんだよ!');
@@ -543,7 +560,7 @@
   }
   function ycSay(msg, mood, ms) {
     if (!YUNA) return;
-    ycB.textContent = msg; ycB.classList.add('show'); ycLast = msg;
+    ycB.textContent = msg; ycB.classList.add('show'); ycLast = msg; ycPlay(msg);
     clearTimeout(ycTimer); ycTimer = setTimeout(() => ycB.classList.remove('show'), ms || 3400);
     if (mood) { yc.classList.remove('sad', 'cheer'); void yc.offsetWidth; yc.classList.add(mood); setTimeout(() => yc.classList.remove(mood), 1500); }
   }

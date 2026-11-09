@@ -76,6 +76,8 @@ html.yuna .yc.on{display:block;position:fixed;right:10px;bottom:16px;z-index:130
 .yc-chr{pointer-events:auto;order:2;border:0;background:transparent;cursor:pointer;padding:0;filter:drop-shadow(0 4px 8px rgba(255,111,174,.45));-webkit-tap-highlight-color:transparent}
 .yc-chr img{display:block;width:auto;height:auto;max-width:140px;max-height:190px}
 .yc-up{pointer-events:auto;order:1;margin-bottom:4px;appearance:none;border:2px solid #fff;background:linear-gradient(180deg,#ff8fc0,#ff5fa2);color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;cursor:pointer;box-shadow:0 3px 10px rgba(255,95,162,.45);white-space:nowrap}
+.yc-snd{pointer-events:auto;order:0;margin-bottom:4px;appearance:none;width:32px;height:32px;padding:0;border:2px solid #ff9cc7;border-radius:50%;background:#fff;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 3px 10px rgba(255,95,162,.35)}
+.yc-snd[aria-pressed="true"]{background:#ffe3ef;border-color:#ff5fa2}
 .yc-bubble{display:none;position:absolute;right:6px;bottom:calc(100% + 10px);width:max-content;max-width:200px;background:#fff;border:2px solid #ff9cc7;color:#5a2744;font-size:13px;font-weight:700;line-height:1.45;padding:9px 12px;border-radius:16px;box-shadow:0 4px 12px rgba(255,111,174,.3)}
 .yc-bubble::after{content:"";position:absolute;right:28px;bottom:-8px;width:12px;height:12px;background:#fff;border-right:2px solid #ff9cc7;border-bottom:2px solid #ff9cc7;transform:rotate(45deg)}
 .yc-bubble.show{display:block;animation:ycpop .25s ease-out}
