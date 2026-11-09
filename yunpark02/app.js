@@ -528,12 +528,22 @@
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AV = '20261109b', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  const AV = '20261109d', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
   YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
   // ボイス: セリフ → 音声ファイル。録音が増えたら、ここに1行足してファイルを voice/ に置く
-  const YC_VOICE = { '今日もおつかれさま♡': 'voice/otsukare.mp3' };
+  const YC_VOICE = {
+    '今日もおつかれさま♡': 'voice/otsukare.mp3',
+    'ちゃんと水分とってる?': 'voice/mizu.mp3',
+    'もっともっと頑張っちゃお♡': 'voice/ganbatte.mp3',
+    'あはは、つっついた?': 'voice/tsuttsuita.mp3',
+    '頑張らないと、踏んじゃうぞ！': 'voice/fumu.mp3',
+    '今日のご飯何食べる？？': 'voice/gohan.mp3',
+    'えー、見つからないよー': 'voice/mitsukaranai.mp3',
+    'わーい、ありがとう': 'voice/waai.mp3',
+    '行ってきます': 'voice/ittekimasu.mp3' // 文字は出さず、音声だけ（「トップへ」を押したとき）
+  };
   let ycVoiceOn = true, ycAudio = null; // 初期はオン（自分でオフにした人だけオフ）
   try { if (localStorage.getItem('yc_voice') === 'off') ycVoiceOn = false; } catch (e) { }
   const ycSnd = document.getElementById('ycsnd');
@@ -550,7 +560,7 @@
     if (ycVoiceOn) ycSay('ボイス、オンにしたよ♡', null, 1800);
   });
   function ycLines() {
-    const L = ['今日もおつかれさま♡', 'ちゃんと水分とってる?', 'もっともっと頑張っちゃお〜!', 'えへへ、つっついた?', 'ピンヒールで踏むわよ！'];
+    const L = ['今日もおつかれさま♡', 'ちゃんと水分とってる?', 'もっともっと頑張っちゃお♡', 'あはは、つっついた?', '頑張らないと、踏んじゃうぞ！', '今日のご飯何食べる？？'];
     if (ycLw) {
       const t = top10Of(ycLw)[0];
       if (t) L.push('今週の武勲王は' + t.name + 'さんだよ!');
@@ -597,21 +607,21 @@
   }
   function ycToTop() {
     if (ycFlying) return;
-    ycSay('いってきまーす♡', null, 1400); ycHearts(8);
+    ycPlay('行ってきます'); ycHearts(8);
     if (reduceMotion()) { window.scrollTo(0, 0); return; }
     ycFlying = true; yc.classList.add('fly'); window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => { ycFlying = false; yc.classList.remove('fly'); ycUpdate(); }, 950);
   }
   function ycTalk() {
     ycTaps++; clearTimeout(ycTapT); ycTapT = setTimeout(() => { ycTaps = 0; }, 1800);
-    if (ycTaps >= 10) { ycTaps = 0; ycConfetti(); ycHearts(10); ycSay('わーい！ありがとう♡', 'cheer', 3000); return; }
+    if (ycTaps >= 10) { ycTaps = 0; ycConfetti(); ycHearts(10); ycSay('わーい、ありがとう', 'cheer', 3000); return; }
     const L = ycLines().filter(t => t !== ycLast); ycSay(L[Math.floor(Math.random() * L.length)]); ycHearts(2);
   }
   function ycPerson(name) {
     const a = AGG.get(name); if (!YUNA || !a || a.tierIdx < 0) return;
     ycSay(name + 'さん、★' + BADGE_TIERS[a.tierIdx].label + 'おめでとう!', 'cheer', 4200); ycHearts(5);
   }
-  function ycNoHit() { if (!YUNA) return; ycTemp = Date.now() + 4000; ycUpdate(); if (ycLast !== '見つからないよ〜' || !ycB.classList.contains('show')) ycSay('見つからないよ〜', 'sad', 3600); setTimeout(ycUpdate, 4100); }
+  function ycNoHit() { if (!YUNA) return; ycTemp = Date.now() + 4000; ycUpdate(); if (ycLast !== 'えー、見つからないよー' || !ycB.classList.contains('show')) ycSay('えー、見つからないよー', 'sad', 3600); setTimeout(ycUpdate, 4100); }
   document.getElementById('ycup').addEventListener('click', ycToTop);
   document.getElementById('ycchr').addEventListener('click', ycTalk);
   window.addEventListener('scroll', ycUpdate, { passive: true }); window.addEventListener('resize', ycUpdate);
