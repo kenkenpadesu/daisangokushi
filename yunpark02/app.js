@@ -528,7 +528,7 @@
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AV = '20261109d', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  const AV = '20261115a', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
   YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
