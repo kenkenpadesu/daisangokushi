@@ -1,98 +1,152 @@
 "use strict";
 (function(){
-  const te=new TextEncoder(), tdd=new TextDecoder();
-  const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-  const CAMP={'群':'qun','漢':'han','晋':'jin','魏':'wei','呉':'wu','蜀':'shu'};
-  const ARM={'歩兵':'歩','弓兵':'弓','騎馬兵':'騎'};
+  /* ---------- 共通 ---------- */
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const ARMS_KANJI={'歩兵':'歩','弓兵':'弓','騎馬兵':'騎'};
+  const TIER_ORDER=['T0','T0-','T1','T2-','スタダ'];
   const POSORD={'本営':0,'中衛':1,'前衛':2};
   const SKEY='jissen_pass_v1';
-  const $=id=>document.getElementById(id);
-  const esc=s=>(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  function hl(s,q){s=esc(s);if(!q)return s;const i=s.toLowerCase().indexOf(q.toLowerCase());
-    return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+q.length)+'</mark>'+s.slice(i+q.length);}
-  function dispGen(n){return (n||'').replace(/^(xp|sp)\s*/i,'');}
-  function arr(x){return Array.isArray(x)?x:(x?[x]:[]);}
+  const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+            set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
 
-  let GEN={}, THEORY=[], REAL=[], ALL=[];
-  let mode='combo', sel='theory';
+  /* ---------- テーマ（編成ボードと同じ保存キーを共有） ---------- */
+  function applyTheme(dark){
+    document.body.classList.toggle('dark',dark);
+    $('themeSwitch').checked=dark;
+    $('themeLabel').textContent=dark?'夜':'昼';
+    $('themeThumb').textContent=dark?'🌙':'☀';
+    ls.set('stzb_dark',dark);
+  }
+  applyTheme(!!ls.get('stzb_dark',false));
+  $('themeSwitch').addEventListener('change',e=>applyTheme(e.target.checked));
 
+  function setStickyOffset(){const h=document.querySelector('header');if(h&&h.offsetHeight)document.documentElement.style.setProperty('--htop',h.offsetHeight+'px');}
+  window.addEventListener('resize',setStickyOffset);
+  window.addEventListener('orientationchange',()=>setTimeout(setStickyOffset,150));
+
+  /* ---------- データ ---------- */
+  let GEN={}, THEORY=[], REAL=[];
+  let tab='theory', tierSel='T0', userSel='ALL';
+
+  const te=new TextEncoder(), td=new TextDecoder();
+  const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   async function decryptBlob(blob,pass){
     const km=await crypto.subtle.importKey('raw',te.encode(pass),'PBKDF2',false,['deriveKey']);
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64d(blob.salt),iterations:blob.iter||250000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
     const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(blob.iv)},key,b64d(blob.ct));
-    return JSON.parse(tdd.decode(pt));
+    return JSON.parse(td.decode(pt));
   }
   async function loadTheory(){
-    // 正本：編成ボード本体から（常に最新）。だめなら同梱フォールバック。
     let d=null;
     try{const r=await fetch('../index.html',{cache:'no-store'});
       if(r.ok){const t=await r.text();const m=t.match(/<script id="tierdata"[^>]*>([\s\S]*?)<\/script>/);if(m)d=JSON.parse(m[1]);}}catch(e){}
     if(!d){try{const r=await fetch('./tier-data.json',{cache:'no-store'});if(r.ok)d=await r.json();}catch(e){}}
-    if(!d)return;
-    (d.generals||[]).forEach(g=>{GEN[g.name]={fac:CAMP[g.camp]||'',arm:ARM[g.arms]||g.arms||''};});
-    THEORY=(d.teams||[]).map(t=>({type:'theory',tier:t.tier,score:t.score,name:t.name,
-      members:(t.members||[]).map(m=>({pos:m.pos,gen:m.gen,
-        t2:arr(m.t2).join('／'),t3:arr(m.t3).join('／'),treasure:m.treasure||'—'}))}));
+    if(!d)return false;
+    (d.generals||[]).forEach(g=>{GEN[g.name]={camp:g.camp||'',arms:g.arms||''};});
+    THEORY=d.teams||[];
+    return true;
   }
-  function badge(gen){const g=GEN[gen]||{};const fac=g.fac?('<span class="bdg b-'+g.fac+'">'+({wei:'魏',jin:'晋',shu:'蜀',qun:'群',wu:'呉',han:'漢'})[g.fac]+'</span>'):'';
-    const arm=g.arm?('<span class="bdg arm">'+esc(g.arm)+'</span>'):'';return fac+arm;}
+  function badge(n){const g=GEN[n]||{};if(!g.camp&&!g.arms)return '';
+    return '<span class="cbadge">'+(g.camp?'<span class="camp c'+esc(g.camp)+'">'+esc(g.camp)+'</span>':'')+(g.arms?'<span class="arms">'+esc(ARMS_KANJI[g.arms]||'')+'</span>':'')+'</span>';}
+  const arr=x=>Array.isArray(x)?x:(x?[x]:[]);
+  const slash=a=>arr(a).map(esc).join('<span class="slash">/</span>');
+  const tierCls=t=>t==='スタダ'?'SUTA':t;
+  const dispGen=n=>String(n||'');
 
-  function cardHTML(t,q){
-    const head = t.type==='theory'
-     ? '<span class="src theory">理論</span><span class="tier">'+esc(t.tier)+'</span><span class="score">'+esc(String(t.score))+'</span><span class="nm">'+hl(t.name,q)+'</span>'
-     : '<span class="src real">実戦</span><span class="nm">'+esc(t.members.map(m=>dispGen(m.gen)).join('・'))+'</span><span class="meta">ユーザー名：'+hl(t.user||'—',mode==='player'?q:'')+' ・ '+esc(t.date||'')+'</span>';
-    const fifthHead=t.type==='theory'?'宝物':'高級兵種';
-    const ms=t.members.slice().sort((a,b)=>(POSORD[a.pos]??9)-(POSORD[b.pos]??9));
-    const rows=ms.map(m=>{
-      const fifth=t.type==='theory'
-        ? '<span class="fifth">'+esc(m.treasure||'—')+'</span>'
-        : '<span class="fifth u"><span>'+esc(m.u1||'')+'</span><span>'+esc(m.u2||'')+'</span></span>';
-      return '<tr><td class="pos">'+esc(m.pos)+'</td><td><div class="gn">'+hl(dispGen(m.gen),q)+'</div><div class="badges">'+badge(m.gen)+'</div></td>'+
-        '<td class="tc">'+hl(m.t2||'',q)+'</td><td class="tc">'+hl(m.t3||'',q)+'</td><td>'+fifth+'</td></tr>';
-    }).join('');
-    return '<div class="pcard"><div class="ph">'+head+'</div><table><thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th><th>'+fifthHead+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  /* ---------- 検索 ---------- */
+  function hit(q,...vals){return vals.some(v=>arr(v).some(x=>String(x||'').toLowerCase().includes(q)));}
+  function theoryMatch(t,q){return hit(q,t.name,t.name_zh)||t.members.some(m=>hit(q,m.gen,m.gen_zh,m.t2,m.t3));}
+  function realMatch(t,q){return hit(q,t.user)||t.members.some(m=>hit(q,m.gen,m.t2,m.t3,m.u1,m.u2));}
+
+  /* ---------- 描画 ---------- */
+  function memRows(t,real){
+    return t.members.slice().sort((a,b)=>(POSORD[a.pos]??9)-(POSORD[b.pos]??9)).map(m=>
+      '<tr><td>'+esc(m.pos)+'</td><td class="g"><div class="gcell"><span>'+esc(dispGen(m.gen))+'</span>'+badge(m.gen)+'</div></td>'+
+      '<td>'+slash(m.t2)+'</td><td>'+slash(m.t3)+'</td>'+
+      (real ? '<td class="uni"><span>'+esc(m.u1||'')+'</span><span>'+esc(m.u2||'')+'</span></td>'
+            : '<td>'+esc(m.treasure)+'</td><td>'+esc(m.ciTiao)+'</td>')+'</tr>').join('');
   }
-  function matchCombo(t,q){if(!q)return true;q=q.toLowerCase();
-    if((t.name||'').toLowerCase().includes(q))return true;
-    return t.members.some(m=>[dispGen(m.gen),m.gen,m.t2,m.t3].some(x=>(x||'').toLowerCase().includes(q)));}
-  function matchPlayer(t,q){if(t.type!=='real')return false;if(!q)return true;
-    return (t.user||'').toLowerCase().includes(q.toLowerCase());}
-  function run(){
-    const q=$('q').value.trim();
-    let res=ALL.filter(t=>mode==='combo'?matchCombo(t,q):matchPlayer(t,q));
-    if(mode==='combo')res=res.filter(t=>t.type===sel);
-    res.sort((a,b)=>(a.type===b.type)?0:(a.type==='theory'?-1:1));
-    $('count').textContent=res.length+' 件'+(mode==='player'?'（ユーザー名検索＝実戦）':'（'+(sel==='theory'?'理論':'実戦')+'）');
-    $('list').innerHTML=res.length?res.map(t=>cardHTML(t,q)).join(''):'<div class="empty">該当なし。別の武将名・戦法名を試してください。</div>';
+  function theoryCard(t){
+    const tags=[...(t.strongVs||[]).map(x=>'<span class="tag s"><span class="k">強い</span>'+esc(x)+'</span>'),
+                ...(t.weakVs||[]).map(x=>'<span class="tag w"><span class="k">弱い</span>'+esc(x)+'</span>')].join('');
+    const nm=(t.name_zh&&t.name&&t.name!==t.name_zh&&t.tier!=='スタダ')
+      ? esc(t.name_zh)+'<span class="jp">（'+esc(t.name)+'）</span>' : esc(t.name||t.name_zh);
+    return '<article class="tcard'+(t.tier==='スタダ'?' suta':'')+'"><div class="head">'+
+      '<span class="tier '+tierCls(t.tier)+'">'+esc(t.tier)+'</span><span class="score">'+esc(t.score||'')+'</span>'+
+      '<span class="name mincho">'+nm+'</span></div>'+
+      (tags?'<div class="tags">'+tags+'</div>':'')+
+      '<table class="mem"><thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th><th>宝物</th><th>词条</th></tr></thead><tbody>'+memRows(t,false)+'</tbody></table>'+
+      ((t.note&&t.tier!=='スタダ')?'<div class="note">'+esc(t.note)+'</div>':'')+'</article>';
+  }
+  function realCard(t){
+    return '<article class="tcard"><div class="head"><span class="tier REAL">実戦</span>'+
+      '<span class="name mincho">'+esc(t.members.map(m=>dispGen(m.gen)).join('・'))+
+      '<span class="real-meta">ユーザー名：'+esc(t.user||'—')+' ・ '+esc(t.date||'')+'</span></span></div>'+
+      '<table class="mem"><thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th><th>高級兵種</th></tr></thead><tbody>'+memRows(t,true)+'</tbody></table></article>';
+  }
+  function renderNav(){
+    const nav=$('nav');let html='';
+    if(tab==='theory'){
+      const cnt=k=>k==='ALL'?THEORY.filter(t=>t.tier!=='スタダ').length:THEORY.filter(t=>t.tier===k).length;
+      const items=[['T0','T0'],['T0-','T0-'],['T1','T1'],['T2-','T2-'],['スタダ','SUTA'],['ALL','ALL']];
+      html=items.map(([k,c])=>'<button class="tnav '+c+'" data-k="'+esc(k)+'" role="tab" aria-selected="'+(tierSel===k)+'">'+
+        (k==='ALL'?'<span class="all-label">すべて</span>':k==='スタダ'?'<span class="suta-label">スタダ</span>':esc(k))+' <span class="tn-count">'+cnt(k)+'</span></button>').join('');
+    }else{
+      const users=[...new Set(REAL.map(t=>t.user).filter(Boolean))];
+      html='<button class="tnav ALL" data-k="ALL" role="tab" aria-selected="'+(userSel==='ALL')+'"><span class="all-label">すべて</span> <span class="tn-count">'+REAL.length+'</span></button>'+
+        users.map(u=>'<button class="tnav USER" data-k="'+esc(u)+'" role="tab" aria-selected="'+(userSel===u)+'">'+esc(u)+' <span class="tn-count">'+REAL.filter(t=>t.user===u).length+'</span></button>').join('');
+    }
+    nav.innerHTML=html;
+  }
+  function render(){
+    const q=$('q').value.trim().toLowerCase();const searching=q.length>0;
+    let list;
+    if(tab==='theory'){
+      list=THEORY.filter(t=>searching?theoryMatch(t,q):(tierSel==='ALL'?t.tier!=='スタダ':t.tier===tierSel));
+      list.sort((a,b)=>TIER_ORDER.indexOf(a.tier)-TIER_ORDER.indexOf(b.tier)||(parseFloat(b.score||0)-parseFloat(a.score||0)));
+    }else{
+      list=REAL.filter(t=>searching?realMatch(t,q):(userSel==='ALL'||t.user===userSel));
+    }
+    document.querySelectorAll('#nav .tnav').forEach(b=>b.classList.toggle('dim',searching));
+    $('count').textContent=searching?('「'+$('q').value.trim()+'」の検索結果：'+list.length+'件'):(list.length+' 部隊');
+    $('grid').innerHTML=list.length?list.map(tab==='theory'?theoryCard:realCard).join(''):'<div class="jn-empty">該当なし</div>';
+  }
+  function setTab(name){
+    tab=name;
+    $('tab-theory').setAttribute('aria-selected',name==='theory');
+    $('tab-real').setAttribute('aria-selected',name==='real');
+    $('q').placeholder=name==='theory'?'武将名・部隊名・戦法で検索':'武将名・戦法名・ユーザー名で検索';
+    renderNav();render();
   }
   function wire(){
-    $('q').addEventListener('input',run);
-    document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{
-      document.querySelectorAll('.mode').forEach(x=>x.classList.remove('on'));b.classList.add('on');
-      mode=b.dataset.mode;$('filters').style.display=mode==='player'?'none':'flex';
-      $('q').placeholder=mode==='player'?'ユーザー名で検索（例：リン）':'武将名・戦法名で検索（例：張遼／戦必断金）';run();}));
-    document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
-      document.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');sel=b.dataset.f;run();}));
+    $('tab-theory').addEventListener('click',()=>setTab('theory'));
+    $('tab-real').addEventListener('click',()=>setTab('real'));
+    $('nav').addEventListener('click',e=>{const b=e.target.closest('.tnav');if(!b)return;
+      if(tab==='theory')tierSel=b.dataset.k;else userSel=b.dataset.k;
+      $('q').value='';renderNav();render();});
+    $('q').addEventListener('input',render);
   }
+
+  /* ---------- 解錠 ---------- */
+  let wired=false;
   async function enter(pass){
-    const res=await fetch('./teams-db.enc.json',{cache:'no-store'});
-    if(!res.ok)throw new Error('data '+res.status);
-    const blob=await res.json();
-    REAL=(await decryptBlob(blob,pass)).map(t=>({type:'real',user:t.user||'',date:t.date||'',
-      members:(t.members||[]).map(m=>({pos:m.pos,gen:m.gen,t2:m.t2||'',t3:m.t3||'',u1:m.u1||'',u2:m.u2||''}))}));
-    if(!THEORY.length)await loadTheory();
-    ALL=THEORY.concat(REAL);
-    if(!THEORY.length)$('notice').classList.remove('hide');
-    $('ov').classList.add('hide');$('app').classList.remove('locked');
-    wire();run();
+    const r=await fetch('./teams-db.enc.json',{cache:'no-store'});
+    if(!r.ok)throw new Error('data');
+    const data=await decryptBlob(await r.json(),pass);
+    REAL=data.map(t=>({user:t.user||'',date:t.date||'',members:(t.members||[]).map(m=>({pos:m.pos,gen:m.gen,t2:m.t2||'',t3:m.t3||'',u1:m.u1||'',u2:m.u2||''}))}));
+    REAL.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    if(!THEORY.length&&!(await loadTheory()))$('notice').hidden=false;
+    $('gate').hidden=true;$('app').hidden=false;
+    setStickyOffset();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(setStickyOffset);
+    if(!wired){wire();wired=true;}
+    setTab(THEORY.length?'theory':'real');
   }
-  // ゲート
-  $('gf').addEventListener('submit',async e=>{
-    e.preventDefault();const err=$('err'),pass=$('pass').value;err.textContent='確認中…';
+  $('gateForm').addEventListener('submit',async e=>{
+    e.preventDefault();const err=$('gateErr'),pass=$('gatePass').value;err.textContent='確認中…';
     try{await enter(pass);try{sessionStorage.setItem(SKEY,pass);}catch(_){}err.textContent='';}
     catch(x){err.textContent='合言葉が違うか、データを読めませんでした。';}
   });
-  // セッション復帰
   (async()=>{let p=null;try{p=sessionStorage.getItem(SKEY);}catch(_){}
     if(p){try{await enter(p);}catch(e){try{sessionStorage.removeItem(SKEY);}catch(_){}}}})();
 })();

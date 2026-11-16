@@ -2,45 +2,66 @@
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>陣容録</title>
+<meta name="theme-color" content="#16202b">
+<title>率土之滨 陣容録</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="ov" id="ov">
-  <div class="modal">
-    <div class="ico">🔒</div>
-    <h3>陣容録</h3>
-    <p>同盟限定ページです。合言葉を入力してください。</p>
-    <form id="gf">
-      <input type="password" id="pass" placeholder="合言葉" autocomplete="off">
-      <div class="err" id="err"></div>
-      <button class="btn" type="submit">解錠する</button>
+
+<!-- 合言葉ゲート -->
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-head"><div class="seal mincho">率</div><h2>陣容録</h2></div>
+    <form class="gate-body" id="gateForm">
+      <p>同盟限定ページです。合言葉を入力してください。</p>
+      <input type="password" id="gatePass" placeholder="合言葉" autocomplete="off">
+      <div class="gate-err" id="gateErr"></div>
+      <button type="submit">解錠する</button>
     </form>
   </div>
 </div>
 
-<div id="app" class="locked">
-  <div class="head">
-    <div class="t">陣容録（同盟限定）</div>
-    <div class="s">編成ボード（理論）＋ 陣容録（実戦）をまとめて検索</div>
-  </div>
-  <div class="wrap">
-    <div class="notice hide" id="notice">理論データ（編成ボード）を読み込めませんでした。実戦のみ表示しています。</div>
-    <div class="searchbar">🔍 <input id="q" placeholder="武将名・戦法名で検索（例：張遼／戦必断金）"></div>
-    <div class="modes">
-      <div class="mode on" data-mode="combo">🔍 編成で探す（武将・戦法）</div>
-      <div class="mode" data-mode="player">🙂 人で探す（ユーザー名）</div>
-    </div>
-    <div class="filters" id="filters">
-      <span class="flabel">表示</span>
-      <div class="seg">
-        <button data-f="theory" class="on">理論</button>
-        <button data-f="real">実戦</button>
+<div id="app" hidden>
+<div class="topctrls">
+  <label class="theme-toggle" title="昼／夜モード切替">
+    <span class="tlabel" id="themeLabel">昼</span>
+    <span class="switch"><input type="checkbox" id="themeSwitch" role="switch" aria-label="ダークモード切替"><span class="track"></span><span class="thumb" id="themeThumb">☀</span></span>
+  </label>
+</div>
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <div class="seal mincho">率</div>
+      <div>
+        <h1>率土之滨 陣容録</h1>
+        <div class="sub">同盟限定 ／ 編成ボード（理論）＋ 実戦編成</div>
       </div>
     </div>
-    <div class="count" id="count"></div>
-    <div id="list"></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-theory" role="tab" aria-selected="true">📋 理論</button>
+      <button class="tab" id="tab-real" role="tab" aria-selected="false">⚔ 実戦</button>
+    </div>
   </div>
+</header>
+
+<main>
+  <section class="view">
+    <div class="jn-notice" id="notice" hidden>理論データ（編成ボード）を読み込めませんでした。実戦のみ表示しています。</div>
+    <div class="tiernav" id="nav" role="tablist"></div>
+    <div class="toolbar">
+      <label class="search">
+        <span aria-hidden="true">🔍</span>
+        <input id="q" type="search" placeholder="武将名・部隊名・戦法で検索" autocomplete="off">
+      </label>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
 </div>
+
 <script src="app.js"></script>
 </body></html>
