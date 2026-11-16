@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>陣容録</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ov" id="ov">
+  <div class="modal">
+    <div class="ico">🔒</div>
+    <h3>陣容録</h3>
+    <p>同盟限定ページです。合言葉を入力してください。</p>
+    <form id="gf">
+      <input type="password" id="pass" placeholder="合言葉" autocomplete="off">
+      <div class="err" id="err"></div>
+      <button class="btn" type="submit">解錠する</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="locked">
+  <div class="head">
+    <div class="t">陣容録（同盟限定）</div>
+    <div class="s">編成ボード（理論）＋ 陣容録（実戦）をまとめて検索</div>
+  </div>
+  <div class="wrap">
+    <div class="notice hide" id="notice">理論データ（編成ボード）を読み込めませんでした。実戦のみ表示しています。</div>
+    <div class="searchbar">🔍 <input id="q" placeholder="武将名・戦法名で検索（例：張遼／戦必断金）"></div>
+    <div class="modes">
+      <div class="mode on" data-mode="combo">🔍 編成で探す（武将・戦法）</div>
+      <div class="mode" data-mode="player">🙂 人で探す（ユーザー名）</div>
+    </div>
+    <div class="filters" id="filters">
+      <span class="flabel">表示</span>
+      <div class="seg">
+        <button data-f="theory" class="on">理論</button>
+        <button data-f="real">実戦</button>
+      </div>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body></html>
