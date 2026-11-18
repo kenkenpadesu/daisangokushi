@@ -78,7 +78,9 @@ form.addEventListener('submit', (ev) => {
 });
 
 // 夜/昼は合言葉の画面から編成ボードと同じ設定に合わせる
-try { if (localStorage.getItem('stzb_dark') === '1') document.body.classList.add('dark'); } catch (e) { /* 無視 */ }
+let darkPref = null;
+try { darkPref = localStorage.getItem('stzb_dark'); } catch (e) { /* 無視 */ }
+if (darkPref !== '0') document.body.classList.add('dark');
 
 let saved = null;
 try { saved = localStorage.getItem(KEY_STORE); } catch (e) { /* 無視 */ }
