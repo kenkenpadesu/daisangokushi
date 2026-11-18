@@ -64,23 +64,7 @@ main {
   grid-template-columns: 1fr;
   gap: 12px;
 }
-@media (min-width: 760px) {
-  main { grid-template-columns: 1fr auto 1fr; }
-  main > .settings, main > #runBtn, main > .status, main > .progress,
-  main > .result, main > .log, main > .footnote { grid-column: 1 / -1; }
-  .vs { align-self: center; }
-}
 
-.side {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px;
-}
-.side-title { font-size: 15px; margin: 0 0 8px; }
-.side-a { color: var(--a); }
-.side-d { color: var(--d); }
-.vs { text-align: center; font-weight: 700; color: var(--muted); }
 
 select, input, button { font: inherit; color: inherit; }
 select, input {
@@ -91,24 +75,6 @@ select, input {
 }
 .team-select { width: 100%; }
 
-.members { display: grid; gap: 6px; margin-top: 8px; }
-.member {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 6px 8px;
-}
-.member-head { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
-.pos { font-size: 12px; color: var(--muted); min-width: 2.5em; }
-.gen { font-weight: 700; }
-.innate { font-size: 12px; color: var(--muted); }
-.tac-row { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.tac-row select, .tac-fixed { flex: 1 1 40%; font-size: 13px; }
-.tac-fixed {
-  padding: 6px 8px;
-  border: 1px dashed var(--line);
-  border-radius: 6px;
-}
-.state-partial { color: var(--warn); }
 .state-missing { color: var(--bad); text-decoration: line-through; }
 
 .settings {
@@ -121,7 +87,6 @@ select, input {
   padding: 10px;
 }
 .settings label { display: flex; gap: 6px; align-items: center; font-size: 14px; }
-.settings input { width: 6.5em; }
 
 button.primary {
   background: var(--accent);
@@ -213,3 +178,176 @@ button.ghost {
 .gate-box h1 { font-size: 18px; margin: 0; }
 .gate-box p { margin: 0; }
 .gate-msg { font-size: 13px; color: var(--bad); min-height: 1.2em; }
+
+/* 部隊の表（編成ボード風） */
+.team {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.team-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.side-title { font-size: 16px; margin: 0; white-space: nowrap; }
+.side-a { color: var(--a); }
+.side-d { color: var(--d); }
+.preset { max-width: 60%; font-size: 13px; }
+
+.lineup { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.lineup th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 8px 6px;
+  border-bottom: 1px dashed var(--line);
+}
+.lineup th:first-child, .lineup td.pos-cell { width: 3.8em; white-space: nowrap; }
+.lineup td {
+  vertical-align: top;
+  padding: 10px 6px;
+  border-bottom: 1px dashed var(--line);
+  font-size: 14px;
+}
+.pos-cell { color: var(--muted); }
+.toggle {
+  display: block;
+  margin-top: 6px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.pick {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+}
+.pick.empty { color: var(--muted); }
+.gen-name { font-weight: 700; font-size: 15px; }
+.badges { display: flex; gap: 4px; margin-top: 4px; }
+.badge-camp, .badge-arms {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 1.9em;
+  height: 1.9em;
+  padding: 0 4px;
+  border-radius: 6px;
+  color: #fff;
+}
+.badge-arms {
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--text);
+}
+.camp-魏 { background: #4a6aa8; }
+.camp-蜀 { background: #4f8a4b; }
+.camp-呉 { background: #b5503d; }
+.camp-群 { background: #b89a3e; }
+.camp-漢 { background: #8a5aa8; }
+.camp-晋 { background: #3f8f8f; }
+.sub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.detail-row td { padding: 0 6px 10px; }
+.detail {
+  display: grid;
+  gap: 8px;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+}
+.detail-grid { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.detail-grid label { display: flex; gap: 4px; align-items: center; }
+.detail-grid input { width: 4.2em; }
+.detail-grid label:last-child input { width: 6.5em; }
+.points-head { display: flex; justify-content: space-between; font-weight: 600; }
+.points-left.over { color: var(--bad); }
+.stat-rows { display: grid; gap: 4px; }
+.stat-row {
+  display: grid;
+  grid-template-columns: 2.6em 1fr auto auto auto;
+  gap: 6px;
+  align-items: center;
+}
+.stat-row .val { font-variant-numeric: tabular-nums; text-align: right; }
+.stat-row input { width: 3.6em; text-align: right; }
+.stat-row button {
+  width: 2em;
+  height: 2em;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+.stat-row .plus { color: var(--accent); font-variant-numeric: tabular-nums; }
+.innate-line { color: var(--muted); }
+
+.settings { align-items: center; }
+.settings p { margin: 0; }
+
+/* 選択ダイアログ */
+.picker {
+  width: min(520px, 96vw);
+  max-height: 86vh;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+}
+.picker::backdrop { background: rgba(0, 0, 0, .45); }
+.picker-box { display: grid; grid-template-rows: auto auto auto 1fr; max-height: 86vh; }
+.picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px 4px;
+}
+.picker-head h2 { font-size: 15px; margin: 0; }
+#pickerSearch { margin: 6px 12px; }
+.picker-filters { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 12px 6px; }
+.chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+.chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+body.dark .chip.on { color: #1b1b1b; }
+.picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 10px;
+  overflow-y: auto;
+}
+.picker-list li { border-top: 1px solid var(--line); }
+.picker-list button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 6px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.picker-list button:disabled { opacity: .5; }
+.picker-list .main { flex: 1; }
+.picker-list .zh { font-size: 11px; color: var(--muted); margin-left: 4px; }
+.picker-list .meta { font-size: 11px; color: var(--muted); }

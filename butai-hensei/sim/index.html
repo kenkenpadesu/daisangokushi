@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>部隊シミュレーター（試作）</title>
+<title>部隊シミュレーター</title>
 <link rel="stylesheet" href="css/sim.css">
 </head>
 <body>
@@ -21,23 +21,31 @@
 
 <div id="app" hidden>
 <header class="top">
-  <h1>部隊シミュレーター <span class="badge">試作</span></h1>
+  <h1>部隊シミュレーター</h1>
   <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
 </header>
 
 <main>
-  <section class="side" id="sideA">
-    <h2 class="side-title side-a">攻撃側</h2>
-    <select class="team-select" aria-label="攻撃側の部隊"></select>
-    <div class="members"></div>
+  <section class="team" id="teamA" data-side="A">
+    <div class="team-head">
+      <h2 class="side-title side-a">攻撃側</h2>
+      <select class="preset" aria-label="Tier表から読み込む"></select>
+    </div>
+    <table class="lineup">
+      <thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
-  <div class="vs">VS</div>
-
-  <section class="side" id="sideD">
-    <h2 class="side-title side-d">防御側</h2>
-    <select class="team-select" aria-label="防御側の部隊"></select>
-    <div class="members"></div>
+  <section class="team" id="teamD" data-side="D">
+    <div class="team-head">
+      <h2 class="side-title side-d">防御側</h2>
+      <select class="preset" aria-label="Tier表から読み込む"></select>
+    </div>
+    <table class="lineup">
+      <thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </section>
 
   <section class="settings">
@@ -48,12 +56,7 @@
         <option value="100">100回</option>
       </select>
     </label>
-    <label>兵力
-      <input id="troops" type="number" min="100" max="20000" step="100" value="10000" inputmode="numeric">
-    </label>
-    <label>レベル
-      <input id="level" type="number" min="1" max="50" value="40" inputmode="numeric">
-    </label>
+    <p class="small">行の「▼」で、レベル・赤・兵力・加点を変えられます</p>
   </section>
 
   <button type="button" id="runBtn" class="primary">戦わせる</button>
@@ -81,8 +84,20 @@
     <div class="log-body"></div>
   </section>
 
-  <p class="footnote">戦闘計算は stzb_watcher の戦闘エンジン（2026-07時点のデータ）を元にしています。宝物・词条・高級兵種・加点はまだ反映していません。</p>
+  <p class="footnote">戦闘計算は stzb_watcher の戦闘エンジン（2026-07時点のデータ）を元にしています。宝物・词条・高級兵種はまだ反映していません。⚠＝発動条件の一部が未再現、✕＝データが無く使えない戦法。</p>
 </main>
+
+<dialog id="picker" class="picker">
+  <form method="dialog" class="picker-box">
+    <div class="picker-head">
+      <h2 id="pickerTitle">選択</h2>
+      <button type="submit" class="ghost" value="cancel" aria-label="閉じる">✕</button>
+    </div>
+    <input id="pickerSearch" type="search" placeholder="名前で検索（日本語・中国語）" autocomplete="off">
+    <div class="picker-filters" id="pickerFilters"></div>
+    <ul id="pickerList" class="picker-list"></ul>
+  </form>
+</dialog>
 </div>
 
 <script type="module" src="js/loader.js"></script>
