@@ -26,27 +26,34 @@
 </header>
 
 <main>
+  <div class="teams">
   <section class="team" id="teamA" data-side="A">
     <div class="team-head">
       <h2 class="side-title side-a">攻撃側</h2>
-      <select class="preset" aria-label="Tier表から読み込む"></select>
+      <div class="team-tools">
+        <select class="preset" aria-label="部隊を読み込む"></select>
+        <button type="button" class="ghost team-save">保存</button>
+        <button type="button" class="ghost team-del">削除</button>
+      </div>
     </div>
-    <table class="lineup">
-      <thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <div class="team-sum"></div>
+    <div class="formation"></div>
   </section>
 
   <section class="team" id="teamD" data-side="D">
     <div class="team-head">
       <h2 class="side-title side-d">防御側</h2>
-      <select class="preset" aria-label="Tier表から読み込む"></select>
+      <div class="team-tools">
+        <select class="preset" aria-label="部隊を読み込む"></select>
+        <button type="button" class="ghost team-save">保存</button>
+        <button type="button" class="ghost team-del">削除</button>
+      </div>
     </div>
-    <table class="lineup">
-      <thead><tr><th>位置</th><th>武将</th><th>第二戦法</th><th>第三戦法</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <div class="team-sum"></div>
+    <div class="formation"></div>
   </section>
+
+  </div>
 
   <section class="settings">
     <label>回数
@@ -56,29 +63,54 @@
         <option value="100">100回</option>
       </select>
     </label>
-    <p class="small">行の「▼」で、レベル・赤・兵力・加点を変えられます</p>
+    <p class="small">武将カードを押すと、レベル・赤・兵力・配分を変えられます</p>
   </section>
 
   <button type="button" id="runBtn" class="primary">戦わせる</button>
   <div id="status" class="status" aria-live="polite"></div>
   <progress id="progress" class="progress" max="1" value="0" hidden></progress>
 
-  <section id="result" class="result" hidden>
-    <h2>結果</h2>
-    <div class="ratebar">
-      <div class="seg seg-a"></div><div class="seg seg-draw"></div><div class="seg seg-d"></div>
+  <section id="result" class="result battle-view" hidden>
+    <div class="bv-wrap">
+      <div class="bv-side bv-a" data-side="A"></div>
+      <div class="bv-center">
+        <div class="bv-outcome"></div>
+        <div class="bv-summary">
+          <span class="bv-sum-title">【<span class="bv-total"></span>戦の結果】</span>
+          <span class="bv-rates"></span>
+          <div class="bv-pick">
+            <button type="button" class="bv-prev" aria-label="前の戦闘">◀</button>
+            <span class="bv-index"></span>
+            <button type="button" class="bv-next" aria-label="次の戦闘">▶</button>
+          </div>
+        </div>
+      </div>
+      <div class="bv-side bv-d" data-side="D"></div>
     </div>
-    <div class="rates"></div>
-    <table class="remain">
-      <thead><tr><th>位置</th><th>攻撃側（平均残り）</th><th>防御側（平均残り）</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <div class="bv-slider">
+      <label for="turnSlider" class="bv-slider-head"><span>表示するターン</span><span class="bv-turn"></span></label>
+      <input type="range" id="turnSlider" min="0" max="1" value="1">
+      <div class="bv-ticks"></div>
+    </div>
+    <div class="bv-actions">
+      <button type="button" class="bv-btn" id="statsBtn">統計</button>
+      <button type="button" class="bv-btn" id="turnLogBtn">このターンの戦報</button>
+    </div>
     <ul class="warnings"></ul>
+  </section>
+
+  <section id="stats" class="stats-view" hidden>
+    <div class="sv-tabs" role="tablist">
+      <button type="button" class="sv-tab on" data-tab="hero" role="tab">武将統計</button>
+      <button type="button" class="sv-tab" data-tab="skill" role="tab">戦法統計</button>
+      <span class="sv-note"></span>
+    </div>
+    <div class="sv-body"></div>
   </section>
 
   <section id="log" class="log" hidden>
     <div class="log-head">
-      <h2>戦報（1戦目）</h2>
+      <h2 class="log-title">戦報（1戦目）</h2>
       <label class="small"><input type="checkbox" id="detailToggle"> 細かい効果も表示</label>
     </div>
     <div class="log-body"></div>
