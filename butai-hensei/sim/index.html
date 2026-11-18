@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>部隊シミュレーター（試作）</title>
+<link rel="stylesheet" href="css/sim.css">
+</head>
+<body>
+<section id="gate" class="gate">
+  <form id="gateForm" class="gate-box" autocomplete="off">
+    <h1>部隊シミュレーター</h1>
+    <p class="small">合言葉を入れてください</p>
+    <input id="gatePass" type="password" aria-label="合言葉">
+    <label class="small"><input type="checkbox" id="gateRemember" checked> この端末で覚えておく</label>
+    <button type="submit" class="primary">開く</button>
+    <p id="gateMsg" class="gate-msg" aria-live="polite"></p>
+  </form>
+</section>
+
+<div id="app" hidden>
+<header class="top">
+  <h1>部隊シミュレーター <span class="badge">試作</span></h1>
+  <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
+</header>
+
+<main>
+  <section class="side" id="sideA">
+    <h2 class="side-title side-a">攻撃側</h2>
+    <select class="team-select" aria-label="攻撃側の部隊"></select>
+    <div class="members"></div>
+  </section>
+
+  <div class="vs">VS</div>
+
+  <section class="side" id="sideD">
+    <h2 class="side-title side-d">防御側</h2>
+    <select class="team-select" aria-label="防御側の部隊"></select>
+    <div class="members"></div>
+  </section>
+
+  <section class="settings">
+    <label>回数
+      <select id="repeat">
+        <option value="10">10回</option>
+        <option value="30" selected>30回</option>
+        <option value="100">100回</option>
+      </select>
+    </label>
+    <label>兵力
+      <input id="troops" type="number" min="100" max="20000" step="100" value="10000" inputmode="numeric">
+    </label>
+    <label>レベル
+      <input id="level" type="number" min="1" max="50" value="40" inputmode="numeric">
+    </label>
+  </section>
+
+  <button type="button" id="runBtn" class="primary">戦わせる</button>
+  <div id="status" class="status" aria-live="polite"></div>
+  <progress id="progress" class="progress" max="1" value="0" hidden></progress>
+
+  <section id="result" class="result" hidden>
+    <h2>結果</h2>
+    <div class="ratebar">
+      <div class="seg seg-a"></div><div class="seg seg-draw"></div><div class="seg seg-d"></div>
+    </div>
+    <div class="rates"></div>
+    <table class="remain">
+      <thead><tr><th>位置</th><th>攻撃側（平均残り）</th><th>防御側（平均残り）</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <ul class="warnings"></ul>
+  </section>
+
+  <section id="log" class="log" hidden>
+    <div class="log-head">
+      <h2>戦報（1戦目）</h2>
+      <label class="small"><input type="checkbox" id="detailToggle"> 細かい効果も表示</label>
+    </div>
+    <div class="log-body"></div>
+  </section>
+
+  <p class="footnote">戦闘計算は stzb_watcher の戦闘エンジン（2026-07時点のデータ）を元にしています。宝物・词条・高級兵種・加点はまだ反映していません。</p>
+</main>
+</div>
+
+<script type="module" src="js/loader.js"></script>
+</body>
+</html>
