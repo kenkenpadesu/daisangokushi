@@ -934,3 +934,29 @@ body:not(.dark) .bv-info .bv-lv, body:not(.dark) .bv-lv { color: #a8688a; }
 }
 body.dark .top-btn.on { display: block; }
 body:not(.dark) .lang-btn { border: 2px solid #ffc6dd; border-radius: 999px; background: #fff; color: #d6337f; font-weight: 700; }
+
+/* ゆなっこモード：統計の文字を読みやすく */
+body:not(.dark) .sv-side { color: #c42a78; font-weight: 700; }
+body:not(.dark) .sv-table th { color: #c42a78; font-weight: 700; }
+body:not(.dark) .sv-table td { color: #5a2744; border-bottom: 1px solid #ffd6e7; }
+body:not(.dark) .sv-table.sv-d th { color: #6a55e0; }
+body:not(.dark) .sv-table.sv-d td { border-bottom-color: #e2dcff; }
+body:not(.dark) .sv-mini { border-color: #ff8fc0; border-radius: 6px; }
+body:not(.dark) .sv-mini-name { color: #fff; background: rgba(214, 51, 127, .75); border-radius: 3px; }
+body:not(.dark) .sv-mini-lv { color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000; }
+body:not(.dark) .sv-note { color: #ff4f9a; border-color: #ff9cc7; border-radius: 999px; }
+body:not(.dark) .sv-cell { border-bottom: 1px solid #ffd6e7; color: #5a2744; }
+body:not(.dark) .sv-grid.sv-d .sv-cell { border-bottom-color: #e2dcff; }
+body:not(.dark) .sv-line { color: #a8688a; }
+body:not(.dark) .sv-q { background: #fff; }
+body:not(.dark) .sv-q { color: #b83fc2; border-color: #c96ad1; }
+body:not(.dark) .sv-q.q-A { color: #3f6fc4; border-color: #5b8de0; }
+body:not(.dark) .sv-q.q-B { color: #3d8a47; border-color: #5fb36a; }
+
+/* ゆなっこモード：武将詳細の星を濃いピンクに（赤が付いた星はさらに濃く光らせる） */
+body:not(.dark) .gm-infobar .star { color: #ff4f9a; text-shadow: none; }
+body:not(.dark) .gm-infobar .star.on { color: #c2185b; text-shadow: 0 0 4px rgba(255, 79, 154, .7); }
+/* 赤が付いていない星は中抜き（輪郭だけ） */
+body:not(.dark) .gm-infobar .star:not(.on) { color: transparent; -webkit-text-stroke: 1.5px #ff4f9a; }
+/* ダークモードも、赤が付いていない星は中抜き（輪郭だけ） */
+body.dark .gm-infobar .star:not(.on) { color: transparent; -webkit-text-stroke: 1.5px #ff6a3d; }
