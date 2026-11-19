@@ -154,7 +154,7 @@
     <div class="log-body"></div>
   </section>
 
-  <p class="footnote">戦闘計算は stzb_watcher の戦闘エンジン（2026-07時点のデータ）を元にしています。宝物・词条・高級兵種はまだ反映していません。⚠＝発動条件の一部が未再現、✕＝データが無く使えない戦法。</p>
+  <p class="footnote">戦闘計算は stzb_watcher の戦闘エンジン（2026-07時点のデータ）を元にしています。⚠＝発動条件の一部が未再現、✕＝データが無く使えない戦法。</p>
 </main>
 
 <dialog id="picker" class="picker">
@@ -175,6 +175,17 @@
     <div class="help-foot">
       <label class="gm-check"><input type="checkbox" id="helpNoShow"><span id="helpNoShowText">次から表示しない</span></label>
       <button type="button" id="helpClose" class="primary">はじめる</button>
+    </div>
+  </div>
+</dialog>
+<dialog id="preDialog" class="picker pre-dialog">
+  <div class="picker-box">
+    <div class="picker-head"><h2>戦わせる前に確認してください</h2></div>
+    <p class="small pre-note">次の点が気になります。項目を押すと、その武将の詳細を開きます。</p>
+    <div id="preBody" class="pre-body"></div>
+    <div class="pre-foot">
+      <button type="button" id="preBack" class="ghost">戻って直す</button>
+      <button type="button" id="preGo" class="primary">このまま戦わせる</button>
     </div>
   </div>
 </dialog>

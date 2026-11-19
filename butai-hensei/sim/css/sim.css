@@ -1013,3 +1013,58 @@ body:not(.dark) .help-foot { border-top: 2px dashed #ffd0e3; }
 body.dark button.ghost { border-color: #7a6740; }
 body.dark button.ghost:disabled { border-color: #4a4232; }
 body:not(.dark) .team-tools button { font-size: 12.5px; padding: 7px 0; }
+
+/* ===== ゆなっこモード：文字の読みやすさ（白い背景で文字と背景の差を十分にとる） ===== */
+/* 濃いピンク（見出し・選択中のタブ・強調） */
+body:not(.dark) .top h1, body:not(.dark) .team .side-a, body:not(.dark) .gm-tab.on, body:not(.dark) .gm-gear-head,
+body:not(.dark) .help-sec h3, body:not(.dark) .sv-tab.on, body:not(.dark) .sv-note, body:not(.dark) .sv-mid,
+body:not(.dark) .bv-outcome, body:not(.dark) .bv-turn, body:not(.dark) .ocr-pos, body:not(.dark) .help-intro,
+body:not(.dark) .log .h-a, body:not(.dark) .h-a { color: #c2186b; }
+body:not(.dark) .team .side-d, body:not(.dark) .log .h-d, body:not(.dark) .h-d { color: #4f3fd0; }
+body:not(.dark) .log .skill, body:not(.dark) .skill { color: #a8156a; }
+/* 補足の文字（くすみピンク → 濃いめ） */
+body:not(.dark) .gm-tab, body:not(.dark) .gm-close, body:not(.dark) .gm-stat-name, body:not(.dark) .gm-orb-label,
+body:not(.dark) .gm-panel-title, body:not(.dark) .bv-sum-title, body:not(.dark) .bv-total, body:not(.dark) .bv-slider-head,
+body:not(.dark) .gm-gear-note, body:not(.dark) .sv-line, body:not(.dark) .team-sum, body:not(.dark) .ocr-f,
+body:not(.dark) .small, body:not(.dark) .status, body:not(.dark) .muted, body:not(.dark) .meta, body:not(.dark) .zh { color: #8a3f69; }
+body:not(.dark) .sv-tab:not(.on), body:not(.dark) .gm-tac.empty, body:not(.dark) .gm-orb.empty .gm-orb-name { color: #a0577f; }
+body:not(.dark) .gm-stat-grow { color: #0b7a5c; }
+body:not(.dark) .bv-loss { color: #c8321f; }
+body:not(.dark) .gm-card-sub { color: #8a5a00; }
+body:not(.dark) .alloc-left { color: #0b7a5c; }
+body:not(.dark) .battle-view .warnings, body:not(.dark) .warnings { color: #a35a00; }
+body:not(.dark) .gm-q { color: #a86b00; text-shadow: 0 0 2px #fff, 0 0 2px #fff; }
+/* 配分タブ：黒い行を白ピンクに */
+body:not(.dark) .gm-alloc { background: #fff3f9; border: 1.5px solid #ffd0e3; border-radius: 10px; color: #4a1d38; }
+body:not(.dark) .gm-alloc-name { color: #c2186b; font-weight: 700; }
+body:not(.dark) .gm-alloc-val, body:not(.dark) .gm-alloc-val span { color: #4a1d38; }
+body:not(.dark) .gm-alloc-foot { color: #4a1d38; }
+/* ピンクの押しボタン：白い文字が読めるよう濃いめのピンクに */
+body:not(.dark) button.primary, body:not(.dark) .gm-btn, body:not(.dark) .gm-btn-s, body:not(.dark) .gm-change,
+body:not(.dark) #themeBtn, body:not(.dark) .yc-up, body:not(.dark) .chip.on, body:not(.dark) .gm-orb-name,
+body:not(.dark) .bv-nav, body:not(.dark) .bv-center button, body:not(.dark) .bv-btns button,
+body:not(.dark) .battle-view button:not(.sv-tab), body:not(.dark) .bv-btn {
+  background: linear-gradient(180deg, #e8559a, #c2186b); color: #fff; border-color: #c2186b;
+}
+body:not(.dark) .gm-orb.empty .gm-orb-name { background: #ffe3ef; }
+body:not(.dark) .gm-step { color: #c2186b; border-color: #f39cbf; }
+body:not(.dark) .gm-step:disabled { color: #d9a3bd; }
+body:not(.dark) .gm-plus { color: #8a3f69; }
+body:not(.dark) .gm-plus.on, body:not(.dark) .gm-up { color: #a8156a; font-weight: 700; }
+body:not(.dark) .bv-ticks { color: #8a3f69; }
+
+/* 戦わせる前の確認 */
+.pre-dialog .picker-box { grid-template-rows: auto auto 1fr auto; }
+.pre-note { margin: 4px 14px; }
+.pre-body { overflow-y: auto; padding: 4px 14px 8px; }
+.pre-sec h3 { font-size: 15px; margin: 8px 0 4px; }
+.pre-A h3 { color: var(--a); }
+.pre-D h3 { color: var(--d); }
+.pre-sec ul { margin: 0; padding-left: 1.1em; }
+.pre-sec li { font-size: 13.5px; line-height: 1.6; margin: 3px 0; }
+.pre-item { background: none; border: none; padding: 0; text-align: left; color: inherit; font: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; cursor: pointer; }
+.pre-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 10px 14px 14px; border-top: 1px solid var(--line); }
+body:not(.dark) .pre-A h3 { color: #c2186b; }
+body:not(.dark) .pre-D h3 { color: #4f3fd0; }
+body:not(.dark) .pre-sec li { color: #4a1d38; }
+body:not(.dark) .pre-foot { border-top: 2px dashed #ffd0e3; }
