@@ -1002,3 +1002,14 @@ body:not(.dark) .help-foot { border-top: 2px dashed #ffd0e3; }
   header.top h1 { flex: 1 1 100%; }
   .top-btns { margin-left: auto; }
 }
+
+/* 部隊の見出し：1段目に「攻撃側／防御側」と部隊の読み込み、2段目にボタン4つを同じ幅で */
+.team .team-head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.3fr) minmax(0, .7fr) minmax(0, .7fr); align-items: center; gap: 8px 6px; }
+.team .team-head .side-title { grid-column: 1; }
+.team-tools { display: contents; }
+.team-tools .preset { grid-column: 2 / -1; width: 100%; }
+.team-tools button { white-space: nowrap; font-size: 13px; padding: 7px 2px; min-width: 0; }
+/* ダークモード：ボタンの縁を見やすく */
+body.dark button.ghost { border-color: #7a6740; }
+body.dark button.ghost:disabled { border-color: #4a4232; }
+body:not(.dark) .team-tools button { font-size: 12.5px; padding: 7px 0; }
