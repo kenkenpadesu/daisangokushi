@@ -768,3 +768,38 @@ body.dark .chip.on { color: #1b1b1b; }
 .gm-sel { width: 100%; min-width: 0; min-height: 32px; background: #141414; color: #efe9dc; border: 1px solid #4a4a4a; border-radius: 2px; font: inherit; font-size: 13px; }
 .gm-gear-lv { display: inline-flex; align-items: center; gap: 6px; }
 .gm-card-sub { font-size: 11.5px; color: #d9b56c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 武将の画像（カードの背景いっぱいに表示） */
+.hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; pointer-events: none; }
+.gm-card .bv-stars, .gm-card .gm-card-lv, .gm-card .bv-nm, .bv-art .bv-stars, .bv-art .bv-nm, .sv-mini .sv-mini-name, .sv-mini .sv-mini-lv { z-index: 1; }
+.bv-stars { text-shadow: 0 0 3px #000; }
+
+/* 編成ボードから読み込む部隊の一覧 */
+.team-board { flex: none; font-size: 12px; padding: 4px 8px; white-space: nowrap; }
+.board-item {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 8px; width: 100%; text-align: left;
+  padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: inherit; font: inherit;
+}
+.board-no { font-weight: 700; white-space: nowrap; }
+.board-name { color: var(--muted); }
+.board-heroes { grid-column: 1 / -1; font-family: var(--serif); font-size: 15px; }
+.board-tacs { grid-column: 1 / -1; color: var(--muted); }
+
+/* 武将カードの金の装飾枠（外枠＋内側の細線＋上の角の雷文） */
+.gm-card:not(.empty), .bv-art { border: 3px solid #b8954f; border-radius: 2px; box-shadow: 0 0 0 1px #3b2d14; }
+.gm-card:not(.empty)::after, .bv-art::after {
+  content: ""; position: absolute; inset: 2px; border: 1px solid rgba(217, 190, 122, .65); z-index: 2; pointer-events: none;
+}
+.card-fr {
+  position: absolute; top: 1px; width: 18px; height: 18px; z-index: 3; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M1 19V1h18' fill='none' stroke='%23e3c77e' stroke-width='2'/%3E%3Cpath d='M5 15V5h10v6H9V9h3' fill='none' stroke='%23e3c77e' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.card-fr.tl { left: 1px; }
+.card-fr.tr { right: 1px; transform: scaleX(-1); }
+
+/* コストを0.5上げる・部隊コスト上限 */
+.gm-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.gm-check input { width: 18px; height: 18px; accent-color: #c9a45c; }
+.team-sum .cost-bad { color: #ff6b5a; font-weight: 700; }
+.team-sum .cost-warn { color: #ff6b5a; font-size: 12px; }
+.team-sum.cost-over { flex-wrap: wrap; row-gap: 2px; }
