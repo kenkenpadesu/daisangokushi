@@ -767,6 +767,10 @@ body.dark .chip.on { color: #1b1b1b; }
 .gm-gear-note { grid-column: 2; font-size: 11.5px; color: #b8ae9c; line-height: 1.4; }
 .gm-sel { width: 100%; min-width: 0; min-height: 32px; background: #141414; color: #efe9dc; border: 1px solid #4a4a4a; border-radius: 2px; font: inherit; font-size: 13px; }
 .gm-gear-lv { display: inline-flex; align-items: center; gap: 6px; }
+.gm-gear-chk { width: 16px; height: 16px; margin: 0; accent-color: #ff6a3d; }
+.gm-gear-warn { grid-column: 1 / -1; margin: 2px 0 6px; padding: 6px 10px; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #ffb4a0; background: rgba(200,60,40,.18); border: 1px solid #c8503a; }
+body:not(.dark) .gm-gear-chk { accent-color: #ff4f9a; }
+body:not(.dark) .gm-gear-warn { color: #c0213b; background: #ffe6ec; border-color: #ff7a9a; }
 .gm-card-sub { font-size: 11.5px; color: #d9b56c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* 武将の画像（カードの背景いっぱいに表示） */
