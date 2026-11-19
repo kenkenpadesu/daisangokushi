@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>部隊シミュレーター</title>
+<title>率土之濱　戦闘シミュレーター　β版</title>
 <link rel="stylesheet" href="css/sim.css">
 </head>
 <body>
 <section id="gate" class="gate">
   <form id="gateForm" class="gate-box" autocomplete="off">
-    <h1>部隊シミュレーター</h1>
+    <h1>率土之濱　戦闘シミュレーター　β版</h1>
     <p class="small">合言葉を入れてください</p>
     <input id="gatePass" type="password" aria-label="合言葉">
     <label class="small"><input type="checkbox" id="gateRemember" checked> この端末で覚えておく</label>
@@ -21,7 +21,7 @@
 
 <div id="app" hidden>
 <header class="top">
-  <h1>部隊シミュレーター</h1>
+  <h1>率土之濱　戦闘シミュレーター　β版</h1>
   <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
 </header>
 
@@ -61,6 +61,12 @@
         <option value="10">10回</option>
         <option value="30" selected>30回</option>
         <option value="100">100回</option>
+      </select>
+    </label>
+    <label>戦う場所
+      <select id="terrain">
+        <option value="field" selected>建築物なし</option>
+        <option value="building">建築物あり</option>
       </select>
     </label>
     <p class="small">武将カードを押すと、レベル・赤・兵力・配分を変えられます</p>

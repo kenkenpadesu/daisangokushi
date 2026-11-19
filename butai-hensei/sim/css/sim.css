@@ -758,3 +758,13 @@ body.dark .chip.on { color: #1b1b1b; }
 }
 @media (min-width: 900px) { main { max-width: 1240px; } }
 .teams, .team { min-width: 0; }
+
+/* 兵種・宝物の段（武将の詳細パネル） */
+.gm-gear { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: #2c2c2c; }
+.gm-gear-head { font-family: var(--serif); font-size: 14px; color: #e6dcc4; }
+.gm-gear-row { display: grid; grid-template-columns: 4.5em minmax(0, 1fr); gap: 2px 8px; align-items: center; }
+.gm-gear-label { font-family: var(--serif); font-size: 13px; color: #d8d2c4; white-space: nowrap; }
+.gm-gear-note { grid-column: 2; font-size: 11.5px; color: #b8ae9c; line-height: 1.4; }
+.gm-sel { width: 100%; min-width: 0; min-height: 32px; background: #141414; color: #efe9dc; border: 1px solid #4a4a4a; border-radius: 2px; font: inherit; font-size: 13px; }
+.gm-gear-lv { display: inline-flex; align-items: center; gap: 6px; }
+.gm-card-sub { font-size: 11.5px; color: #d9b56c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
