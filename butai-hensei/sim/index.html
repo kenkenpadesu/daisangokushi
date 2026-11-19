@@ -47,6 +47,7 @@
 <header class="top">
   <h1>率土之濱　戦闘シミュレーター　β版</h1>
   <div class="top-btns">
+    <button type="button" id="helpBtn" class="ghost lang-btn">使い方</button>
     <button type="button" id="langBtn" class="ghost lang-btn" aria-label="言語の切り替え">中文</button>
     <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
   </div>
@@ -60,6 +61,7 @@
       <div class="team-tools">
         <select class="preset" aria-label="部隊を読み込む"></select>
         <button type="button" class="ghost team-board">ボード読込</button>
+        <button type="button" class="ghost team-ocr">スクショ読込</button>
         <button type="button" class="ghost team-save">保存</button>
         <button type="button" class="ghost team-del">削除</button>
       </div>
@@ -74,6 +76,7 @@
       <div class="team-tools">
         <select class="preset" aria-label="部隊を読み込む"></select>
         <button type="button" class="ghost team-board">ボード読込</button>
+        <button type="button" class="ghost team-ocr">スクショ読込</button>
         <button type="button" class="ghost team-save">保存</button>
         <button type="button" class="ghost team-del">削除</button>
       </div>
@@ -163,6 +166,28 @@
     <input id="pickerSearch" type="search" placeholder="名前で検索（日本語・中国語）" autocomplete="off">
     <div class="picker-filters" id="pickerFilters"></div>
     <ul id="pickerList" class="picker-list"></ul>
+  </form>
+</dialog>
+<dialog id="helpDialog" class="picker help-dialog">
+  <div class="picker-box">
+    <div class="picker-head"><h2 id="helpTitle">使い方</h2></div>
+    <div id="helpBody" class="help-body"></div>
+    <div class="help-foot">
+      <label class="gm-check"><input type="checkbox" id="helpNoShow"><span id="helpNoShowText">次から表示しない</span></label>
+      <button type="button" id="helpClose" class="primary">はじめる</button>
+    </div>
+  </div>
+</dialog>
+<dialog id="ocrDialog" class="picker ocr-dialog">
+  <form method="dialog" class="picker-box">
+    <div class="picker-head">
+      <h2 id="ocrTitle">スクショ読込</h2>
+      <button type="submit" class="ghost" value="cancel" aria-label="閉じる">✕</button>
+    </div>
+    <p id="ocrMsg" class="small ocr-msg" aria-live="polite"></p>
+    <div id="ocrBody" class="ocr-body"></div>
+    <details id="ocrAdjust" class="ocr-adjust" hidden></details>
+    <div class="ocr-foot"><button type="button" id="ocrApply" class="primary" hidden>この部隊を入れる</button></div>
   </form>
 </dialog>
 <dialog id="boardDialog" class="picker">
