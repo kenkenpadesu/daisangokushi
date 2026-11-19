@@ -803,3 +803,6 @@ body.dark .chip.on { color: #1b1b1b; }
 .team-sum .cost-bad { color: #ff6b5a; font-weight: 700; }
 .team-sum .cost-warn { color: #ff6b5a; font-size: 12px; }
 .team-sum.cost-over { flex-wrap: wrap; row-gap: 2px; }
+
+/* 武将カードは常に3:4（パソコンでも正方形にしない） */
+.gm-card:not(.empty), .bv-art { height: auto; aspect-ratio: 3 / 4; }
