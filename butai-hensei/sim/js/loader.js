@@ -55,7 +55,7 @@ async function unlock(phrase) {
 }
 
 async function tryOpen(phrase, save) {
-  msg.textContent = '開いています…';
+  msg.textContent = gt('開いています…');
   form.querySelector('button').disabled = true;
   try {
     await unlock(phrase);
@@ -63,7 +63,7 @@ async function tryOpen(phrase, save) {
     form.querySelector('button').disabled = false;
     try { localStorage.removeItem(KEY_STORE); } catch (x) { /* 無視 */ }
     msg.textContent = e instanceof DOMException && e.name === 'OperationError'
-      ? '合言葉が違います' : `開けませんでした：${e.message}`;
+      ? gt('合言葉が違います') : `${lang === 'zh' ? '无法打开：' : '開けませんでした：'}${e.message}`;
     return;
   }
   if (save) { try { localStorage.setItem(KEY_STORE, phrase); } catch (x) { /* 保存不可 */ } }
@@ -81,6 +81,24 @@ form.addEventListener('submit', (ev) => {
 let darkPref = null;
 try { darkPref = localStorage.getItem('stzb_dark'); } catch (e) { /* 無視 */ }
 if (darkPref !== '0') document.body.classList.add('dark');
+
+// 言語（日本語／中文）：合言葉の画面だけここで切り替える。中の画面は app.js が翻訳する
+let lang = 'ja';
+try { if (localStorage.getItem('stzb_lang') === 'zh') lang = 'zh'; } catch (e) { /* 無視 */ }
+const GATE_ZH = { '率土之濱\u3000戦闘シミュレーター\u3000β版': '率土之滨\u3000战斗模拟器\u3000β版', '合言葉を入れてください': '请输入口令', 'この端末で覚えておく': '在此设备上记住', '開く': '打开', '開いています…': '正在打开…', '合言葉が違います': '口令错误' };
+const gt = (t) => (lang === 'zh' && GATE_ZH[t]) || t;
+if (lang === 'zh') {
+  document.documentElement.lang = 'zh-CN';
+  gate.querySelectorAll('h1, p, button, label').forEach((n) => n.childNodes.forEach((c) => {
+    if (c.nodeType === 3 && c.nodeValue.trim()) c.nodeValue = c.nodeValue.replace(c.nodeValue.trim(), gt(c.nodeValue.trim()));
+  }));
+}
+const gateLang = document.getElementById('gateLang');
+gateLang.textContent = lang === 'zh' ? '日本語' : '中文';
+gateLang.addEventListener('click', () => {
+  try { localStorage.setItem('stzb_lang', lang === 'zh' ? 'ja' : 'zh'); } catch (e) { /* 無視 */ }
+  location.reload();
+});
 
 let saved = null;
 try { saved = localStorage.getItem(KEY_STORE); } catch (e) { /* 無視 */ }

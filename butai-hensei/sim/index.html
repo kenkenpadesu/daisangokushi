@@ -5,8 +5,28 @@
 <!-- Google Tag Manager（部隊編成ボードと同じ） -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-NK4MCM9C');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="description" content="部隊を組んで、戦闘を何度も再現。勝率・残り兵力を比較できます（仲間内専用）。">
+<!-- OGP（仲間内でリンクを共有したときのカード） -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ゆんぱーく">
+<meta property="og:title" content="率土之濱　戦闘シミュレーター　β版">
+<meta property="og:description" content="部隊を組んで、戦闘を何度も再現。勝率・残り兵力を比較できます（仲間内専用）。">
+<meta property="og:image" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/sim/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/sim/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="率土之濱　戦闘シミュレーター　β版">
+<meta name="twitter:description" content="部隊を組んで、戦闘を何度も再現。勝率・残り兵力を比較できます（仲間内専用）。">
+<meta name="twitter:image" content="https://kenkenpadesu.github.io/daisangokushi/butai-hensei/sim/ogp.png">
 <title>率土之濱　戦闘シミュレーター　β版</title>
+<!-- ゆなっこモード用フォント（ゆんぱーくと同じ） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/sim.css">
 </head>
 <body>
@@ -19,13 +39,17 @@
     <label class="small"><input type="checkbox" id="gateRemember" checked> この端末で覚えておく</label>
     <button type="submit" class="primary">開く</button>
     <p id="gateMsg" class="gate-msg" aria-live="polite"></p>
+    <button type="button" id="gateLang" class="ghost lang-btn">中文</button>
   </form>
 </section>
 
 <div id="app" hidden>
 <header class="top">
   <h1>率土之濱　戦闘シミュレーター　β版</h1>
-  <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
+  <div class="top-btns">
+    <button type="button" id="langBtn" class="ghost lang-btn" aria-label="言語の切り替え">中文</button>
+    <button type="button" id="themeBtn" class="ghost" aria-label="夜/昼の切り替え">🌙</button>
+  </div>
 </header>
 
 <main>
@@ -154,5 +178,15 @@
 </div>
 
 <script type="module" src="js/loader.js"></script>
+<!-- トップへ戻る（ダークモード用。ゆなっこモードではゆなっこちゃんが担当） -->
+<button type="button" id="topBtn" class="top-btn" aria-label="トップへ">↑</button>
+<!-- ゆなっこちゃん（ゆなっこモードのときだけ表示） -->
+<div class="yc" id="yc"><div class="yc-in" id="ycin">
+  <div class="yc-bubble" id="ycb"></div>
+  <button class="yc-snd" id="ycsnd" type="button" aria-label="ボイスのオン・オフ" aria-pressed="true">🔊</button>
+  <button class="yc-up" id="ycup" type="button">↑ トップへ</button>
+  <button class="yc-chr" id="ycchr" type="button" aria-label="ゆなっこちゃん"><img id="ycimg" src="yuna/yuna-chara1.webp" alt=""></button>
+</div></div>
+<div class="yc-load" id="ycload"><img src="yuna/yuna-load.webp" alt=""><span>loading中<i>.</i><i>.</i><i>.</i></span></div>
 </body>
 </html>
