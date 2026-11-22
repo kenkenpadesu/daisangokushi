@@ -107,3 +107,32 @@ html.yuna .yc-load.show{opacity:1;visibility:visible}
 
 /* 新しいCSSが読み込めているかの目印（app.js が確認する）*/
 html.yuna{--yc-ok:1}
+/* ===== シーズン終了メッセージ(開くたびに表示するモーダル。両モード共通) ===== */
+.fin{position:fixed;inset:0;z-index:135;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,12,6,.66);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+.fin[hidden]{display:none}
+html.yuna .fin{background:rgba(90,39,68,.45)}
+.fin.show{opacity:1;visibility:visible}
+.fin-box{position:relative;width:100%;max-width:380px;text-align:center;padding:30px 22px 24px;border-radius:6px;background:linear-gradient(180deg,#2c2318,#1e1810);border:1px solid var(--line2);box-shadow:0 0 0 1px #000,0 18px 50px rgba(0,0,0,.55);transform:translateY(14px) scale(.96);transition:transform .45s cubic-bezier(.2,1.3,.4,1)}
+.fin.show .fin-box{transform:none}
+.fin-box::before,.fin-box::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:84px;height:2px;background:var(--gold)}
+.fin-box::before{top:-1px}.fin-box::after{bottom:-1px}
+html.yuna .fin-box{border:3px solid #ffc6dd;border-radius:26px;background:linear-gradient(180deg,#fff,#fff0f7);box-shadow:0 8px 0 #ffd0e3,0 22px 46px rgba(255,95,162,.32)}
+html.yuna .fin-box::before,html.yuna .fin-box::after{display:none}
+.fin-chr{display:none;width:150px;height:auto;max-height:190px;object-fit:contain;margin:-96px auto 14px;filter:drop-shadow(0 6px 10px rgba(255,95,162,.35));animation:finbob 2.6s ease-in-out infinite}
+html.yuna .fin-chr{display:block}
+@keyframes finbob{50%{transform:translateY(-6px) rotate(1.5deg)}}
+.fin-k{font-size:12px;letter-spacing:.32em;text-indent:.32em;font-weight:700;color:var(--gold-dim)}
+html.yuna .fin-k{color:#ff6fae}
+.fin-t1,.fin-t2{margin:0;font-family:"Noto Serif JP",serif;color:var(--gold-soft);letter-spacing:.06em}
+.fin-t1{margin-top:10px;font-weight:700;font-size:21px}
+.fin-t2{margin-top:6px;font-weight:900;font-size:34px;line-height:1.25}
+.fin-t2 i{font-style:normal;color:var(--gold)}
+html.yuna .fin-t1,html.yuna .fin-t2{font-family:var(--cute);font-weight:400}
+html.yuna .fin-t1{color:#d6337f}
+html.yuna .fin-t2{color:#ff4f9a;text-shadow:2px 2px 0 #fff,0 4px 14px rgba(255,111,174,.35)}
+html.yuna .fin-t2 i{color:#ff9cc7}
+.fin-btn{appearance:none;margin-top:22px;border:1px solid var(--gold-dim);background:linear-gradient(180deg,#3a2f1d,#2c2318);color:var(--gold-soft);font:700 15px inherit;font-family:inherit;padding:12px 38px;border-radius:4px;cursor:pointer}
+html.yuna .fin-btn{border:0;border-radius:999px;color:#fff;background:linear-gradient(180deg,#ff8fc0,#ff5fa2);box-shadow:0 4px 0 #e0467f,0 8px 16px rgba(255,95,162,.35)}
+.fin-btn:active{transform:translateY(2px)}
+@media(prefers-reduced-motion:reduce){.fin-chr{animation:none}}
+:root{--fin-ok:1}

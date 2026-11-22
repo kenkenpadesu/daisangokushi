@@ -435,7 +435,10 @@
   const loadImg = src => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
   function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
   const top10Of = w => w.data.slice().sort((p, q) => q.b - p.b).filter(r => w.rankB.get(r.name) <= 10).slice(0, 10);
-  const shareWeek = () => isWeek() ? activeWeek() : (isTrend() ? latest : null);
+  // シーズン合計（通算）を「1週ぶんのデータ」の形にしたもの。TOP10画像づくりで使う
+  const TOTW = { label: 'シーズン合計', season: true, play: true, data: totalList.map(a => ({ name: a.name, b: a.tot, s: 0 })) };
+  TOTW.rankB = new Map(totalList.map(a => [a.name, a.trank]));
+  const shareWeek = () => isTotal() ? TOTW : (isWeek() ? activeWeek() : (isTrend() ? latest : null));
   async function drawShare(w, yuna) {
     const T = SH_THEME[yuna ? 'yuna' : 'dark'], rows = top10Of(w), max = rows[0].b;
     const cv = document.createElement('canvas'); cv.width = SH_W; cv.height = SH_H; const c = cv.getContext('2d');
@@ -463,8 +466,9 @@
     }
     c.textBaseline = 'alphabetic'; c.textAlign = 'left';
     c.fillStyle = T.kick; c.font = '700 22px ' + T.sub.split('px ')[1]; if ('letterSpacing' in c) c.letterSpacing = '8px'; c.fillText('ゆんぱーく ・ 同盟武勲記録', 190, 96); if ('letterSpacing' in c) c.letterSpacing = '0px';
-    c.font = T.title; c.fillStyle = T.title_c; if (yuna) { c.save(); c.fillStyle = '#fff'; c.fillText('武勲ランキング TOP10', 193, 152); c.restore(); c.fillStyle = T.title_c; } c.fillText('武勲ランキング TOP10', 190, 149);
-    c.textAlign = 'right'; c.font = T.big; c.fillStyle = yuna ? '#c42a78' : T.ink; c.fillText(w.label, 1010, 118);
+    const ttl = w.season ? 'シーズン合計 TOP10' : '武勲ランキング TOP10';
+    c.font = T.title; c.fillStyle = T.title_c; if (yuna) { c.save(); c.fillStyle = '#fff'; c.fillText(ttl, 193, 152); c.restore(); c.fillStyle = T.title_c; } c.fillText(ttl, 190, 149);
+    c.textAlign = 'right'; c.font = T.big; c.fillStyle = yuna ? '#c42a78' : T.ink; c.fillText(w.season ? 'Season 5' : w.label, 1010, 118);
     c.font = '500 20px ' + T.small.split('px ')[1]; c.fillStyle = T.muted; c.fillText('全' + w.data.length + '名', 1010, 152); c.textAlign = 'left';
     // 行
     const top = 196, RH = 100, barX = 165, barEnd = 770;
@@ -478,7 +482,7 @@
       else { const m = T.medal0; c.fillStyle = m[0]; rr(c, mx, my, ms, ms, 8); c.fill(); c.lineWidth = yuna ? 3 : 2; c.strokeStyle = m[1]; rr(c, mx + 1, my + 1, ms - 2, ms - 2, 8); c.stroke(); c.fillStyle = m[2]; }
       c.font = '900 ' + (rank >= 10 ? 30 : 34) + 'px ' + T.sub.split('px ')[1]; c.textAlign = 'center'; c.fillText(String(rank), mx + ms / 2, my + ms / 2 + 12); c.textAlign = 'left';
       // 名前＋バッジ＋分隊
-      const k = tierIdxOf(r.b), sq = SQUADS[r.name] || '', ny = y + 46;
+      const k = w.season ? ((AGG.get(r.name) || { tierIdx: -1 }).tierIdx) : tierIdxOf(r.b), sq = SQUADS[r.name] || '', ny = y + 46;
       c.font = '700 22px ' + T.sub.split('px ')[1]; const sqW = sq ? c.measureText(sq).width : 0;
       let bw = 0, bt = ''; if (k >= 0) { bt = '★' + BADGE_TIERS[k].label; c.font = '700 21px ' + T.sub.split('px ')[1]; bw = c.measureText(bt).width + 30 + 12; }
       const maxNameW = barEnd - barX - bw - sqW - 24;
@@ -494,13 +498,14 @@
       const by2 = y + 64; c.fillStyle = T.track; rr(c, barX, by2, barEnd - barX, 10, 5); c.fill();
       const g = c.createLinearGradient(barX, 0, barEnd, 0); g.addColorStop(0, T.bar[0]); g.addColorStop(1, T.bar[1]); c.fillStyle = g; rr(c, barX, by2, Math.max(10, (barEnd - barX) * r.b / max), 10, 5); c.fill();
       // 武勲
-      c.font = T.val; c.fillStyle = T.val_c; c.textAlign = 'right'; c.fillText(fmtW(r.b), 1000, y + 66); c.textAlign = 'left';
+      c.font = T.val; c.fillStyle = T.val_c; c.textAlign = 'right'; c.fillText(w.season ? ((Math.round(r.b / 1000) / 10).toLocaleString('ja-JP') + '万') : fmtW(r.b), 1000, y + 66); c.textAlign = 'left';
     });
     // フッター
     c.strokeStyle = yuna ? '#ffc6dd' : '#3b3125'; c.lineWidth = yuna ? 3 : 1; if (yuna) c.setLineDash([10, 7]); c.beginPath(); c.moveTo(70, 1246); c.lineTo(1010, 1246); c.stroke(); c.setLineDash([]);
     if (yuna && chara) { const k = Math.min(230 / chara.width, 146 / chara.height), dw = Math.round(chara.width * k), dh = Math.round(chara.height * k); c.drawImage(chara, 560 - Math.round(dw / 2), 1332 - dh, dw, dh); }
-    c.font = T.small; c.fillStyle = T.foot; c.fillText('同盟平均武勲 ', 70, 1292); const lw = c.measureText('同盟平均武勲 ').width;
-    c.font = '700 ' + T.small.split(' ').slice(1).join(' '); c.fillStyle = T.footb; c.fillText((Math.round(avgOf(w, 'b') / 1000) / 10).toLocaleString('ja-JP') + '万', 70 + lw, 1292);
+    const fl = w.season ? '同盟合計武勲 ' : '同盟平均武勲 ';
+    c.font = T.small; c.fillStyle = T.foot; c.fillText(fl, 70, 1292); const lw = c.measureText(fl).width;
+    c.font = '700 ' + T.small.split(' ').slice(1).join(' '); c.fillStyle = T.footb; c.fillText((w.season ? Math.round(w.data.reduce((a, r) => a + r.b, 0) / 10000).toLocaleString('ja-JP') : (Math.round(avgOf(w, 'b') / 1000) / 10).toLocaleString('ja-JP')) + '万', 70 + lw, 1292);
     c.font = T.small; c.fillStyle = T.foot; c.textAlign = 'right'; c.fillText('Season 5 ・ ゆんぱーく', 1010, 1292); c.textAlign = 'left';
     return cv;
   }
@@ -510,25 +515,26 @@
     try {
       const cv = await drawShare(w, YUNA); setTimeout(ycLoadHide, Math.max(0, 700 - (Date.now() - t0)));
       const blob = await new Promise(res => cv.toBlob(res, 'image/png'));
-      const fname = 'yunpark_' + w.label.replace('〜', '').replace('/', '-') + '_TOP10.png';
+      const fname = w.season ? 'yunpark_season5_total_TOP10.png' : 'yunpark_' + w.label.replace('〜', '').replace('/', '-') + '_TOP10.png';
       const file = new File([blob], fname, { type: 'image/png' });
       const touch = window.matchMedia && matchMedia('(pointer:coarse)').matches;
-      if (touch && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'ゆんぱーく ' + w.label + ' 武勲TOP10' }); btn.textContent = label; btn.disabled = false; return; } catch (e) { if (e && e.name === 'AbortError') { btn.textContent = label; btn.disabled = false; return; } } }
+      if (touch && navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'ゆんぱーく ' + w.label + (w.season ? ' 武勲TOP10' : ' 武勲TOP10') }); btn.disabled = false; updateShareBtn(); return; } catch (e) { if (e && e.name === 'AbortError') { btn.disabled = false; updateShareBtn(); return; } } }
       const u = URL.createObjectURL(blob), el = document.createElement('a'); el.href = u; el.download = fname; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
       btn.textContent = '保存しました ✓';
     } catch (e) { ycLoadHide(); btn.textContent = '作れませんでした'; }
-    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1800);
+    setTimeout(() => { btn.disabled = false; updateShareBtn(); }, 1800);
   }
   function updateShareBtn() {
-    const w = shareWeek(), bar = document.getElementById('sharebar');
+    const w = shareWeek(), bar = document.getElementById('sharebar'), btn = document.getElementById('sharebtn');
     bar.style.display = (w && w.play) ? 'flex' : 'none';
+    if (w && !btn.disabled) btn.textContent = w.season ? '📷 シーズン合計TOP10を画像で保存' : '📷 TOP10を画像で保存';
   }
   document.getElementById('sharebtn').addEventListener('click', e => shareTop10(e.currentTarget));
 
   // ================= ゆなっこちゃん（ゆなっこモード専用）=================
   const yc = document.getElementById('yc'), ycIn = document.getElementById('ycin'), ycB = document.getElementById('ycb');
   const YC_H = 124, reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const AV = '20261115a', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
+  const AV = '20261123a', YC_PEEK = ['yuna-chara1.webp?v=' + AV, 'yuna-chara2.webp?v=' + AV], ycImg = document.getElementById('ycimg'), ycLd = document.getElementById('ycload');
   YC_PEEK.concat(['yuna-load.webp?v=' + AV]).forEach(s => { const im = new Image(); im.src = s; });
   let ycCur = YC_PEEK[0], ycWasOn = false, ycLoadT = 0, ycLoadLast = 0, ycTimer = 0, ycFlying = false, ycTaps = 0, ycTapT = 0, ycLast = '', ycTemp = 0;
   const ycLw = PLAY.length ? PLAY[PLAY.length - 1] : null;
@@ -640,6 +646,26 @@
       if (!pm.hidden && /^#m=/.test(location.hash)) { destroyPmCharts(); drawPersonCharts(decodeURIComponent(location.hash.slice(3))); }
     });
   })();
+  // ================= シーズン終了メッセージ（開くたびに表示）=================
+  const fin = document.getElementById('fin');
+  // yuna.css が古いまま（キャッシュ等）だと見た目が崩れるため、新しいCSSが読めているときだけ表示する
+  const finOk = () => !!getComputedStyle(document.documentElement).getPropertyValue('--fin-ok').trim();
+  function openFin() {
+    if (!fin || !finOk()) return;
+    fin.hidden = false; void fin.offsetWidth; fin.classList.add('show'); document.body.classList.add('modal-open');
+    if (!reduceMotion()) ycConfetti();
+    const b = document.getElementById('finx'); if (b) b.focus();
+  }
+  function closeFin() {
+    if (!fin || fin.hidden) return;
+    fin.classList.remove('show'); if (pm.hidden) document.body.classList.remove('modal-open');
+    setTimeout(() => { fin.hidden = true; }, 380);
+  }
+  if (fin) {
+    document.getElementById('finx').addEventListener('click', closeFin);
+    fin.addEventListener('click', e => { if (e.target === fin) closeFin(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !fin.hidden) closeFin(); });
+  }
   // ---- init ----
   ycUpdate();
   const sqCard = document.getElementById('sqCard');
@@ -648,4 +674,5 @@
   buildSeg(); buildWkChips(); buildChips(); buildSqFilter(); applyView(); render();
   const hm = /^#m=(.+)$/.exec(location.hash);
   if (hm) { try { openPerson(decodeURIComponent(hm[1])); } catch (e) { } }
+  openFin();
 })();
